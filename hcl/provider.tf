@@ -18,8 +18,7 @@ provider "shoreline" {
 
 resource "shoreline_bot" "cpu_bot" {
   name = "cpu_bot"
-  alarm_statement = "${shoreline_alarm.cpu_alarm.name}"
-  action_statement = "${shoreline_action.ls_action.name}"
+  command = "if ${shoreline_alarm.cpu_alarm.name} then ${shoreline_action.ls_action.name} fi"
   description = "Act on CPU usage."
   enabled = true
 }
@@ -52,7 +51,7 @@ resource "shoreline_metric" "cpu_plus_one" {
   name = "cpu_plus"
   value = "cpu_usage + 2"
   description = "Erroneous CPU usage."
-  resource_query = "host| pod"
+  #resource_query = "host| pod"
 }
 
 resource "shoreline_resource" "books" {
