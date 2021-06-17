@@ -5,6 +5,10 @@ REPODIR=/tmp/tf-repo/providers
 #SUBPATH=shoreline.io/terraform/shoreline/1.0.0/linux_amd64
 SUBPATH=shoreline.io/terraform/shoreline/1.0.0/darwin_amd64
 
+NAME=shoreline
+BINARY=terraform-provider-${NAME}
+VERSION=1.0
+
 install:
 	go build
 	#mkdir -p $(PLUGDIR)/$(SUBPATH)
@@ -12,6 +16,13 @@ install:
 	rm -rf $(REPODIR)/*
 	mkdir -p $(REPODIR)/$(SUBPATH)
 	cp terraform-provider-shoreline $(REPODIR)/$(SUBPATH)/terraform-provider-shoreline
+
+release:
+	GOOS=darwin GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_darwin_amd64
+	GOOS=linux GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_linux_amd64
+	GOOS=openbsd GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_openbsd_amd64
+	GOOS=windows GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_windows_amd64
+
 
 # Run acceptance tests
 #############
