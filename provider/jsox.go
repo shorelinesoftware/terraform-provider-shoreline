@@ -131,7 +131,7 @@ func ParseIndexSpec(spec string) int {
 	if !strings.HasSuffix(spec, "]") {
 		return -1
 	}
-	subStr := spec[1:l-1]
+	subStr := spec[1 : l-1]
 	if len(subStr) == 0 {
 		return -2
 	}

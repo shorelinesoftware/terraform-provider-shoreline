@@ -329,6 +329,7 @@ var ObjectConfigJsonStr = `
 	}
 }
 `
+
 // old bot
 //			"#action_statement": { "type": "command",  "required": true, "primary": true },
 //			"#alarm_statement":  { "type": "command",  "required": true }
@@ -484,24 +485,24 @@ func attrValueString(typ string, key string, val interface{}, attrs map[string]i
 }
 
 func setFieldViaOp(typ string, attrs map[string]interface{}, name string, key string, val interface{}) diag.Diagnostics {
-		var diags diag.Diagnostics
+	var diags diag.Diagnostics
 
-		valStr := attrValueString(typ, key, val, attrs)
-		appendActionLog(fmt.Sprintf("Setting %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
+	valStr := attrValueString(typ, key, val, attrs)
+	appendActionLog(fmt.Sprintf("Setting %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
 
-		op := fmt.Sprintf("%s.%s = %s", name, key, valStr)
-		appendActionLog(fmt.Sprintf("Setting with op statement... '%s'\n", op))
-		result, err := runOpCommand(op)
-		if err != nil {
-			diags = diag.Errorf("Failed to set %s %s.%s: %s", typ, name, key, err.Error())
-			return diags
-		}
-		err = CheckUpdateResult(result)
-		if err != nil {
-			diags = diag.Errorf("Failed to update %s %s.%s: %s", typ, name, key, err.Error())
-			return diags
-		}
-		return nil
+	op := fmt.Sprintf("%s.%s = %s", name, key, valStr)
+	appendActionLog(fmt.Sprintf("Setting with op statement... '%s'\n", op))
+	result, err := runOpCommand(op)
+	if err != nil {
+		diags = diag.Errorf("Failed to set %s %s.%s: %s", typ, name, key, err.Error())
+		return diags
+	}
+	err = CheckUpdateResult(result)
+	if err != nil {
+		diags = diag.Errorf("Failed to update %s %s.%s: %s", typ, name, key, err.Error())
+		return diags
+	}
+	return nil
 }
 
 func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, ctx context.Context, d *schema.ResourceData, meta interface{}, doDiff bool) diag.Diagnostics {
@@ -527,17 +528,20 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	// TODO handle intbool type
 	doEnable := false
 	enableVal := false
+	anyChange := false
 	for key, _ := range attrs {
 		val, exists := d.GetOk(key)
 		if !exists {
 			continue
 		}
-		if doDiff && !d.HasChange(key) {
+		if key == "enabled" {
+			enableVal, _ = CastToBoolMaybe(val)
+			if doDiff && !d.HasChange(key) {
+				doEnable = true
+			}
 			continue
 		}
-		if key == "enabled" {
-			doEnable = true
-			enableVal, _ = CastToBoolMaybe(val)
+		if doDiff && !d.HasChange(key) {
 			continue
 		}
 
@@ -547,21 +551,25 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 			vals := re.FindStringSubmatch(CastToString(val))
 			keys := re.SubexpNames()
 			for i := 1; i < len(keys); i++ {
-				result :=  setFieldViaOp(typ, attrs, name, keys[i], vals[i])
+				result := setFieldViaOp(typ, attrs, name, keys[i], vals[i])
 				if result != nil {
 					return result
 				}
 			}
+			anyChange = true
 			continue
 		}
 
-		result :=  setFieldViaOp(typ, attrs, name, key, val)
+		result := setFieldViaOp(typ, attrs, name, key, val)
 		if result != nil {
 			return result
 		}
+		anyChange = true
 	}
 
-	if doEnable {
+	// Enabled is automatically toggled to "false" by oplang on any other attribute change.
+	// So, it requires special handling.
+	if doEnable || (enableVal && anyChange) {
 		act := "enable"
 		if !enableVal {
 			act = "disable"
@@ -647,8 +655,8 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 
 		stepsJs := map[string]interface{}{}
 
-		if typ=="alarm" || typ=="action" || typ=="bot" {
-			// TODO extract fields from step objects
+		if typ == "alarm" || typ == "action" || typ == "bot" {
+			// extract fields from step objects
 			op := fmt.Sprintf("get_%s_class( %s_name = \"%s\" )", typ, typ, name)
 			extraJs, err := runOpCommandToJson(op)
 			if err != nil {
@@ -685,7 +693,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 				re := regexp.MustCompile(`\$\{\w\w*\}`)
 				for expr := re.FindString(fullVal); expr != ""; expr = re.FindString(fullVal) {
 					l := len(expr)
-					varName := expr[2:l-1]
+					varName := expr[2 : l-1]
 					valStr := CastToString(GetNestedValueOrDefault(record, ToKeyPath("attributes."+varName), ""))
 					fullVal = strings.Replace(fullVal, expr, valStr, -1)
 				}
