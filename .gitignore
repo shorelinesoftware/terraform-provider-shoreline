@@ -1,0 +1,14 @@
+
+# generated executable
+terraform-provider-shoreline
+
+# vim swap files
+.*.swp
+.*.swo
+
+# terraform generated files
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.lock.hcl
+.terraform
+
