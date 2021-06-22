@@ -10,8 +10,21 @@ VERSION=1.0.1
 OS=$(shell uname | tr 'A-Z' 'a-z')
 SUBPATH=shoreline.io/terraform/shoreline/$(VERSION)/$(OS)_amd64
 
-install:
+build: format
 	go build
+
+test:
+	echo unit-tests...
+
+check:
+	gofmt -l .
+
+format:
+	gofmt -w .
+
+# NOTE: This relies on your ~/.terraformrc pointing to /tmp/tf-repo.
+#   See terraformrc in the current dir
+install: build
 	rm -rf $(REPODIR)/*
 	mkdir -p $(REPODIR)/$(SUBPATH)
 	cp terraform-provider-shoreline $(REPODIR)/$(SUBPATH)/terraform-provider-shoreline
@@ -21,9 +34,6 @@ release:
 	GOOS=linux   GOARCH=amd64 go build -o ./bin/$(BINARY)_$(VERSION)_linux_amd64
 	GOOS=openbsd GOARCH=amd64 go build -o ./bin/$(BINARY)_$(VERSION)_openbsd_amd64
 	GOOS=windows GOARCH=amd64 go build -o ./bin/$(BINARY)_$(VERSION)_windows_amd64
-
-check:
-	gofmt -l .
 
 # Run acceptance tests
 #############

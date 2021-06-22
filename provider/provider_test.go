@@ -11,6 +11,16 @@ import (
 	"math/rand"
 )
 
+func getProviderConfigString() string {
+	return `
+	provider "shoreline" {
+		url = "https://opsstage.us.api.shoreline-stage.io"
+		retries = 2
+		debug = true
+	}
+`
+}
+
 // providerFactories are used to instantiate a provider during acceptance testing.
 // The factory function will be invoked for every Terraform CLI command executed
 // to create a provider server to which the CLI can reattach.
@@ -63,7 +73,7 @@ func TestAccResourceAction(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getAccResourceAction(pre),
+				Config: getProviderConfigString() + getAccResourceAction(pre),
 				Check: resource.ComposeTestCheckFunc(
 					//resource.TestMatchResourceAttr( "shoreline_action.ls_action", "name", regexp.MustCompile("^ba")),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "name", pre+"_ls_action"),
@@ -108,7 +118,7 @@ func TestAccResourceAlarm(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getAccResourceAlarm(pre),
+				Config: getProviderConfigString() + getAccResourceAlarm(pre),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "name", pre+"_cpu_alarm"),
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "resource_query", "host"),
@@ -146,7 +156,7 @@ func TestAccResourceBot(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getAccResourceAction(pre) + getAccResourceAlarm(pre) + getAccResourceBot(pre),
+				Config: getProviderConfigString() + getAccResourceAction(pre) + getAccResourceAlarm(pre) + getAccResourceBot(pre),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_bot."+pre+"_cpu_bot", "name", pre+"_cpu_bot"),
 					//resource.TestCheckResourceAttr("shoreline_bot."+pre+"_cpu_bot", "alarm_statement", pre+"_cpu_alarm"),
@@ -194,7 +204,7 @@ func TestAccResourceMetric(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getAccResourceMetric(pre),
+				Config: getProviderConfigString() + getAccResourceMetric(pre),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "name", pre+"_cpu_plus_one"),
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "value", "cpu_usage + 2"),
@@ -229,7 +239,7 @@ func TestAccResourceResource(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getAccResourceResource(pre),
+				Config: getProviderConfigString() + getAccResourceResource(pre),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "name", pre+"_books"),
 					resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "description", "Pods with books app."),
@@ -262,7 +272,7 @@ func TestAccResourceFile(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getAccResourceFile(pre),
+				Config: getProviderConfigString() + getAccResourceFile(pre),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "name", pre+"_ex_file"),
 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "destination_path", "/tmp/opcp_example.sh"),
