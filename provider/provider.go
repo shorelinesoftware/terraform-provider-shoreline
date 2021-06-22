@@ -315,7 +315,7 @@ var ObjectConfigJsonStr = `
 			"condition_type":         { "type": "command",  "optional": true, "step": "condition_details.[0].condition_type" },
 			"condition_value":        { "type": "command",  "optional": true, "step": "condition_details.[0].condition_value" },
 			"metric_name":            { "type": "command",  "optional": true, "step": "condition_details.[0].metric_name" },
-			"raise_for":              { "type": "command",  "optional": true, "step": "condition_details.[0].raise_for" },
+			"raise_for":              { "type": "command",  "optional": true, "step": "condition_details.[0].raise_for", "default": "local" },
 			"check_interval":         { "type": "command",  "optional": true, "step": "check_interval" },
 			"resource_type":          { "type": "command",  "optional": true, "step": "resource_type" },
 			"family":                 { "type": "command",  "optional": true, "step": "config_data.family", "default": "custom" }
