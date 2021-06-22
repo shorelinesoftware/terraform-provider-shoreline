@@ -13,7 +13,10 @@ import (
 )
 
 func appendActionLog(msg string) {
-	filename := "/tmp/tf-json.log"
+	if !DoDebugLog {
+		return
+	}
+	filename := "/tmp/tf-shoreline.log"
 	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		//panic(err)
@@ -26,17 +29,35 @@ func appendActionLog(msg string) {
 	}
 }
 
-func runOpCommand(command string) (string, error) {
+func runOpCommand(command string, checkResult bool) (string, error) {
 	//var GlobalOpts = CliOpts{}
 	//if !LoadAuthConfig(&GlobalOpts) {
 	//	return "", fmt.Errorf("Failed to load auth credentials")
 	//}
-	result, err := ExecuteOpCommand(&GlobalOpts, command, false)
+	result := ""
+	err := error(nil)
+	for r := 0; r <= RetryLimit; r += 1 {
+		appendActionLog(fmt.Sprintf("Running OpLang command (retries %d/%d)   ---   command:(( %s ))\n", r, RetryLimit, command))
+		result, err = ExecuteOpCommand(&GlobalOpts, command)
+		if err == nil {
+			if !checkResult {
+				return result, err
+			}
+			err = CheckUpdateResult(result)
+			if err == nil {
+				return result, err
+			} else {
+				appendActionLog(fmt.Sprintf("Failed OpLang update (retries %d/%d)   ---   error:(( %s ))\n", r, RetryLimit, err.Error()))
+			}
+		} else {
+			appendActionLog(fmt.Sprintf("Failed OpLang command (retries %d/%d)   ---   error:(( %s ))\n", r, RetryLimit, err.Error()))
+		}
+	}
 	return result, err
 }
 
 func runOpCommandToJson(command string) (map[string]interface{}, error) {
-	result, err := runOpCommand(command)
+	result, err := runOpCommand(command, false)
 	if err != nil {
 		errOut := fmt.Errorf("Failed to execute op '%s': %s", command, err.Error())
 		return nil, errOut
@@ -94,6 +115,22 @@ func CheckUpdateResult(result string) error {
 		}
 	}
 	return nil
+}
+
+// Takes a regex like: "if (?P<if_expr>.*?) then (?P<then_expr>.*?) fi"
+// and parses out the named captures (e.g. 'if_expr', 'then_expr') 
+// into the returned map, with the name as a key, and the match as the value.
+func ExtractRegexToMap(expr string, regex string) map[string]interface{} {
+	result := map[string]interface{}{}
+	re := regexp.MustCompile(regex)
+	vals := re.FindStringSubmatch(expr)
+	keys := re.SubexpNames()
+
+	// skip index 0, which is the entire expression
+	for i := 1; i < len(keys); i++ {
+		result[keys[i]] = vals[i]
+	}
+	return result
 }
 
 func ValidateVariableName(name string) bool {
@@ -174,6 +211,18 @@ func New(version string) func() *schema.Provider {
 					Sensitive:   true,
 					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_TOKEN", nil),
 				},
+				"retries": {
+					Type:        schema.TypeInt,
+					Optional:    true,
+					Sensitive:   true,
+					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_RETRIES", nil),
+				},
+				"debug": {
+					Type:        schema.TypeBool,
+					Optional:    true,
+					Sensitive:   true,
+					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_DEBUG", nil),
+				},
 			},
 		}
 
@@ -204,6 +253,18 @@ func configure(version string, p *schema.Provider) func(ctx context.Context, d *
 			if !selectAuth(&GlobalOpts, AuthUrl) {
 				return nil, diag.Errorf("Failed to load auth credentials for %s\n"+GetManualAuthMessage(&GlobalOpts), AuthUrl)
 			}
+		}
+
+		retries, hasRetry := d.GetOk("retries")
+		if hasRetry {
+			RetryLimit = retries.(int)
+		} else {
+			RetryLimit = 0
+		}
+
+		debugLog, hasDebugLog := d.GetOk("debug")
+		if hasDebugLog {
+			DoDebugLog = debugLog.(bool)
 		}
 
 		return &apiClient{}, nil
@@ -271,7 +332,9 @@ var ObjectConfigJsonStr = `
 			},
 			"description":      { "type": "string",   "optional": true },
 			"enabled":          { "type": "intbool",  "optional": true, "default": false },
-			"family":           { "type": "command",  "optional": true, "step": "config_data.family", "default": "custom" }
+			"family":           { "type": "command",  "optional": true, "step": "config_data.family", "default": "custom" },
+			"action_statement": { "type": "command",  "internal": true },
+			"alarm_statement":  { "type": "command",  "internal": true }
 		}
 	},
 
@@ -355,6 +418,13 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		if strings.HasPrefix(k, "#") {
 			continue
 		}
+
+		// internal objects, i.e. components of compound fields
+		internal := GetNestedValueOrDefault(attrs, ToKeyPath("internal"), false).(bool)
+		if internal {
+			continue
+		}
+
 		attrMap := attrs.(map[string]interface{})
 		sch := &schema.Schema{}
 		typ := GetNestedValueOrDefault(attrMap, ToKeyPath("type"), "string")
@@ -492,9 +562,10 @@ func setFieldViaOp(typ string, attrs map[string]interface{}, name string, key st
 
 	op := fmt.Sprintf("%s.%s = %s", name, key, valStr)
 	appendActionLog(fmt.Sprintf("Setting with op statement... '%s'\n", op))
-	result, err := runOpCommand(op)
+	result, err := runOpCommand(op, true)
 	if err != nil {
 		diags = diag.Errorf("Failed to set %s %s.%s: %s", typ, name, key, err.Error())
+		appendActionLog(fmt.Sprintf("Failed to set %s %s.%s: %s\nval: (( %+v ))\nop-statement: %s\n", typ, name, key, val, err.Error(), op))
 		return diags
 	}
 	err = CheckUpdateResult(result)
@@ -525,33 +596,61 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		}
 	}
 
-	// TODO handle intbool type
-	doEnable := false
+	// TODO handle intbool type (aside from enable)
+	writeEnable := false
 	enableVal := false
 	anyChange := false
 	for key, _ := range attrs {
-		val, exists := d.GetOk(key)
-		if !exists {
+
+		internal := GetNestedValueOrDefault(attrs, ToKeyPath(key+".internal"), false).(bool)
+		if internal {
 			continue
 		}
+
+		val, exists := d.GetOk(key)
+		// NOTE: Terraform reports !exists when a value is explicitly supplied, but matches the 'default'
+		if !exists && !d.HasChange(key) {
+			appendActionLog(fmt.Sprintf("FieldDoesNotExist: %s: '%s'.'%s' val(%v) HasChange(%v)\n", typ, name, key, val, d.HasChange(key)))
+			continue
+		}
+
+		// Because OpLang auto-toggles some objects to "disabled" on *any* property change, 
+		// we have to restore the value as needed.
 		if key == "enabled" {
 			enableVal, _ = CastToBoolMaybe(val)
-			if doDiff && !d.HasChange(key) {
-				doEnable = true
+			if d.HasChange(key) || !doDiff {
+				writeEnable = true
 			}
+			appendActionLog(fmt.Sprintf("CheckEnableState: %s: '%s' write(%v) val(%v) change(%v) hasChange:(%v) doDiff(%v)\n", typ, name, writeEnable, enableVal, anyChange, d.HasChange(key), doDiff))
 			continue
 		}
 		if doDiff && !d.HasChange(key) {
 			continue
 		}
 
-		compoundRegex, isStr := GetNestedValueOrDefault(attrs, ToKeyPath(key+".compound_out"), nil).(string)
+		compoundRegex, isStr := GetNestedValueOrDefault(attrs, ToKeyPath(key+".compound_in"), nil).(string)
 		if isStr {
-			re := regexp.MustCompile(compoundRegex)
-			vals := re.FindStringSubmatch(CastToString(val))
-			keys := re.SubexpNames()
-			for i := 1; i < len(keys); i++ {
-				result := setFieldViaOp(typ, attrs, name, keys[i], vals[i])
+			curMap := ExtractRegexToMap(CastToString(val), compoundRegex)
+			appendActionLog(fmt.Sprintf("CompoundSet: %s: '%s'.'%s' map(%v) from (( %v ))\n", typ, name, key, curMap, val))
+
+			unchanged := map[string]bool{}
+			if doDiff {
+				old, _ := d.GetChange(key)
+				oldMap := ExtractRegexToMap(CastToString(old), compoundRegex)
+				for k, v := range oldMap {
+					nu, exists := curMap[k]
+					if exists && v == nu {
+						unchanged[k] = true
+					}
+				}
+			}
+
+			for k, v := range curMap {
+				_, skip :=  unchanged[k]
+				if skip {
+					continue
+				}
+				result := setFieldViaOp(typ, attrs, name, k, v)
 				if result != nil {
 					return result
 				}
@@ -567,15 +666,17 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		anyChange = true
 	}
 
+	appendActionLog(fmt.Sprintf("EnableState: %s: '%s' write(%v) val(%v) change(%v)\n", typ, name, writeEnable, enableVal, anyChange))
 	// Enabled is automatically toggled to "false" by oplang on any other attribute change.
 	// So, it requires special handling.
-	if doEnable || (enableVal && anyChange) {
+	if writeEnable || (enableVal && anyChange) {
 		act := "enable"
 		if !enableVal {
 			act = "disable"
 		}
 		op := fmt.Sprintf("%s %s", act, name)
-		result, err := runOpCommand(op)
+		appendActionLog(fmt.Sprintf("EnableState: %s: '%s' Op:'%s'\n", typ, name, op))
+		result, err := runOpCommand(op, true)
 		if err != nil {
 			diags = diag.Errorf("Failed to %s (1) %s: %s", act, typ, err.Error())
 			return diags
@@ -609,7 +710,7 @@ func resourceShorelineObjectCreate(typ string, primary string, attrs map[string]
 		//	alarm := d.Get("alarm_statement").(string)
 		//	op = fmt.Sprintf("%s %s = if %s then %s fi", typ, name, alarm, action)
 		//}
-		result, err := runOpCommand(op)
+		result, err := runOpCommand(op, true)
 		if err != nil {
 			// TODO check already exists
 			diags = diag.Errorf("Failed to create (1) %s: %s", typ, err.Error())
@@ -687,6 +788,11 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 		for key, attr := range attrs {
 			var val interface{}
 
+			internal := GetNestedValueOrDefault(attrs, ToKeyPath(key+".internal"), false).(bool)
+			if internal {
+				continue
+			}
+
 			compoundValue, isStr := GetNestedValueOrDefault(attrs, ToKeyPath(key+".compound_out"), nil).(string)
 			if isStr {
 				fullVal := compoundValue
@@ -740,7 +846,7 @@ func resourceShorelineObjectUpdate(typ string, attrs map[string]interface{}) fun
 
 		var diags diag.Diagnostics
 		name := d.Get("name").(string)
-		appendActionLog(fmt.Sprintf("Updated action: '%s' :: %+v\n", name, d))
+		appendActionLog(fmt.Sprintf("Updated object '%s': '%s' :: %+v\n", typ, name, d))
 
 		diags = resourceShorelineObjectSetFields(typ, attrs, ctx, d, meta, true)
 		if diags != nil {
@@ -763,7 +869,7 @@ func resourceShorelineObjectDelete(typ string) func(ctx context.Context, d *sche
 		appendActionLog(fmt.Sprintf("deleting %s: '%s' :: %+v\n", typ, name, d))
 
 		op := fmt.Sprintf("delete %s", name)
-		result, err := runOpCommand(op)
+		result, err := runOpCommand(op, true)
 		if err != nil {
 			// TODO check already exists
 			diags = diag.Errorf("Failed to delete %s: %s", typ, err.Error())

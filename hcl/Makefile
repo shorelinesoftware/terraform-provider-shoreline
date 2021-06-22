@@ -1,9 +1,14 @@
 #TERRAFORM=../../terraform
 TERRAFORM=terraform
 
-apply:
+plan:
 	$(TERRAFORM) plan
+
+apply:
 	$(TERRAFORM) apply
+
+destroy:
+	$(TERRAFORM) destroy
 
 tf-clean:
 	rm -f terraform.tfstate

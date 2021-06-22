@@ -3,17 +3,18 @@ terraform {
   required_providers {
     shoreline = {
       source  = "shoreline.io/terraform/shoreline"
-      version = ">= 1.0"
+      version = ">= 1.0.1"
     }
   }
 }
 
 provider "shoreline" {
   # provider configuration here
-  url = "https://test.us.api.shoreline-vm1.io"
-  #url = "https://test.us.api.shoreline-test5.io"
-  #url = "https://test.us.api.shoreline-test4.io"
   #token = "xyz1.asdfj.asd3fas..."
+  #url = "https://test.us.api.shoreline-vm1.io"
+  url = "https://test.us.api.shoreline-test6.io"
+  retries = 2
+  debug = true
 }
 
 resource "shoreline_bot" "cpu_bot" {
@@ -26,13 +27,17 @@ resource "shoreline_bot" "cpu_bot" {
 resource "shoreline_action" "ls_action" {
   name = "ls_action"
   command = "`ls /tmp`"
-  description = "List some files"
+  description = "List some files ..."
   resource_query = "host"
   #params = [ "foo", "bar", "blah" ]
   #timeout = 60
   start_title_template    = "JVM dump started"
   complete_title_template = "JVM dump completed"
   error_title_template    = "JVM dump failed"
+
+  start_short_template    = "JVM dump short started"
+  complete_short_template = "JVM dump short completed"
+  error_short_template    = "JVM dump short failed"
 
   enabled = true
 }
@@ -43,8 +48,11 @@ resource "shoreline_alarm" "cpu_alarm" {
   clear_query = "(cpu_usage < 0 | sum(5)) >= 2.75"
   description = "Watch CPU usage."
   resource_query = "host"
-  enabled = true
+
+  fire_short_template = "fired blah123"
   resolve_short_template = "cleared blah123"
+
+  enabled = true
 }
 
 resource "shoreline_metric" "cpu_plus_one" {

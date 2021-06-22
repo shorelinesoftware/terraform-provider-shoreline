@@ -32,6 +32,8 @@ const CanonicalUrl = "https://<customer>.<region>.api.shoreline-<cluster>.io"
 
 var AuthUrl string
 var AuthToken string
+var RetryLimit int
+var DoDebugLog = false
 var GlobalOpts = CliOpts{}
 
 var clientAuth *ClientAuth
@@ -206,7 +208,7 @@ func GetInnerError(err error) string {
 	return innerStr
 }
 
-func ExecuteOpCommand(GlobalOpts *CliOpts, expr string, columnSummary bool) (string, error) {
+func ExecuteOpCommand(GlobalOpts *CliOpts, expr string) (string, error) {
 	if !GlobalOpts.HasAuth {
 		return "", fmt.Errorf("No valid auth credentials.")
 	} else {
