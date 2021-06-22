@@ -1,19 +1,17 @@
 default: install
 
-PLUGDIR=~/.terraform.d/plugins
 REPODIR=/tmp/tf-repo/providers
 
 NAME=shoreline
 BINARY=terraform-provider-$(NAME)
 VERSION=1.0.1
 
-#SUBPATH=shoreline.io/terraform/shoreline/$(VERSION)/linux_amd64
-SUBPATH=shoreline.io/terraform/shoreline/$(VERSION)/darwin_amd64
+// NOTE: this only works for 64 bit linux and MacOs ("darwin")
+OS=$(shell uname | tr 'A-Z' 'a-z')
+SUBPATH=shoreline.io/terraform/shoreline/$(VERSION)/$(OS)_amd64
 
 install:
 	go build
-	#mkdir -p $(PLUGDIR)/$(SUBPATH)
-	#cp tf-json $(PLUGDIR)/$(SUBPATH)/
 	rm -rf $(REPODIR)/*
 	mkdir -p $(REPODIR)/$(SUBPATH)
 	cp terraform-provider-shoreline $(REPODIR)/$(SUBPATH)/terraform-provider-shoreline
@@ -24,6 +22,8 @@ release:
 	GOOS=openbsd GOARCH=amd64 go build -o ./bin/$(BINARY)_$(VERSION)_openbsd_amd64
 	GOOS=windows GOARCH=amd64 go build -o ./bin/$(BINARY)_$(VERSION)_windows_amd64
 
+check:
+	gofmt -l .
 
 # Run acceptance tests
 #############

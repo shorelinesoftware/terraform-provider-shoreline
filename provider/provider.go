@@ -118,7 +118,7 @@ func CheckUpdateResult(result string) error {
 }
 
 // Takes a regex like: "if (?P<if_expr>.*?) then (?P<then_expr>.*?) fi"
-// and parses out the named captures (e.g. 'if_expr', 'then_expr') 
+// and parses out the named captures (e.g. 'if_expr', 'then_expr')
 // into the returned map, with the name as a key, and the match as the value.
 func ExtractRegexToMap(expr string, regex string) map[string]interface{} {
 	result := map[string]interface{}{}
@@ -342,7 +342,7 @@ var ObjectConfigJsonStr = `
 		"attributes": {
 			"type":           { "type": "string",   "computed": true, "value": "METRIC" },
 			"name":           { "type": "label",    "required": true, "forcenew": true },
-			"value":          { "type": "command",   "required": true, "primary": true },
+			"value":          { "type": "command",   "required": true, "primary": true, "alias_out": "val" },
 			"description":    { "type": "string",   "optional": true },
 			"params":         { "type": "string[]", "optional": true },
 			"res_env_var":    { "type": "string",   "optional": true },
@@ -561,6 +561,15 @@ func setFieldViaOp(typ string, attrs map[string]interface{}, name string, key st
 	appendActionLog(fmt.Sprintf("Setting %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
 
 	op := fmt.Sprintf("%s.%s = %s", name, key, valStr)
+
+	// TODO Let alias to be a list of fallbacks for versioning,
+	//   or have alternate ObjectConfigJsonStr based on backend version,
+	//   or let backend return ObjectConfigJsonStr to use.
+	alias, isStr := GetNestedValueOrDefault(attrs, ToKeyPath(key+".alias_out"), nil).(string)
+	if isStr {
+		op = fmt.Sprintf("%s.%s = %s", name, alias, valStr)
+	}
+
 	appendActionLog(fmt.Sprintf("Setting with op statement... '%s'\n", op))
 	result, err := runOpCommand(op, true)
 	if err != nil {
@@ -614,7 +623,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 			continue
 		}
 
-		// Because OpLang auto-toggles some objects to "disabled" on *any* property change, 
+		// Because OpLang auto-toggles some objects to "disabled" on *any* property change,
 		// we have to restore the value as needed.
 		if key == "enabled" {
 			enableVal, _ = CastToBoolMaybe(val)
@@ -646,7 +655,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 			}
 
 			for k, v := range curMap {
-				_, skip :=  unchanged[k]
+				_, skip := unchanged[k]
 				if skip {
 					continue
 				}

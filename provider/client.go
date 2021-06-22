@@ -283,7 +283,6 @@ func (client *Client) fetchAccessToken(suppressErrors bool) (ret []byte, err err
 		return ret, fmt.Errorf(string(ret))
 	}
 
-	//WriteMsg("\nAUTH RESPONSE: %s\n\n", ret)
 	var js interface{}
 	jsErr := json.Unmarshal(ret, &js)
 	if jsErr != nil {
@@ -380,7 +379,6 @@ func (client *Client) executeInner(statement string, suppressErrors bool) (ret [
 	}
 
 	if resp.StatusCode != 200 {
-		//WriteMsg("ERROR: Unexpected HTTP status code (%v) in response.\n", resp.StatusCode)
 		if ret == nil || len(ret) == 0 {
 			ret = []byte(fmt.Sprintf("ERROR: Unexpected HTTP status code (%v) in response.\n", resp.StatusCode))
 		}

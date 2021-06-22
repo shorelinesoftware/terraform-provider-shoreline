@@ -12,8 +12,10 @@ destroy:
 
 tf-clean:
 	rm -f terraform.tfstate
+	rm -f .terraform.lock.hcl
+	rm -rf .terraform
 
-install: tf-clean
-	rm -f .terraform.lock.hcl 
+install:
+	rm -f .terraform.lock.hcl
 	make -C .. install 
 	$(TERRAFORM) init
