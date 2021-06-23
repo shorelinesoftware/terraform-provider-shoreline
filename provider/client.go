@@ -207,117 +207,11 @@ func maybePrintTimer(startTimeMs int64, label string) {
 	}
 }
 
-func (client *Client) fetchAccessToken(suppressErrors bool) (ret []byte, err error) {
+func (client *Client) callApi(suppressErrors bool, auth string, url string, body string, kind string) (ret []byte, err error, code int) {
 	startTimeMs := time.Now().UnixNano() / 1_000_000
-	defer maybePrintTimer(startTimeMs, "fetchAccessToken()")
+	defer maybePrintTimer(startTimeMs, kind)
 
-	url := fmt.Sprintf("%s%s", client.authData.BaseURL, authEndpoint)
-	authorization := fmt.Sprintf("Bearer %s", client.authData.ApiToken)
-	body := "{\"refresh_token\": \"" + client.authData.ApiToken + "\"}"
-	req, err := http.NewRequest("POST", url, strings.NewReader(body))
-	if err != nil {
-		if !suppressErrors {
-			WriteMsg("ERROR creating HTTP auth request object.\n")
-		}
-		return ret, err
-	}
-	req.Header.Set("authorization", authorization)
-	req.Header.Set("content-type", "application/json; charset=utf-8")
-	req.Header.Set("idempotency-key", client.authData.ApiKey)
-	req.Header.Set("accept", "*/*")
-
-	// Allow Ctrl-C to cancel
-	canceled := false
-	ctx, cancel := context.WithCancel(context.Background())
-	req = req.WithContext(ctx)
-	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, os.Interrupt)
-	defer func() {
-		signal.Stop(interrupt) //, os.Interrupt)
-		close(interrupt)
-	}()
-	go func() {
-		sig := <-interrupt
-		canceled = true
-		if sig != nil {
-			//fmt.Printf("cancel signal %v\n", sig)
-			cancel()
-		}
-	}()
-
-	resp, err := client.httpClient.Do(req)
-	if canceled {
-		return ret, errors.New("User Cancelled")
-	}
-
-	if err != nil {
-		if !suppressErrors {
-			WriteMsg("ERROR Sending HTTP auth request.\n")
-		}
-		return ret, err
-	}
-
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			if !suppressErrors {
-				WriteMsg("ERROR: Closing HTTP connection: %s\n", err)
-			}
-		}
-	}()
-
-	ret, err = ioutil.ReadAll(resp.Body)
-
-	if err != nil {
-		if !suppressErrors {
-			WriteMsg("ERROR Reading HTTP auth response.\n")
-		}
-		return ret, err
-	}
-
-	if resp.StatusCode != 200 {
-		if !suppressErrors {
-			WriteMsg("ERROR Unexpected HTTP status code (%v) in auth response.\n", resp.StatusCode)
-			WriteMsg("You may need to get a fresh authorization token! e.g\n")
-			WriteMsg(" 'auth %s'\n", client.authData.BaseURL)
-		}
-		return ret, fmt.Errorf(string(ret))
-	}
-
-	var js interface{}
-	jsErr := json.Unmarshal(ret, &js)
-	if jsErr != nil {
-		if !suppressErrors {
-			WriteMsg("ERROR Unmarshaling HTTP auth response.\n")
-		}
-		return ret, err
-	}
-	// NOTE: A refresh token is also returned, so we could also update the token saved in the config.
-	//refresh, isStr := GetNestedValueOrDefault(js, ToKeyPath("refresh_token"), "").(string)
-	access, isStr := GetNestedValueOrDefault(js, ToKeyPath("access_token"), "").(string)
-	if !isStr || access == "" {
-		if !suppressErrors {
-			WriteMsg("ERROR Missing token in auth response.\n")
-		}
-		return ret, fmt.Errorf("Missing access token in response.")
-	}
-
-	return []byte(access), err
-}
-
-func (client *Client) executeInner(statement string, suppressErrors bool) (ret []byte, err error, code int) {
-	startTimeMs := time.Now().UnixNano() / 1_000_000
-	defer maybePrintTimer(startTimeMs, "Execute()")
-
-	url := fmt.Sprintf("%s%s", client.authData.BaseURL, executeEndpoint)
-	authorization := fmt.Sprintf("Bearer %s", client.authData.AccessToken)
-	body_data := map[string]string{"statement": statement}
-	body, err := json.Marshal(body_data)
-	if err != nil {
-		if !suppressErrors {
-			WriteMsg("ERROR marshaling op statement body.\n")
-		}
-		return ret, err, 0
-	}
+	authorization := fmt.Sprintf("Bearer %s", auth)
 	req, err := http.NewRequest("POST", url, strings.NewReader(string(body)))
 	if err != nil {
 		if !suppressErrors {
@@ -354,13 +248,6 @@ func (client *Client) executeInner(statement string, suppressErrors bool) (ret [
 		return ret, errors.New("User Cancelled"), 0
 	}
 
-	if err != nil {
-		if !suppressErrors {
-			WriteMsg("ERROR Sending HTTP request.\n")
-		}
-		return ret, err, 0
-	}
-
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
 			if !suppressErrors {
@@ -373,16 +260,71 @@ func (client *Client) executeInner(statement string, suppressErrors bool) (ret [
 
 	if err != nil {
 		if !suppressErrors {
-			WriteMsg("ERROR Reading HTTP response.\n")
+			WriteMsg("ERROR Reading HTTP response -- %s.\n", kind)
 		}
 		return ret, err, 0
 	}
 
-	if resp.StatusCode != 200 {
-		if ret == nil || len(ret) == 0 {
-			ret = []byte(fmt.Sprintf("ERROR: Unexpected HTTP status code (%v) in response.\n", resp.StatusCode))
-		}
-		return ret, fmt.Errorf("%s", string(ret)), resp.StatusCode
-	}
 	return ret, err, resp.StatusCode
+}
+
+func (client *Client) fetchAccessToken(suppressErrors bool) (ret []byte, err error) {
+	url := fmt.Sprintf("%s%s", client.authData.BaseURL, authEndpoint)
+	auth := client.authData.ApiToken
+	kind := "fetchAccessToken()"
+	body := "{\"refresh_token\": \"" + client.authData.ApiToken + "\"}"
+	ret, err, code := client.callApi(suppressErrors, auth, url, body, kind)
+
+	if code != 200 {
+		if !suppressErrors {
+			WriteMsg("ERROR Unexpected HTTP status code (%v) in auth response.\n", code)
+			WriteMsg("You may need to get a fresh authorization token! e.g\n")
+			WriteMsg(" 'auth %s'\n", client.authData.BaseURL)
+		}
+		return ret, fmt.Errorf(string(ret))
+	}
+
+	var js interface{}
+	jsErr := json.Unmarshal(ret, &js)
+	if jsErr != nil {
+		if !suppressErrors {
+			WriteMsg("ERROR Unmarshaling HTTP auth response.\n")
+		}
+		return ret, err
+	}
+	// NOTE: A refresh token is also returned, so we could also update the token saved in the config.
+	//refresh, isStr := GetNestedValueOrDefault(js, ToKeyPath("refresh_token"), "").(string)
+	access, isStr := GetNestedValueOrDefault(js, ToKeyPath("access_token"), "").(string)
+	if !isStr || access == "" {
+		if !suppressErrors {
+			WriteMsg("ERROR Missing token in auth response.\n")
+		}
+		return ret, fmt.Errorf("Missing access token in response.")
+	}
+
+	return []byte(access), err
+}
+
+func (client *Client) executeInner(statement string, suppressErrors bool) (ret []byte, err error, code int) {
+	url := fmt.Sprintf("%s%s", client.authData.BaseURL, executeEndpoint)
+	auth := client.authData.AccessToken
+	kind := "Execute()"
+	body_data := map[string]string{"statement": statement}
+	body, err := json.Marshal(body_data)
+	if err != nil {
+		if !suppressErrors {
+			WriteMsg("ERROR marshaling op statement body.\n")
+		}
+		return ret, err, 0
+	}
+	ret, err, code = client.callApi(suppressErrors, auth, url, string(body), kind)
+
+	if code != 200 {
+		if ret == nil || len(ret) == 0 {
+			ret = []byte(fmt.Sprintf("ERROR: Unexpected HTTP status code (%v) in response.\n", code))
+		}
+		return ret, fmt.Errorf("%s", string(ret)), code
+	}
+
+	return ret, err, code
 }
