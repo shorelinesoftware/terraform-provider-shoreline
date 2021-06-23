@@ -12,3 +12,6 @@ terraform.tfstate.backup
 .terraform.lock.hcl
 .terraform
 
+# idea files
+.idea
+
