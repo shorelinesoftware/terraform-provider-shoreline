@@ -57,5 +57,5 @@ jobs:
         env:
           version: ${{ github.event.inputs.version }}
         run: |
-          aws s3 rm s3://shoreline-terraform/provider/terraform-provider-shoreline_${version}_darwin_amd64
+          aws s3 rm s3://shoreline-terraform-provider/${version}/terraform-provider-shoreline_${version}_darwin_amd64
           aws s3 cp ./terraform-provider-shoreline_${version}_darwin_amd64.dmg s3://shoreline-terraform-provider/${version}/terraform-provider-shoreline_${version}_darwin_amd64.dmg
