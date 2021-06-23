@@ -38,7 +38,7 @@ jobs:
           mv ./terraform-provider-shoreline_${version}_darwin_amd64 ./terraform-provider-shoreline_${version}_darwin_amd64.command
           chmod 755 ./terraform-provider-shoreline_${version}_darwin_amd64.command
           echo '{
-            "source" : ["./terraform-provider-shoreline_${version}_darwin_amd64.command"],
+            "source" : ["./terraform-provider-shoreline_'"${version}"'_darwin_amd64.command"],
             "bundle_id" : "io.shoreline.terraform",
             "apple_id": {
                "username" : "build@shorelinesoftware.com",
@@ -48,8 +48,8 @@ jobs:
                "application_identity" : "E4C09D7E61638C54FFD01886C778C5474B9F958D"
             },
             "dmg" :{
-               "output_path":  "./terraform-provider-shoreline_${version}_darwin_amd64.dmg",
-               "volume_name":  "terraform-provider-shoreline_${version}_darwin_amd64.command"
+               "output_path":  "./terraform-provider-shoreline_'"${version}"'_darwin_amd64.dmg",
+               "volume_name":  "terraform-provider-shoreline_'"${version}"'_darwin_amd64.command"
             }
           }' | jq '' > gon.json
           gon -log-level=debug -log-json ./gon.json
