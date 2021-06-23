@@ -4,7 +4,7 @@ on:
     branches: [ main ]
   workflow_dispatch:
 jobs:
-  test:
+  terraform-test-and-build:
     runs-on: ubuntu-20.04
     steps:
       - name: build
@@ -41,4 +41,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.SHORELINE_GITHUB_TOKEN }}
           version: ${{ steps.upload_to_s3.outputs.version }}
         run: |
-          curl -X POST --header "Authorization: token ${GITHUB_TOKEN}" --header "Accept: application/vnd.github.v3+json" https://api.github.com/repos/shorelinesoftware/shoreline-terraform-provider/actions/workflows/8195326/dispatches -d '{"ref":"main", "inputs":{"version":"'$version'"}}'
+          curl -X POST --header "Authorization: token ${GITHUB_TOKEN}" --header "Accept: application/vnd.github.v3+json" https://api.github.com/repos/shorelinesoftware/shoreline-terraform-provider/actions/workflows/10682343/dispatches -d '{"ref":"main", "inputs":{"version":"'$version'"}}'

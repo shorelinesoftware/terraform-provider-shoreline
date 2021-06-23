@@ -1,4 +1,4 @@
-name: Sign and Notarize Mac CLI
+name: Sign and Notarize Mac terraform
 on: 
   workflow_dispatch:
     inputs:
@@ -19,7 +19,7 @@ jobs:
         env:
           version: ${{ github.event.inputs.version }}
         run: |
-          aws s3 cp s3://shoreline-terraform-provider/{version}/terraform-provider-shoreline_${version}_darwin_amd64 ./terraform-provider-shoreline_${version}_darwin_amd64
+          aws s3 cp s3://shoreline-terraform-provider/${version}/terraform-provider-shoreline_${version}_darwin_amd64 ./terraform-provider-shoreline_${version}_darwin_amd64
       - name: Import Code-Signing Certificates
         uses: Apple-Actions/import-codesign-certs@v1
         with:
