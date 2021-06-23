@@ -36,9 +36,9 @@ jobs:
           echo "uploading version:${version} files to s3"
           aws s3 cp ./bin/ s3://shoreline-terraform-provider/${version}/ --recursive
           echo "::set-output name=version::$version"
-#      - name: Trigger sign and notarize workflow
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.SHORELINE_GITHUB_TOKEN }}
-#          version: ${{ steps.upload_to_s3.outputs.version }}
-#        run: |
-#          curl -X POST --header "Authorization: token ${GITHUB_TOKEN}" --header "Accept: application/vnd.github.v3+json" https://api.github.com/repos/shorelinesoftware/shoreline/actions/workflows/8195326/dispatches -d '{"ref":"master", "inputs":{"version":"'$version'"}}'
+      - name: Trigger sign and notarize workflow
+        env:
+          GITHUB_TOKEN: ${{ secrets.SHORELINE_GITHUB_TOKEN }}
+          version: ${{ steps.upload_to_s3.outputs.version }}
+        run: |
+          curl -X POST --header "Authorization: token ${GITHUB_TOKEN}" --header "Accept: application/vnd.github.v3+json" https://api.github.com/repos/shorelinesoftware/shoreline-terraform-provider/actions/workflows/8195326/dispatches -d '{"ref":"main", "inputs":{"version":"'$version'"}}'

@@ -9,12 +9,17 @@ jobs:
   sign-and-notarize-mac-cli:
     runs-on: macos-latest
     steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.SHORELINE_BUILD_AWS_KEY }}
+          aws-secret-access-key: ${{ secrets.SHORELINE_BUILD_AWS_SEC }}
+          aws-region: us-west-2
       - name: Download cli asset
         env:
-          GITHUB_TOKEN: ${{ secrets.SHORELINE_GITHUB_TOKEN }}
-          TAG: ${{ github.event.inputs.tag }}
+          version: ${{ github.event.inputs.version }}
         run: |
-          wget -O oplang_cli_mac --header "Authorization: token ${GITHUB_TOKEN}" --header="Accept:application/octet-stream" "https://api.github.com/repos/shorelinesoftware/shoreline/releases/assets/$(curl --header "Authorization: token ${GITHUB_TOKEN}" "https://api.github.com/repos/shorelinesoftware/shoreline/releases?per_page=100&page=1" | jq ". | map(select(.tag_name == \"$TAG\"))[0].assets | map(select(.name == \"oplang_cli_mac\"))[0].id")"
+          aws s3 cp s3://shoreline-terraform-provider/{version}/terraform-provider-shoreline_${version}_darwin_amd64 ./terraform-provider-shoreline_${version}_darwin_amd64
       - name: Import Code-Signing Certificates
         uses: Apple-Actions/import-codesign-certs@v1
         with:
@@ -27,13 +32,14 @@ jobs:
       - name: Sign and notarize mac cli
         env:
           AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
+          version: ${{ github.event.inputs.version }}
         run: |
-          chmod 755 ./oplang_cli_mac
-          mv ./oplang_cli_mac ./oplang_cli_mac.command
-          chmod 755 ./oplang_cli_mac.command
+          chmod 755 ./terraform-provider-shoreline_${version}_darwin_amd64
+          mv ./terraform-provider-shoreline_${version}_darwin_amd64 ./terraform-provider-shoreline_${version}_darwin_amd64.command
+          chmod 755 ./terraform-provider-shoreline_${version}_darwin_amd64.command
           echo '{
-            "source" : ["./oplang_cli_mac.command"],
-            "bundle_id" : "io.shoreline.oplang-cli",
+            "source" : ["./terraform-provider-shoreline_${version}_darwin_amd64.command"],
+            "bundle_id" : "io.shoreline.terraform",
             "apple_id": {
                "username" : "build@shorelinesoftware.com",
                "password":  "@env:AC_PASSWORD"
@@ -42,40 +48,14 @@ jobs:
                "application_identity" : "E4C09D7E61638C54FFD01886C778C5474B9F958D"
             },
             "dmg" :{
-               "output_path":  "./oplang_cli_mac.dmg",
-               "volume_name":  "oplang_cli_mac.command"
+               "output_path":  "./terraform-provider-shoreline_${version}_darwin_amd64.dmg",
+               "volume_name":  "terraform-provider-shoreline_${version}_darwin_amd64.command"
             }
           }' | jq '' > gon.json
           gon -log-level=debug -log-json ./gon.json
-      - name: Delete cli asset
-        env:
-          GITHUB_TOKEN: ${{ secrets.SHORELINE_GITHUB_TOKEN }}
-          TAG: ${{ github.event.inputs.tag }}
-        run: |
-          curl -X DELETE --header "Authorization: token ${GITHUB_TOKEN}" "https://api.github.com/repos/shorelinesoftware/shoreline/releases/assets/$(curl --header "Authorization: token ${GITHUB_TOKEN}" "https://api.github.com/repos/shorelinesoftware/shoreline/releases?per_page=100&page=1" | jq ". | map(select(.tag_name == \"$TAG\"))[0].assets | map(select(.name == \"oplang_cli_mac\"))[0].id")"
-      - name: Upload signed cli asset
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            ./oplang_cli_mac.dmg
-          tag_name: ${{ github.event.inputs.tag }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: shorelinesoftware/shoreline
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.SHORELINE_BUILD_AWS_KEY }}
-          aws-secret-access-key: ${{ secrets.SHORELINE_BUILD_AWS_SEC }}
-          aws-region: us-west-2
       - name: Upload signed cli to S3
         env:
-          tag: ${{ github.event.inputs.tag }}
+          version: ${{ github.event.inputs.version }}
         run: |
-          if [ "$(echo $tag | grep master)" ]
-          then
-            aws s3 cp ./oplang_cli_mac.dmg s3://shoreline-cli/latest/mac/oplang_cli_mac.dmg
-            aws s3 cp ./oplang_cli_mac.dmg s3://shoreline-cli/master/mac/$tag/oplang_cli_mac.dmg
-          else
-            aws s3 cp ./oplang_cli_mac.dmg s3://shoreline-cli/release/mac/$tag/oplang_cli_mac.dmg
-          fi
+          aws s3 rm s3://shoreline-terraform/provider/terraform-provider-shoreline_${version}_darwin_amd64
+          aws s3 cp ./terraform-provider-shoreline_${version}_darwin_amd64.dmg s3://shoreline-terraform-provider/${version}/terraform-provider-shoreline_${version}_darwin_amd64.dmg
