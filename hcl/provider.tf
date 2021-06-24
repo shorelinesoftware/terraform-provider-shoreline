@@ -11,25 +11,26 @@ terraform {
 provider "shoreline" {
   # provider configuration here
   #token = "xyz1.asdfj.asd3fas..."
-  #url = "https://test.us.api.shoreline-vm1.io"
-  url = "https://test.us.api.shoreline-test6.io"
+  url = "https://test.us.api.shoreline-vm1.io"
+  #url = "https://test.us.api.shoreline-test6.io"
   retries = 2
   debug = true
 }
 
 resource "shoreline_bot" "cpu_bot" {
   name = "cpu_bot"
-  command = "if ${shoreline_alarm.cpu_alarm.name} then ${shoreline_action.ls_action.name} fi"
+  command = "if ${shoreline_alarm.cpu_alarm.name} then ${shoreline_action.ls_action.name}('/tmp') fi"
   description = "Act on CPU usage."
   enabled = true
 }
 
 resource "shoreline_action" "ls_action" {
   name = "ls_action"
-  command = "`ls /tmp`"
+  command = "`ls $${dir}; export FOO='bar'`"
   description = "List some files ..."
   resource_query = "host"
-  #params = [ "foo", "bar", "blah" ]
+  params = [ "dir" ]
+  res_env_var = "FOO"
   #timeout = 60
   start_title_template    = "JVM dump started"
   complete_title_template = "JVM dump completed"
@@ -51,6 +52,10 @@ resource "shoreline_alarm" "cpu_alarm" {
 
   fire_short_template = "fired blah123"
   resolve_short_template = "cleared blah123"
+  check_interval = 50
+  compile_eligible = false
+  condition_type = "above"
+  condition_value = "10"
 
   enabled = true
 }

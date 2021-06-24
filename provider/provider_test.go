@@ -73,35 +73,71 @@ func TestAccResourceAction(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getProviderConfigString() + getAccResourceAction(pre),
+				Config: getProviderConfigString() + getAccResourceAction(pre, false),
 				Check: resource.ComposeTestCheckFunc(
 					//resource.TestMatchResourceAttr( "shoreline_action.ls_action", "name", regexp.MustCompile("^ba")),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "name", pre+"_ls_action"),
-					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "resource_query", "host"),
-					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "command", "`ls /tmp`"),
-					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "timeout", "20"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "command", "`ls ${dir}; export FOO='bar'`"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "description", "List some files"),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "enabled", "true"),
-					//resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "params", "[\"foo\"]"),
-					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "error_title_template", "JVM dump failed"),
+					//resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "params", "[\"dir\"]"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "start_title_template", "my_action started"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "complete_title_template", "my_action completed"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "error_title_template", "my_action failed"),
+				),
+			},
+			{
+				Config: getProviderConfigString() + getAccResourceAction(pre, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "name", pre+"_ls_action"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "command", "`ls ${dir}; export FOO='bar'`"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "enabled", "true"),
+					//resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "params", "[\"dir\"]"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "start_title_template", "my_action started"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "complete_title_template", "my_action completed"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "error_title_template", "my_action failed"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "resource_query", "host"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "timeout", "20"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "shell", "/bin/bash"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "res_env_var", "FOO"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "start_short_template", "started"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "complete_short_template", "completed"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "error_short_template", "failed"),
 				),
 			},
 		},
 	})
+
+	//resource.UnitTest(t, resource.TestCase{
+	//	PreCheck:          func() { testAccPreCheck(t) },
+	//	ProviderFactories: providerFactories,
+	//})
 }
 
-func getAccResourceAction(prefix string) string {
+func getAccResourceAction(prefix string, full bool) string {
+	extra := `
+			resource_query = "host"
+			timeout = 20
+			shell = "/bin/bash"
+			res_env_var = "FOO"
+			start_short_template    = "started"
+			complete_short_template = "completed"
+			error_short_template    = "failed"
+`
+	if !full {
+		extra = ""
+	}
 	return `
 		resource "shoreline_action" "` + prefix + `_ls_action" {
 			name = "` + prefix + `_ls_action"
-			command = "` + "`ls /tmp`" + `"
+			command = "` + "`ls $${dir}; export FOO='bar'`" + `"
 			description = "List some files"
-			resource_query = "host"
-			timeout = 20
-			#params = ["foo"]
-			start_title_template    = "JVM dump started"
-			complete_title_template = "JVM dump completed"
-			error_title_template    = "JVM dump failed"
+			params = ["dir"]
 			enabled = true
+			start_title_template    = "my_action started"
+			complete_title_template = "my_action completed"
+			error_title_template    = "my_action failed"
+			` + extra + `
 		}
 `
 }
@@ -118,20 +154,59 @@ func TestAccResourceAlarm(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getProviderConfigString() + getAccResourceAlarm(pre),
+				Config: getProviderConfigString() + getAccResourceAlarm(pre, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "name", pre+"_cpu_alarm"),
-					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "resource_query", "host"),
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "fire_query", "( cpu_usage > 0 | sum ( 5 ) ) >= 2"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "clear_query", "( cpu_usage < 0 | sum ( 5 ) ) >= 2"),
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "description", "Watch CPU usage."),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "resource_query", "host"),
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "enabled", "true"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "fire_title_template", "alarm fired"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "resolve_title_template", "alarm resolved"),
+				),
+			},
+			{
+				Config: getProviderConfigString() + getAccResourceAlarm(pre, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "name", pre+"_cpu_alarm"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "fire_query", "( cpu_usage > 0 | sum ( 5 ) ) >= 2"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "clear_query", "( cpu_usage < 0 | sum ( 5 ) ) >= 2"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "description", "Watch CPU usage."),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "resource_query", "host"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "enabled", "true"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "fire_short_template", "fired"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "resolve_short_template", "resolved"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "raise_for", "local"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "check_interval", "50"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "compile_eligible", "false"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "resource_type", "host"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "family", "custom"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "metric_name", "cpu_usage"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "condition_type", "above"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "condition_value", "0"),
 				),
 			},
 		},
 	})
 }
 
-func getAccResourceAlarm(prefix string) string {
+func getAccResourceAlarm(prefix string, full bool) string {
+	extra := `
+			fire_short_template     = "fired"
+			resolve_short_template  = "resolved"
+			raise_for               = "local"
+			check_interval          = 50
+			compile_eligible        = false
+			resource_type           = "host"
+			family                  = "custom"
+			metric_name             = "cpu_usage"
+			condition_type          = "above"
+			condition_value         = "0"
+`
+	if !full {
+		extra = ""
+	}
 	return `
 		resource "shoreline_alarm" "` + prefix + `_cpu_alarm" {
 			name = "` + prefix + `_cpu_alarm"
@@ -140,6 +215,9 @@ func getAccResourceAlarm(prefix string) string {
 	    description = "Watch CPU usage."
 	    resource_query = "host"
 	    enabled = true
+			fire_title_template     = "alarm fired"
+			resolve_title_template  = "alarm resolved"
+			` + extra + `
 		}
 `
 }
@@ -156,13 +234,14 @@ func TestAccResourceBot(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getProviderConfigString() + getAccResourceAction(pre) + getAccResourceAlarm(pre) + getAccResourceBot(pre),
+				Config: getProviderConfigString() + getAccResourceAction(pre, false) + getAccResourceAlarm(pre, false) + getAccResourceBot(pre),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_bot."+pre+"_cpu_bot", "name", pre+"_cpu_bot"),
 					//resource.TestCheckResourceAttr("shoreline_bot."+pre+"_cpu_bot", "alarm_statement", pre+"_cpu_alarm"),
-					resource.TestCheckResourceAttr("shoreline_bot."+pre+"_cpu_bot", "command", "if "+pre+"_cpu_alarm then "+pre+"_ls_action fi"),
+					resource.TestCheckResourceAttr("shoreline_bot."+pre+"_cpu_bot", "command", "if "+pre+"_cpu_alarm then "+pre+"_ls_action ( \"/tmp\" ) fi"),
 					resource.TestCheckResourceAttr("shoreline_bot."+pre+"_cpu_bot", "description", "Act on CPU usage."),
 					resource.TestCheckResourceAttr("shoreline_bot."+pre+"_cpu_bot", "enabled", "true"),
+					resource.TestCheckResourceAttr("shoreline_bot."+pre+"_cpu_bot", "family", "custom"),
 				),
 			},
 		},
@@ -172,10 +251,11 @@ func TestAccResourceBot(t *testing.T) {
 func getAccResourceBot(prefix string) string {
 	return `
 		resource "shoreline_bot" "` + prefix + `_cpu_bot" {
-			name = "` + prefix + `_cpu_bot"
-      command = "if ${shoreline_alarm.` + prefix + `_cpu_alarm.name} then ${shoreline_action.` + prefix + `_ls_action.name} fi"
+			name        = "` + prefix + `_cpu_bot"
+      command     = "if ${shoreline_alarm.` + prefix + `_cpu_alarm.name} then ${shoreline_action.` + prefix + `_ls_action.name}(\"/tmp\") fi"
       description = "Act on CPU usage."
-      enabled = true
+      enabled     = true
+			family      = "custom"
 		}
 `
 }
@@ -209,7 +289,10 @@ func TestAccResourceMetric(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "name", pre+"_cpu_plus_one"),
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "value", "cpu_usage + 2"),
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "description", "Erroneous CPU usage."),
-					//resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "resource_query", "host | pod"),
+					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "resource_query", "host | pod"),
+					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "units", "cores"),
+					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "shell", "/bin/bash"),
+					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "timeout", "5"),
 				),
 			},
 		},
@@ -222,7 +305,10 @@ func getAccResourceMetric(prefix string) string {
 			name = "` + prefix + `_cpu_plus_one"
       value = "cpu_usage + 2"
       description = "Erroneous CPU usage."
-      #resource_query = "host| pod"
+      resource_query = "host | pod"
+			units = "cores"
+			shell = "/bin/bash"
+			timeout = "5"
 		}
 `
 }
@@ -244,6 +330,9 @@ func TestAccResourceResource(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "name", pre+"_books"),
 					resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "description", "Pods with books app."),
 					resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "value", "host | pod | app = 'bookstore'"),
+					resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "shell", "/bin/bash"),
+					resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "timeout", "5"),
+					resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "res_env_var", "FOO"),
 				),
 			},
 		},
@@ -256,6 +345,9 @@ func getAccResourceResource(prefix string) string {
 			name = "` + prefix + `_books"
       description = "Pods with books app."
       value = "host | pod | app='bookstore'"
+			shell = "/bin/bash"
+			res_env_var = "FOO"
+			timeout = "5"
 		}
 `
 }
@@ -279,7 +371,11 @@ func TestAccResourceFile(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "description", "op_copy example script."),
 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "resource_query", "host"),
 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "enabled", "false"),
-					// TODO length and checksum
+					// computed values...
+					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "file_length", "58"),
+					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "checksum", "dbfb2a7d8176bd6e3dde256824421de3"),
+					// just check that it's set
+					resource.TestCheckResourceAttrSet("shoreline_file."+pre+"_ex_file", "file_length"),
 				),
 			},
 		},

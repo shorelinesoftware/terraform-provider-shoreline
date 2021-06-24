@@ -303,20 +303,21 @@ var ObjectConfigJsonStr = `
 			"type":                   { "type": "string",   "computed": true, "value": "ALARM" },
 			"name":                   { "type": "label",    "required": true, "forcenew": true },
 			"fire_query":             { "type": "command",  "required": true, "primary": true },
-			"description":            { "type": "string",   "optional": true },
-			"enabled":                { "type": "intbool",  "optional": true, "default": false },
 			"clear_query":            { "type": "command",  "optional": true },
-			"mute_query":             { "type": "string",   "optional": true },
+			"description":            { "type": "string",   "optional": true },
 			"resource_query":         { "type": "command",  "optional": true },
+			"enabled":                { "type": "intbool",  "optional": true, "default": false },
+			"mute_query":             { "type": "string",   "optional": true },
 			"resolve_short_template": { "type": "string",   "optional": true, "step": "clear_step_class.short_template" },
 			"resolve_title_template": { "type": "string",   "optional": true, "step": "clear_step_class.title_template", "suppress_null_regex": "^cleared \\w*$" },
 			"fire_short_template":    { "type": "string",   "optional": true, "step": "fire_step_class.short_template" },
 			"fire_title_template":    { "type": "string",   "optional": true, "step": "fire_step_class.title_template", "suppress_null_regex": "^fired \\w*$" },
 			"condition_type":         { "type": "command",  "optional": true, "step": "condition_details.[0].condition_type" },
-			"condition_value":        { "type": "command",  "optional": true, "step": "condition_details.[0].condition_value" },
+			"condition_value":        { "type": "float",   "optional": true, "step": "condition_details.[0].condition_value" },
 			"metric_name":            { "type": "command",  "optional": true, "step": "condition_details.[0].metric_name" },
 			"raise_for":              { "type": "command",  "optional": true, "step": "condition_details.[0].raise_for", "default": "local" },
 			"check_interval":         { "type": "command",  "optional": true, "step": "check_interval" },
+			"compile_eligible":       { "type": "bool",     "optional": true, "step": "compile_eligible", "default": true },
 			"resource_type":          { "type": "command",  "optional": true, "step": "resource_type" },
 			"family":                 { "type": "command",  "optional": true, "step": "config_data.family", "default": "custom" }
 		}
@@ -344,12 +345,13 @@ var ObjectConfigJsonStr = `
 			"name":           { "type": "label",    "required": true, "forcenew": true },
 			"value":          { "type": "command",   "required": true, "primary": true, "alias_out": "val" },
 			"description":    { "type": "string",   "optional": true },
-			"params":         { "type": "string[]", "optional": true },
-			"res_env_var":    { "type": "string",   "optional": true },
+			"units":          { "type": "string",   "optional": true },
+
+			"resource_query": { "type": "command",   "optional": true },
 			"shell":          { "type": "string",   "optional": true },
 			"timeout":        { "type": "unsigned", "optional": true },
-			"units":          { "type": "string",   "optional": true },
-			"#resource_query": { "type": "command",   "optional": true },
+			"params":         { "type": "string[]", "optional": true },
+			"res_env_var":    { "type": "string",   "optional": true },
 			"#enabled":        { "type": "intbool",  "optional": true, "default": false },
 			"#resource_type":  { "type": "resource", "optional": true },
 			"#user":           { "type": "string",   "optional": true }
@@ -364,10 +366,9 @@ var ObjectConfigJsonStr = `
 			"description":    { "type": "string",   "optional": true },
 			"params":         { "type": "string[]", "optional": true },
 			"res_env_var":    { "type": "string",   "optional": true },
-			"resource_query": { "type": "command",  "optional": true },
 			"shell":          { "type": "string",   "optional": true },
 			"timeout":        { "type": "unsigned", "optional": true },
-			"units":          { "type": "string",   "optional": true },
+			"#units":          { "type": "string",   "optional": true },
 			"#resource_type":  { "type": "resource", "optional": true },
 			"#user":           { "type": "string",   "optional": true },
 			"#read_only":      { "type": "bool",     "optional": true }
@@ -450,6 +451,8 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		case "intbool":
 			// special handling to/from backend ("1"/"0")
 			sch.Type = schema.TypeBool
+		case "float":
+			sch.Type = schema.TypeFloat
 		case "int":
 			sch.Type = schema.TypeInt
 		case "unsigned":
@@ -542,6 +545,8 @@ func attrValueString(typ string, key string, val interface{}, attrs map[string]i
 		}
 	case "intbool": // special handling to/from backend ("1"/"0")
 		strVal = fmt.Sprintf("%d", ConvertBoolInt(val))
+	case "float":
+		strVal = fmt.Sprintf("%f", val)
 	case "int":
 		strVal = fmt.Sprintf("%d", val)
 	case "unsigned":
@@ -830,6 +835,8 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 			//}
 			attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
 			switch attrTyp {
+			case "float":
+				d.Set(key, float64(CastToNumber(val)))
 			case "int":
 				d.Set(key, CastToInt(val))
 			case "unsigned":
