@@ -248,13 +248,30 @@ func (client *Client) callApi(suppressErrors bool, auth string, url string, body
 		return ret, errors.New("User Cancelled"), 0
 	}
 
+	if err != nil {
+		if !suppressErrors {
+			WriteMsg("ERROR fetching HTTP response -- %s.\n", kind)
+		}
+		return ret, err, 0
+	}
+
 	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			if !suppressErrors {
-				WriteMsg("ERROR: Closing HTTP connection: %s\n", err)
+		if resp.Body != nil {
+			if err := resp.Body.Close(); err != nil {
+				if !suppressErrors {
+					WriteMsg("ERROR: Closing HTTP connection: %s\n", err)
+				}
 			}
 		}
 	}()
+
+	if resp.Body == nil {
+		err = fmt.Errorf("ERROR: Empty HTTP response body -- %s.\n", kind)
+		if !suppressErrors {
+			WriteMsg("%s", err.Error())
+		}
+		return ret, err, 0
+	}
 
 	ret, err = ioutil.ReadAll(resp.Body)
 
