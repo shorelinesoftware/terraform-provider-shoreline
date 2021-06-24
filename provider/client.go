@@ -167,6 +167,12 @@ func (client *Client) Execute(statement string, suppressErrors bool) (ret []byte
 
 func (client *Client) maybeRefreshAccessToken(suppressErrors bool) bool {
 	decoded := DecodeAuthToken(client.authData.ApiToken)
+	if decoded == nil {
+		if viper.GetBool("debug") {
+			WriteMsg("ApiToken is invalid.\n")
+		}
+		return false
+	}
 	if decoded.Type == "access" {
 		now := time.Now().Unix()
 		if viper.GetBool("debug") {
