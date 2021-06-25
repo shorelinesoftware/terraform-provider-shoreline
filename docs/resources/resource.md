@@ -4,11 +4,14 @@ page_title: "shoreline_resource Resource - terraform-provider-shoreline"
 subcategory: ""
 description: |-
   Shoreline resource. A server or compute resource in the system (e.g. host, pod, container).
+  See the Shoreline Resources Documentation https://docs.shoreline.io/platform/resources for more info.
 ---
 
 # shoreline_resource (Resource)
 
 Shoreline resource. A server or compute resource in the system (e.g. host, pod, container).
+
+See the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info.
 
 
 
@@ -18,19 +21,19 @@ Shoreline resource. A server or compute resource in the system (e.g. host, pod, 
 ### Required
 
 - **name** (String) The name of the object (must be unique).
-- **value** (String) The op statement that defines a metric or resource.
+- **value** (String) The Op statement that defines a Metric or Resource.
 
 ### Optional
 
-- **description** (String) A user friendly explanation of an object.
+- **description** (String) A user-friendly explanation of an object.
 - **id** (String) The ID of this resource.
-- **params** (List of String) Named variables to pass to an object (e.g. an action).
+- **params** (List of String) Named variables to pass to an object (e.g. an Action).
 - **res_env_var** (String) Result environment variable ... an environment variable used to output values through.
 - **shell** (String) The commandline shell to use (e.g. /bin/sh).
-- **timeout** (Number) Maximum time to wait in seconds.
+- **timeout** (Number) Maximum time to wait, in seconds.
 
 ### Read-Only
 
-- **type** (String) The type of object (alarm, action, bot, metric, resource, file).
+- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
 
 

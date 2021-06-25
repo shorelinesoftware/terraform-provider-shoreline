@@ -3,12 +3,15 @@
 page_title: "shoreline_metric Resource - terraform-provider-shoreline"
 subcategory: ""
 description: |-
-  Shoreline metric. A periodic measurement of some property of the system.
+  Shoreline metric. A periodic measurement of a system property.
+  See the Shoreline Metrics Documentation https://docs.shoreline.io/metrics for more info.
 ---
 
 # shoreline_metric (Resource)
 
-Shoreline metric. A periodic measurement of some property of the system.
+Shoreline metric. A periodic measurement of a system property.
+
+See the Shoreline [Metrics Documentation](https://docs.shoreline.io/metrics) for more info.
 
 
 
@@ -18,21 +21,21 @@ Shoreline metric. A periodic measurement of some property of the system.
 ### Required
 
 - **name** (String) The name of the object (must be unique).
-- **value** (String) The op statement that defines a metric or resource.
+- **value** (String) The Op statement that defines a Metric or Resource.
 
 ### Optional
 
-- **description** (String) A user friendly explanation of an object.
+- **description** (String) A user-friendly explanation of an object.
 - **id** (String) The ID of this resource.
-- **params** (List of String) Named variables to pass to an object (e.g. an action).
+- **params** (List of String) Named variables to pass to an object (e.g. an Action).
 - **res_env_var** (String) Result environment variable ... an environment variable used to output values through.
-- **resource_query** (String) A set of resources (e.g. host, pod, container), possibly filtered on tags or dynamic conditions.
+- **resource_query** (String) A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
 - **shell** (String) The commandline shell to use (e.g. /bin/sh).
-- **timeout** (Number) Maximum time to wait in seconds.
-- **units** (String) Units of a metric (e.g. bytes, blocks, packets, percent).
+- **timeout** (Number) Maximum time to wait, in seconds.
+- **units** (String) Units of a Metric (e.g., bytes, blocks, packets, percent).
 
 ### Read-Only
 
-- **type** (String) The type of object (alarm, action, bot, metric, resource, file).
+- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
 
 

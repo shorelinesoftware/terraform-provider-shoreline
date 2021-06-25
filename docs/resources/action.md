@@ -4,11 +4,14 @@ page_title: "shoreline_action Resource - terraform-provider-shoreline"
 subcategory: ""
 description: |-
   Shoreline action. A command that can be run.
+  See the Shoreline Actions Documentation https://docs.shoreline.io/actions for more info.
 ---
 
 # shoreline_action (Resource)
 
 Shoreline action. A command that can be run.
+
+See the Shoreline [Actions Documentation](https://docs.shoreline.io/actions) for more info.
 
 
 
@@ -22,26 +25,26 @@ Shoreline action. A command that can be run.
 
 ### Optional
 
-- **complete_long_template** (String) The long description for action completion.
-- **complete_short_template** (String) The short description for action completion.
-- **complete_title_template** (String) UI title for action completion.
-- **description** (String) A user friendly explanation of an object.
-- **enabled** (Boolean) If the object is currently active or disabled. Defaults to `false`.
-- **error_long_template** (String) The long description of an action error condition.
-- **error_short_template** (String) The short description of an action error condition.
-- **error_title_template** (String) UI title for an action error condition.
+- **complete_long_template** (String) The long description of the Action's completion.
+- **complete_short_template** (String) The short description of the Action's completion.
+- **complete_title_template** (String) UI title of the Action's completion.
+- **description** (String) A user-friendly explanation of an object.
+- **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
+- **error_long_template** (String) The long description of the Action's error condition.
+- **error_short_template** (String) The short description of the Action's error condition.
+- **error_title_template** (String) UI title of the Action's error condition.
 - **id** (String) The ID of this resource.
-- **params** (List of String) Named variables to pass to an object (e.g. an action).
+- **params** (List of String) Named variables to pass to an object (e.g. an Action).
 - **res_env_var** (String) Result environment variable ... an environment variable used to output values through.
-- **resource_query** (String) A set of resources (e.g. host, pod, container), possibly filtered on tags or dynamic conditions.
+- **resource_query** (String) A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
 - **shell** (String) The commandline shell to use (e.g. /bin/sh).
-- **start_long_template** (String) The long description for start of an action.
-- **start_short_template** (String) The short description for start of an action.
-- **start_title_template** (String) UI title for the start of an action.
-- **timeout** (Number) Maximum time to wait in seconds. Defaults to `60`.
+- **start_long_template** (String) The long description when starting the Action.
+- **start_short_template** (String) The short description when starting the Action.
+- **start_title_template** (String) UI title of the start of the Action.
+- **timeout** (Number) Maximum time to wait, in seconds. Defaults to `60`.
 
 ### Read-Only
 
-- **type** (String) The type of object (alarm, action, bot, metric, resource, file).
+- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
 
 
