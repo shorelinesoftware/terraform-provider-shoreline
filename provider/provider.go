@@ -204,7 +204,7 @@ func New(version string) func() *schema.Provider {
 						return
 					},
 					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_URL", nil),
-					Description: "Customer-specific URL for the shorline API server. It should be of the form " + CanonicalUrl + " .",
+					Description: "Customer-specific URL for the shorline API server. It should be of the form ```" + CanonicalUrl + "``` .",
 				},
 				"token": {
 					Type:        schema.TypeString,

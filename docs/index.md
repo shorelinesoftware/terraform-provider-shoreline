@@ -37,7 +37,7 @@ provider "shoreline" {
 
 ### Required
 
-- **url** (String) Customer-specific URL for the shorline API server. It should be of the form https://<customer>.<region>.api.shoreline-<cluster>.io .
+- **url** (String) Customer-specific URL for the shorline API server. It should be of the form ```https://<customer>.<region>.api.shoreline-<cluster>.io``` .
 
 ### Optional
 
