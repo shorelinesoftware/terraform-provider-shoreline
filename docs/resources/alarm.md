@@ -30,13 +30,15 @@ Shoreline alarm. A condition that triggers alerts or actions.
 - **description** (String) A user friendly explanation of an object.
 - **enabled** (Boolean) If the object is currently active or disabled. Defaults to `false`.
 - **family** (String) General class for an action or bot (e.g. custom, standard, metric, or system check). Defaults to `custom`.
-- **fire_short_template** (String) Short description of an alarm trigger condition.
+- **fire_long_template** (String) The long description of an alarm trigger condition.
+- **fire_short_template** (String) The short description of an alarm trigger condition.
 - **fire_title_template** (String) UI title for an alarm trigger condition.
 - **id** (String) The ID of this resource.
 - **metric_name** (String) The metric on which an alarm is triggered.
 - **mute_query** (String) A condition that mutes an alarm.
 - **raise_for** (String) Where an alarm is raised (e.g. local to a resource, or global to the system). Defaults to `local`.
-- **resolve_short_template** (String) Short description of an alarm resolution
+- **resolve_long_template** (String) The long description of an alarm resolution
+- **resolve_short_template** (String) The short description of an alarm resolution
 - **resolve_title_template** (String) UI title for an alarm resolution.
 - **resource_query** (String) A set of resources (e.g. host, pod, container), possibly filtered on tags or dynamic conditions.
 - **resource_type** (String)

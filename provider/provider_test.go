@@ -101,8 +101,11 @@ func TestAccResourceAction(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "shell", "/bin/bash"),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "res_env_var", "FOO"),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "start_short_template", "started"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "start_long_template", "started..."),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "complete_short_template", "completed"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "complete_long_template", "completed..."),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "error_short_template", "failed"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "error_long_template", "failed..."),
 				),
 			},
 		},
@@ -121,8 +124,11 @@ func getAccResourceAction(prefix string, full bool) string {
 			shell = "/bin/bash"
 			res_env_var = "FOO"
 			start_short_template    = "started"
+			start_long_template    = "started..."
 			complete_short_template = "completed"
+			complete_long_template = "completed..."
 			error_short_template    = "failed"
+			error_long_template    = "failed..."
 `
 	if !full {
 		extra = ""
@@ -176,7 +182,9 @@ func TestAccResourceAlarm(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "resource_query", "host"),
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "enabled", "true"),
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "fire_short_template", "fired"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "fire_long_template", "fired..."),
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "resolve_short_template", "resolved"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "resolve_long_template", "resolved..."),
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "raise_for", "local"),
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "check_interval", "50"),
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "compile_eligible", "false"),
@@ -194,7 +202,9 @@ func TestAccResourceAlarm(t *testing.T) {
 func getAccResourceAlarm(prefix string, full bool) string {
 	extra := `
 			fire_short_template     = "fired"
+			fire_long_template      = "fired..."
 			resolve_short_template  = "resolved"
+			resolve_long_template   = "resolved..."
 			raise_for               = "local"
 			check_interval          = 50
 			compile_eligible        = false
