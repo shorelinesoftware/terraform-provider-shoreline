@@ -3,12 +3,15 @@
 page_title: "shoreline_alarm Resource - terraform-provider-shoreline"
 subcategory: ""
 description: |-
-  Shoreline alarm. A condition that triggers alerts or actions.
+  Shoreline alarm. A condition that triggers Alerts or Actions.
+  See the Shoreline Alarms Documentation https://docs.shoreline.io/alarms for more info.
 ---
 
 # shoreline_alarm (Resource)
 
-Shoreline alarm. A condition that triggers alerts or actions.
+Shoreline alarm. A condition that triggers Alerts or Actions.
+
+See the Shoreline [Alarms Documentation](https://docs.shoreline.io/alarms) for more info.
 
 
 
@@ -17,34 +20,34 @@ Shoreline alarm. A condition that triggers alerts or actions.
 
 ### Required
 
-- **fire_query** (String) A condition that triggers an alarm.
+- **fire_query** (String) The Alarm's trigger condition.
 - **name** (String) The name of the object (must be unique).
 
 ### Optional
 
-- **check_interval** (String) Interval (in seconds) between alarm evaluations.
-- **clear_query** (String) A condition that resolves a triggered alarm.
-- **compile_eligible** (Boolean) If the alarm can be effectively optimized. Defaults to `true`.
-- **condition_type** (String) Kind of check in an alarm (e.g. above or below) vs a threshold for a metric.
-- **condition_value** (Number) Switching value (threshold) for a metric in an alarm.
-- **description** (String) A user friendly explanation of an object.
-- **enabled** (Boolean) If the object is currently active or disabled. Defaults to `false`.
-- **family** (String) General class for an action or bot (e.g. custom, standard, metric, or system check). Defaults to `custom`.
-- **fire_long_template** (String) The long description of an alarm trigger condition.
-- **fire_short_template** (String) The short description of an alarm trigger condition.
-- **fire_title_template** (String) UI title for an alarm trigger condition.
+- **check_interval** (String) Interval (in seconds) between Alarm evaluations.
+- **clear_query** (String) The Alarm's resolution condition.
+- **compile_eligible** (Boolean) If the Alarm can be effectively optimized. Defaults to `true`.
+- **condition_type** (String) Kind of check in an Alarm (e.g. above or below) vs a threshold for a Metric.
+- **condition_value** (Number) Switching value (threshold) for a Metric in an Alarm.
+- **description** (String) A user-friendly explanation of an object.
+- **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
+- **family** (String) General class for an Action or Bot (e.g., custom, standard, metric, or system check). Defaults to `custom`.
+- **fire_long_template** (String) The long description of the Alarm's triggering condition.
+- **fire_short_template** (String) The short description of the Alarm's triggering condition.
+- **fire_title_template** (String) UI title of the Alarm's triggering condition.
 - **id** (String) The ID of this resource.
-- **metric_name** (String) The metric on which an alarm is triggered.
-- **mute_query** (String) A condition that mutes an alarm.
-- **raise_for** (String) Where an alarm is raised (e.g. local to a resource, or global to the system). Defaults to `local`.
-- **resolve_long_template** (String) The long description of an alarm resolution
-- **resolve_short_template** (String) The short description of an alarm resolution
-- **resolve_title_template** (String) UI title for an alarm resolution.
-- **resource_query** (String) A set of resources (e.g. host, pod, container), possibly filtered on tags or dynamic conditions.
+- **metric_name** (String) The Alarm's triggering Metric.
+- **mute_query** (String) The Alarm's mute condition.
+- **raise_for** (String) Where an Alarm is raised (e.g., local to a resource, or global to the system). Defaults to `local`.
+- **resolve_long_template** (String) The long description of the Alarm's resolution.
+- **resolve_short_template** (String) The short description of the Alarm's resolution.
+- **resolve_title_template** (String) UI title of the Alarm's' resolution.
+- **resource_query** (String) A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
 - **resource_type** (String)
 
 ### Read-Only
 
-- **type** (String) The type of object (alarm, action, bot, metric, resource, file).
+- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
 
 

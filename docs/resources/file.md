@@ -3,12 +3,15 @@
 page_title: "shoreline_file Resource - terraform-provider-shoreline"
 subcategory: ""
 description: |-
-  Shoreline file. A datafile that is automatically copied/distributed to defined resources.
+  Shoreline file. A datafile that is automatically copied/distributed to defined Resources.
+  See the Shoreline OpCp Documentation https://docs.shoreline.io/op/commands/cp for more info.
 ---
 
 # shoreline_file (Resource)
 
-Shoreline file. A datafile that is automatically copied/distributed to defined resources.
+Shoreline file. A datafile that is automatically copied/distributed to defined Resources.
+
+See the Shoreline [OpCp Documentation](https://docs.shoreline.io/op/commands/cp) for more info.
 
 
 
@@ -17,22 +20,22 @@ Shoreline file. A datafile that is automatically copied/distributed to defined r
 
 ### Required
 
-- **destination_path** (String) The location that a distributed file object will be copied to on each resource.
-- **input_file** (String) The local source for a distributed file object.
+- **destination_path** (String) Target location for a copied distributed File object.  See [Op: cp](https://docs.shoreline.io/op/commands/cp).
+- **input_file** (String) The local source of a distributed File object.
 - **name** (String) The name of the object (must be unique).
 
 ### Optional
 
-- **description** (String) A user friendly explanation of an object.
-- **enabled** (Boolean) If the object is currently active or disabled. Defaults to `false`.
+- **description** (String) A user-friendly explanation of an object.
+- **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
 - **id** (String) The ID of this resource.
-- **resource_query** (String) A set of resources (e.g. host, pod, container), possibly filtered on tags or dynamic conditions.
+- **resource_query** (String) A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
 
 ### Read-Only
 
-- **checksum** (String) Cryptographic hash (e.g. md5) of a file resource.
-- **file_data** (String) Internal representation of a distributed file object's data (computed).
-- **file_length** (Number) Length in bytes of a distributed file object (computed)
-- **type** (String) The type of object (alarm, action, bot, metric, resource, file).
+- **checksum** (String) Cryptographic hash (e.g. md5) of a File Resource.
+- **file_data** (String) Internal representation of a distributed File object's data (computed).
+- **file_length** (Number) Length, in bytes, of a distributed File object (computed)
+- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
 
 

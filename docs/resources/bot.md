@@ -3,12 +3,15 @@
 page_title: "shoreline_bot Resource - terraform-provider-shoreline"
 subcategory: ""
 description: |-
-  Shoreline bot. An automation that ties an action to an alert.
+  Shoreline bot. An automation that ties an Action to an Alert.
+  See the Shoreline Bots Documentation https://docs.shoreline.io/bots for more info.
 ---
 
 # shoreline_bot (Resource)
 
-Shoreline bot. An automation that ties an action to an alert.
+Shoreline bot. An automation that ties an Action to an Alert.
+
+See the Shoreline [Bots Documentation](https://docs.shoreline.io/bots) for more info.
 
 
 
@@ -22,13 +25,13 @@ Shoreline bot. An automation that ties an action to an alert.
 
 ### Optional
 
-- **description** (String) A user friendly explanation of an object.
-- **enabled** (Boolean) If the object is currently active or disabled. Defaults to `false`.
-- **family** (String) General class for an action or bot (e.g. custom, standard, metric, or system check). Defaults to `custom`.
+- **description** (String) A user-friendly explanation of an object.
+- **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
+- **family** (String) General class for an Action or Bot (e.g., custom, standard, metric, or system check). Defaults to `custom`.
 - **id** (String) The ID of this resource.
 
 ### Read-Only
 
-- **type** (String) The type of object (alarm, action, bot, metric, resource, file).
+- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
 
 
