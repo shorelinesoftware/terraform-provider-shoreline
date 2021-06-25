@@ -33,6 +33,7 @@ install: build
 release:
 	GOOS=darwin  GOARCH=amd64 go build -o ./bin/$(BINARY)_$(VERSION)_darwin_amd64
 	GOOS=linux   GOARCH=amd64 go build -o ./bin/$(BINARY)_$(VERSION)_linux_amd64
+	GOOS=linux   GOARCH=arm64 go build -o ./bin/$(BINARY)_$(VERSION)_linux_arm64
 	GOOS=openbsd GOARCH=amd64 go build -o ./bin/$(BINARY)_$(VERSION)_openbsd_amd64
 	GOOS=windows GOARCH=amd64 go build -o ./bin/$(BINARY)_$(VERSION)_windows_amd64
 
