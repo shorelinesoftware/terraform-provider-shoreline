@@ -37,10 +37,10 @@ provider "shoreline" {
 
 ### Required
 
-- **url** (String)
+- **url** (String) Customer-specific URL for the shorline API server. It should be of the form https://<customer>.<region>.api.shoreline-<cluster>.io .
 
 ### Optional
 
-- **debug** (Boolean, Sensitive)
-- **retries** (Number, Sensitive)
-- **token** (String, Sensitive)
+- **debug** (Boolean, Sensitive) Debug logging to /tmp/tf-shoreline.log.
+- **retries** (Number, Sensitive) Number of retries for API calls, in case of e.g. transient network failures.
+- **token** (String, Sensitive) Customer/user-specific authorization token for the shoreline api server. May be provided via SHORELINE_TOKEN env variable.

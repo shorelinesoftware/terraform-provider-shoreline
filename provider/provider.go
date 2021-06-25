@@ -204,24 +204,28 @@ func New(version string) func() *schema.Provider {
 						return
 					},
 					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_URL", nil),
+					Description: "Customer-specific URL for the shorline API server. It should be of the form " + CanonicalUrl + " .",
 				},
 				"token": {
 					Type:        schema.TypeString,
 					Optional:    true,
 					Sensitive:   true,
 					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_TOKEN", nil),
+					Description: "Customer/user-specific authorization token for the shoreline api server. May be provided via SHORELINE_TOKEN env variable.",
 				},
 				"retries": {
 					Type:        schema.TypeInt,
 					Optional:    true,
 					Sensitive:   true,
 					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_RETRIES", nil),
+					Description: "Number of retries for API calls, in case of e.g. transient network failures.",
 				},
 				"debug": {
 					Type:        schema.TypeBool,
 					Optional:    true,
 					Sensitive:   true,
 					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_DEBUG", nil),
+					Description: "Debug logging to /tmp/tf-shoreline.log.",
 				},
 			},
 		}
