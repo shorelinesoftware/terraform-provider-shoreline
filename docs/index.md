@@ -41,6 +41,6 @@ provider "shoreline" {
 
 ### Optional
 
-- **debug** (Boolean, Sensitive) Debug logging to /tmp/tf-shoreline.log.
-- **retries** (Number, Sensitive) Number of retries for API calls, in case of e.g. transient network failures.
+- **debug** (Boolean) Debug logging to /tmp/tf-shoreline.log.
+- **retries** (Number) Number of retries for API calls, in case of e.g. transient network failures.
 - **token** (String, Sensitive) Customer/user-specific authorization token for the shoreline api server. May be provided via SHORELINE_TOKEN env variable.

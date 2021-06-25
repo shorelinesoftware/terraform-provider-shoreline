@@ -216,14 +216,12 @@ func New(version string) func() *schema.Provider {
 				"retries": {
 					Type:        schema.TypeInt,
 					Optional:    true,
-					Sensitive:   true,
 					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_RETRIES", nil),
 					Description: "Number of retries for API calls, in case of e.g. transient network failures.",
 				},
 				"debug": {
 					Type:        schema.TypeBool,
 					Optional:    true,
-					Sensitive:   true,
 					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_DEBUG", nil),
 					Description: "Debug logging to /tmp/tf-shoreline.log.",
 				},
