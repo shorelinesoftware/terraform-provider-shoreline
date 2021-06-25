@@ -390,6 +390,57 @@ var ObjectConfigJsonStr = `
 			"#resource_type":    { "type": "resource", "optional": true },
 			"#last_modified_timestamp": { "type": "string",   "optional": true }
 		}
+	},
+
+	"docs": {
+		"objects": {
+				"action":   "A command that can be run.",
+				"alarm":    "A condition that triggers alerts or actions.",
+				"bot":      "An automation that ties an action to an alert.",
+				"metric":   "A periodic measurement of some property of the system.",
+				"resource": "A server or compute resource in the system (e.g. host, pod, container).",
+				"file":     "A datafile that is automatically copied/distributed to defined resources."
+		},
+
+		"attributes": {
+				"type":                    "The type of object (alarm, action, bot, metric, resource, file).",
+				"check_interval":          "Interval (in seconds) between alarm evaluations.",
+				"checksum":                "Cryptographic hash (e.g. md5) of a file resource.",
+				"clear_query":             "A condition that resolves a triggered alarm.",
+				"command":                 "A specific action to run.",
+				"compile_eligible":        "If the alarm can be effectively optimized.",
+				"complete_short_template": "Short description for action completion.",
+				"complete_title_template": "UI title for action completion.",
+				"condition_type":          "Kind of check in an alarm (e.g. above or below) vs a threshold for a metric.",
+				"condition_value":         "Switching value (threshold) for a metric in an alarm.",
+				"description":             "A user friendly explanation of an object.",
+				"destination_path":        "The location that a distributed file object will be copied to on each resource.",
+				"enabled":                 "If the object is currently active or disabled.",
+				"error_short_template":    "Short description of an action error condition.",
+				"error_title_template":    "UI title for an action error condition.",
+				"family":                  "General class for an action or bot (e.g. custom, standard, metric, or system check).",
+				"file_data":               "Internal representation of a distributed file object's data (computed).",
+				"file_length":             "Length in bytes of a distributed file object (computed)",
+				"fire_query":              "A condition that triggers an alarm.",
+				"fire_short_template":     "Short description of an alarm trigger condition.",
+				"fire_title_template":     "UI title for an alarm trigger condition.",
+				"input_file":              "The local source for a distributed file object.",
+				"metric_name":             "The metric on which an alarm is triggered.",
+				"mute_query":              "A condition that mutes an alarm.",
+				"name":                    "The name of the object (must be unique).",
+				"params":                  "Named variables to pass to an object (e.g. an action).",
+				"raise_for":               "Where an alarm is raised (e.g. local to a resource, or global to the system).",
+				"res_env_var":             "Result environment variable ... an environment variable used to output values through.",
+				"resolve_short_template":  "Short description of an alarm resolution",
+				"resolve_title_template":  "UI title for an alarm resolution.",
+				"resource_query":          "A set of resources (e.g. host, pod, container), possibly filtered on tags or dynamic conditions.",
+				"shell":                   "The commandline shell to use (e.g. /bin/sh).",
+				"start_short_template":    "The short description for start of an action.",
+				"start_title_template":    "UI title for the start of an action.",
+				"timeout":                 "Maximum time to wait in seconds.",
+				"units":                   "Units of a metric (e.g. bytes, blocks, packets, percent).",
+				"value":                   "The op statement that defines a metric or resource."
+		}
 	}
 }
 `
@@ -426,8 +477,14 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 			continue
 		}
 
-		attrMap := attrs.(map[string]interface{})
 		sch := &schema.Schema{}
+
+		description := GetNestedValueOrDefault(object, ToKeyPath("docs.attributes."+k), nil)
+		if description != nil {
+			sch.Description = CastToString(description)
+		}
+
+		attrMap := attrs.(map[string]interface{})
 		typ := GetNestedValueOrDefault(attrMap, ToKeyPath("type"), "string")
 		switch typ {
 		case "command":
@@ -505,8 +562,10 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		params[k] = sch
 	}
 
+	objDescription := CastToString(GetNestedValueOrDefault(object, ToKeyPath("docs.objects."+key), ""))
+
 	return &schema.Resource{
-		Description: "Shoreline " + key + " resource.",
+		Description: "Shoreline " + key + ". " + objDescription,
 
 		CreateContext: resourceShorelineObjectCreate(key, primary, attributes),
 		ReadContext:   resourceShorelineObjectRead(key, attributes),
