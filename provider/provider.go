@@ -168,13 +168,13 @@ func init() {
 
 	// Customize the content of descriptions when output. For example you can add defaults on
 	// to the exported descriptions if present.
-	// schema.SchemaDescriptionBuilder = func(s *schema.Schema) string {
-	// 	desc := s.Description
-	// 	if s.Default != nil {
-	// 		desc += fmt.Sprintf(" Defaults to `%v`.", s.Default)
-	// 	}
-	// 	return strings.TrimSpace(desc)
-	// }
+	schema.SchemaDescriptionBuilder = func(s *schema.Schema) string {
+		desc := s.Description
+		if s.Default != nil {
+			desc += fmt.Sprintf(" Defaults to `%v`.", s.Default)
+		}
+		return strings.TrimSpace(desc)
+	}
 }
 
 func New(version string) func() *schema.Provider {
@@ -479,10 +479,8 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 
 		sch := &schema.Schema{}
 
-		description := GetNestedValueOrDefault(object, ToKeyPath("docs.attributes."+k), nil)
-		if description != nil {
-			sch.Description = CastToString(description)
-		}
+		description := CastToString(GetNestedValueOrDefault(objects, ToKeyPath("docs.attributes."+k), ""))
+		sch.Description = description
 
 		attrMap := attrs.(map[string]interface{})
 		typ := GetNestedValueOrDefault(attrMap, ToKeyPath("type"), "string")
@@ -562,7 +560,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		params[k] = sch
 	}
 
-	objDescription := CastToString(GetNestedValueOrDefault(object, ToKeyPath("docs.objects."+key), ""))
+	objDescription := CastToString(GetNestedValueOrDefault(objects, ToKeyPath("docs.objects."+key), ""))
 
 	return &schema.Resource{
 		Description: "Shoreline " + key + ". " + objDescription,

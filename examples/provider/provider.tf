@@ -14,6 +14,6 @@ provider "shoreline" {
   url = "https://test.us.api.shoreline-vm1.io"
   #url = "https://test.us.api.shoreline-test6.io"
   retries = 2
-  debug = true
+  debug   = true
 }
 

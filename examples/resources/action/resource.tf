@@ -1,11 +1,11 @@
 
 resource "shoreline_action" "ls_action" {
-  name = "ls_action"
-  command = "`ls $${dir}; export FOO='bar'`"
-  description = "List some files ..."
+  name           = "ls_action"
+  command        = "`ls $${dir}; export FOO='bar'`"
+  description    = "List some files ..."
   resource_query = "host"
-  params = [ "dir" ]
-  res_env_var = "FOO"
+  params         = ["dir"]
+  res_env_var    = "FOO"
   #timeout = 60
   start_title_template    = "JVM dump started"
   complete_title_template = "JVM dump completed"

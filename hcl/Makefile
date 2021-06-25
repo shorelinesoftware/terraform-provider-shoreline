@@ -19,3 +19,6 @@ install:
 	rm -f .terraform.lock.hcl
 	make -C .. install 
 	$(TERRAFORM) init
+
+schema:
+	@terraform providers schema -json

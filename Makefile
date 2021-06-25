@@ -12,6 +12,7 @@ SUBPATH=shoreline.io/terraform/shoreline/$(VERSION)/$(OS)_amd64
 
 build: format
 	go build
+	go generate
 
 test:
 	echo unit-tests...
