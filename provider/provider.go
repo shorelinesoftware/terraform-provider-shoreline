@@ -207,14 +207,14 @@ func New(version string) func() *schema.Provider {
 						return
 					},
 					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_URL", nil),
-					Description: "Customer-specific URL for the shorline API server. It should be of the form ```" + CanonicalUrl + "``` .",
+					Description: "Customer-specific URL for the Shoreline API server. It should be of the form ```" + CanonicalUrl + "``` .",
 				},
 				"token": {
 					Type:        schema.TypeString,
 					Optional:    true,
 					Sensitive:   true,
 					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_TOKEN", nil),
-					Description: "Customer/user-specific authorization token for the shoreline api server. May be provided via SHORELINE_TOKEN env variable.",
+					Description: "Customer/user-specific authorization token for the Shoreline API server. May be provided via `SHORELINE_TOKEN` env variable.",
 				},
 				"retries": {
 					Type:        schema.TypeInt,
@@ -226,7 +226,7 @@ func New(version string) func() *schema.Provider {
 					Type:        schema.TypeBool,
 					Optional:    true,
 					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_DEBUG", nil),
-					Description: "Debug logging to /tmp/tf-shoreline.log.",
+					Description: "Debug logging to `/tmp/tf-shoreline.log`.",
 				},
 			},
 		}
