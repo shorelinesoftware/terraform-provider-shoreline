@@ -495,6 +495,27 @@ func VagueLess(a interface{}, b interface{}) bool {
 	return aNum
 }
 
+func MapToSortedDedupedArray(elements map[interface{}]bool) []interface{} {
+	// back to (unsorted) array
+	result := []interface{}{}
+	for k, _ := range elements {
+		result = append(result, k)
+	}
+
+	// sort based on type
+	sort.Slice(result, func(i, j int) bool { return VagueLess(result[i], result[j]) })
+	return result
+}
+
+func SortAndDedupArray(arr []interface{}) []interface{} {
+	elementMap := map[interface{}]bool{}
+	for _, val := range arr {
+		// prevent duplicates
+		elementMap[val] = true
+	}
+	return MapToSortedDedupedArray(elementMap)
+}
+
 // This is used to extract arrays (e.g. timestamps) from a set of top-level objects (e.g. metrics).
 // The returned data (an array) is each of the sub-arrays combined, with values de-duped and sorted.
 func ExtractAlignmentArray(js interface{}, align_key []string) []interface{} {
@@ -524,14 +545,57 @@ func ExtractAlignmentArray(js interface{}, align_key []string) []interface{} {
 			}
 		}
 	}
-	// back to (unsorted) array
-	result := []interface{}{}
-	for k, _ := range elementMap {
-		result = append(result, k)
+	return MapToSortedDedupedArray(elementMap)
+}
+
+func AlignIndexedSubArrays(index int, js interface{}, align []interface{}, align_key []string, value_key []string) {
+	jsMap, isMap := js.(map[string]interface{})
+	if !isMap {
+		return
 	}
-	// sort based on type
-	sort.Slice(result, func(i, j int) bool { return VagueLess(result[i], result[j]) })
-	return result
+	// process the arrays of values by alignment data
+	for _, val := range jsMap {
+		subArray, isArray := val.([]interface{})
+		if !isArray || len(subArray) <= index {
+			continue
+		}
+		v := subArray[index]
+		vMap, isMap := v.(map[string]interface{})
+		if !isMap {
+			continue
+		}
+		cur := GetNestedValueOrDefault(vMap, align_key, nil)
+		if cur == nil {
+			continue
+		}
+		curAr, isArray := cur.([]interface{})
+		if !isArray {
+			continue
+		}
+
+		elementMap := map[interface{}]int{}
+		for i, av := range curAr {
+			// lookup table of align_key to index
+			elementMap[av] = i
+		}
+
+		valIn := GetNestedValueOrDefault(vMap, value_key, nil)
+		arrayIn, isArray := valIn.([]interface{})
+		if !isArray {
+			continue
+		}
+		arrayOut := []interface{}{}
+		for _, al := range align {
+			idx, found := elementMap[al]
+			if found {
+				arrayOut = append(arrayOut, arrayIn[idx])
+			} else {
+				arrayOut = append(arrayOut, nil)
+			}
+		}
+		AddNestedValue(vMap, align_key, align, true)
+		AddNestedValue(vMap, value_key, arrayOut, true)
+	}
 }
 
 // Take an array of values (e.g. global timestamps) 'align',
