@@ -694,7 +694,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		}
 
 		isPrimary := GetNestedValueOrDefault(attrs, ToKeyPath(key+".primary"), false).(bool)
-		if isCreate && isPrimary {
+		if isCreate && isPrimary && typ == "bot" {
 			// primary value is set on creation, and redundant set currently triggers an issue with bots
 			continue
 		}
@@ -804,7 +804,7 @@ func resourceShorelineObjectCreate(typ string, primary string, attrs map[string]
 		//}
 		result, err := runOpCommand(op, true)
 		if err != nil {
-			// TODO check already exists
+			// TODO check if already exists
 			diags = diag.Errorf("Failed to create (1) %s: %s", typ, err.Error())
 			return diags
 		}
