@@ -662,7 +662,7 @@ func setFieldViaOp(typ string, attrs map[string]interface{}, name string, key st
 	return nil
 }
 
-func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, ctx context.Context, d *schema.ResourceData, meta interface{}, doDiff bool) diag.Diagnostics {
+func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, ctx context.Context, d *schema.ResourceData, meta interface{}, doDiff bool, isCreate bool) diag.Diagnostics {
 	var diags diag.Diagnostics
 	name := d.Get("name").(string)
 	// valid-variable-name check (and non-null)
@@ -690,6 +690,12 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 
 		internal := GetNestedValueOrDefault(attrs, ToKeyPath(key+".internal"), false).(bool)
 		if internal {
+			continue
+		}
+
+		isPrimary := GetNestedValueOrDefault(attrs, ToKeyPath(key+".primary"), false).(bool)
+		if isCreate && isPrimary {
+			// primary value is set on creation, and redundant set currently triggers an issue with bots
 			continue
 		}
 
@@ -808,7 +814,7 @@ func resourceShorelineObjectCreate(typ string, primary string, attrs map[string]
 			return diags
 		}
 
-		diags = resourceShorelineObjectSetFields(typ, attrs, ctx, d, meta, false)
+		diags = resourceShorelineObjectSetFields(typ, attrs, ctx, d, meta, false, true)
 		if diags != nil {
 			// delete incomplete object
 			resourceShorelineObjectDelete(typ)(ctx, d, meta)
@@ -936,7 +942,7 @@ func resourceShorelineObjectUpdate(typ string, attrs map[string]interface{}) fun
 		name := d.Get("name").(string)
 		appendActionLog(fmt.Sprintf("Updated object '%s': '%s' :: %+v\n", typ, name, d))
 
-		diags = resourceShorelineObjectSetFields(typ, attrs, ctx, d, meta, true)
+		diags = resourceShorelineObjectSetFields(typ, attrs, ctx, d, meta, true, false)
 		if diags != nil {
 			// TODO delete incomplete object?
 			return diags

@@ -20,20 +20,25 @@ provider "shoreline" {
 resource "shoreline_bot" "cpu_bot" {
   name = "cpu_bot"
   command = "if ${shoreline_alarm.cpu_alarm.name} then ${shoreline_action.ls_action.name}('/tmp') fi"
+  #command = "if ${shoreline_alarm.cpu_alarm.name} then ${shoreline_action.ls_action.name}('/tmp', 'blah') fi"
   description = "Act on CPU usage."
   enabled = true
 }
 
 resource "shoreline_action" "ls_action" {
   name = "ls_action"
-  command = "`ls $${dir}; export FOO='bar'`"
   description = "List some files ..."
-  resource_query = "host"
+
+  command = "`ls $${dir}; export FOO='bar'`"
   params = [ "dir" ]
+  #command = "`ls $${dir}; echo $${msg}; export FOO='bar'`"
+  #params = [ "dir" , "msg" ]
+
   res_env_var = "FOO"
+  resource_query = "host"
   #timeout = 60
   start_title_template    = "JVM dump started"
-  complete_title_template = "JVM dump completed"
+  complete_title_template = "JVM dump  completed"
   error_title_template    = "JVM dump failed"
 
   start_short_template    = "JVM dump short started"
@@ -55,7 +60,7 @@ resource "shoreline_alarm" "cpu_alarm" {
   check_interval = 50
   compile_eligible = false
   condition_type = "above"
-  condition_value = "10"
+  #condition_value = "10"
 
   enabled = true
 }
