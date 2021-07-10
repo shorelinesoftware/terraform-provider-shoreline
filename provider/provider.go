@@ -284,7 +284,7 @@ var ObjectConfigJsonStr = `
 	"action": {
 		"attributes": {
 			"type":                    { "type": "string",   "computed": true, "value": "ACTION" },
-			"name":                    { "type": "label",    "required": true, "forcenew": true },
+			"name":                    { "type": "label",    "required": true, "forcenew": true, "skip": true },
 			"command":                 { "type": "command",  "required": true, "primary": true },
 			"description":             { "type": "string",   "optional": true },
 			"enabled":                 { "type": "intbool",  "optional": true, "default": false },
@@ -309,7 +309,7 @@ var ObjectConfigJsonStr = `
 	"alarm": {
 		"attributes": {
 			"type":                   { "type": "string",   "computed": true, "value": "ALARM" },
-			"name":                   { "type": "label",    "required": true, "forcenew": true },
+			"name":                   { "type": "label",    "required": true, "forcenew": true, "skip": true },
 			"fire_query":             { "type": "command",  "required": true, "primary": true },
 			"clear_query":            { "type": "command",  "optional": true },
 			"description":            { "type": "string",   "optional": true },
@@ -323,10 +323,10 @@ var ObjectConfigJsonStr = `
 			"fire_long_template":     { "type": "string",   "optional": true, "step": "fire_step_class.long_template" },
 			"fire_title_template":    { "type": "string",   "optional": true, "step": "fire_step_class.title_template", "suppress_null_regex": "^fired \\w*$" },
 			"condition_type":         { "type": "command",  "optional": true, "step": "condition_details.[0].condition_type" },
-			"condition_value":        { "type": "float",   "optional": true, "step": "condition_details.[0].condition_value" },
+			"condition_value":        { "type": "string",    "optional": true, "step": "condition_details.[0].condition_value" },
 			"metric_name":            { "type": "command",  "optional": true, "step": "condition_details.[0].metric_name" },
 			"raise_for":              { "type": "command",  "optional": true, "step": "condition_details.[0].raise_for", "default": "local" },
-			"check_interval":         { "type": "command",  "optional": true, "step": "check_interval" },
+			"check_interval_sec":     { "type": "command",  "optional": true, "step": "check_interval" },
 			"compile_eligible":       { "type": "bool",     "optional": true, "step": "compile_eligible", "default": true },
 			"resource_type":          { "type": "command",  "optional": true, "step": "resource_type" },
 			"family":                 { "type": "command",  "optional": true, "step": "config_data.family", "default": "custom" }
@@ -336,7 +336,7 @@ var ObjectConfigJsonStr = `
 	"bot": {
 		"attributes": {
 			"type":             { "type": "string",   "computed": true, "value": "BOT" },
-			"name":             { "type": "label",    "required": true, "forcenew": true },
+			"name":             { "type": "label",    "required": true, "forcenew": true, "skip": true },
 			"command":          { "type": "command",  "required": true, "primary": true, 
 				"compound_in": "if (?P<alarm_statement>.*?) then (?P<action_statement>.*?) fi", 
 				"compound_out": "if ${alarm_statement} then ${action_statement} fi"
@@ -352,7 +352,7 @@ var ObjectConfigJsonStr = `
 	"metric": {
 		"attributes": {
 			"type":           { "type": "string",   "computed": true, "value": "METRIC" },
-			"name":           { "type": "label",    "required": true, "forcenew": true },
+			"name":           { "type": "label",    "required": true, "forcenew": true, "skip": true },
 			"value":          { "type": "command",   "required": true, "primary": true, "alias_out": "val" },
 			"description":    { "type": "string",   "optional": true },
 			"units":          { "type": "string",   "optional": true },
@@ -371,7 +371,7 @@ var ObjectConfigJsonStr = `
 	"resource": {
 		"attributes": {
 			"type":           { "type": "string",   "computed": true, "value": "RESOURCE" },
-			"name":           { "type": "label",    "required": true, "forcenew": true },
+			"name":           { "type": "label",    "required": true, "forcenew": true, "skip": true },
 			"value":          { "type": "command",  "required": true, "primary": true },
 			"description":    { "type": "string",   "optional": true },
 			"params":         { "type": "string[]", "optional": true },
@@ -388,12 +388,12 @@ var ObjectConfigJsonStr = `
 	"file": {
 		"attributes": {
 			"type":             { "type": "string",   "computed": true, "value": "FILE" },
-			"name":             { "type": "label",    "required": true, "forcenew": true },
+			"name":             { "type": "label",    "required": true, "forcenew": true, "skip": true },
 			"destination_path": { "type": "string",   "required": true, "primary": true },
 			"description":      { "type": "string",   "optional": true },
 			"resource_query":   { "type": "string",   "optional": true },
 			"enabled":          { "type": "intbool",  "optional": true, "default": false },
-			"input_file":       { "type": "string",   "required": true },
+			"input_file":       { "type": "string",   "required": true, "skip": true },
 			"file_data":        { "type": "string",   "computed": true },
 			"file_length":      { "type": "int",      "computed": true },
 			"checksum":         { "type": "string",   "computed": true },
@@ -688,6 +688,11 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	anyChange := false
 	for key, _ := range attrs {
 
+		skip := GetNestedValueOrDefault(attrs, ToKeyPath(key+".skip"), false).(bool)
+		if skip {
+			continue
+		}
+
 		internal := GetNestedValueOrDefault(attrs, ToKeyPath(key+".internal"), false).(bool)
 		if internal {
 			continue
@@ -925,6 +930,12 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 				d.Set(key, CastToBool(val))
 			case "string[]":
 				d.Set(key, CastToArray(val))
+			case "string":
+				d.Set(key, CastToString(val))
+			case "command":
+				d.Set(key, CastToString(val))
+			case "label":
+				d.Set(key, CastToString(val))
 			default:
 				d.Set(key, val)
 			}

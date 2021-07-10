@@ -3,7 +3,7 @@ terraform {
   required_providers {
     shoreline = {
       source  = "shoreline.io/terraform/shoreline"
-      version = ">= 1.0.1"
+      version = ">= 1.0.4"
     }
   }
 }
@@ -19,7 +19,7 @@ provider "shoreline" {
 
 resource "shoreline_bot" "cpu_bot" {
   name = "cpu_bot"
-  command = "if ${shoreline_alarm.cpu_alarm.name} then ${shoreline_action.ls_action.name}('/tmp') fi"
+  command = "if ${shoreline_alarm.cpu_alarm.name} then ${shoreline_action.ls_action.name}(dir='/tmp') fi"
   #command = "if ${shoreline_alarm.cpu_alarm.name} then ${shoreline_action.ls_action.name}('/tmp', 'blah') fi"
   description = "Act on CPU usage."
   enabled = true
@@ -57,10 +57,10 @@ resource "shoreline_alarm" "cpu_alarm" {
 
   fire_short_template = "fired blah123"
   resolve_short_template = "cleared blah123"
-  check_interval = 50
+  check_interval_sec = 50
   compile_eligible = false
   condition_type = "above"
-  #condition_value = "10"
+  condition_value = 10.1
 
   enabled = true
 }
