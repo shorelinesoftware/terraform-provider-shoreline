@@ -25,11 +25,11 @@ See the Shoreline [Alarms Documentation](https://docs.shoreline.io/alarms) for m
 
 ### Optional
 
-- **check_interval** (String) Interval (in seconds) between Alarm evaluations.
+- **check_interval_sec** (String)
 - **clear_query** (String) The Alarm's resolution condition.
 - **compile_eligible** (Boolean) If the Alarm can be effectively optimized. Defaults to `true`.
 - **condition_type** (String) Kind of check in an Alarm (e.g. above or below) vs a threshold for a Metric.
-- **condition_value** (Number) Switching value (threshold) for a Metric in an Alarm.
+- **condition_value** (String) Switching value (threshold) for a Metric in an Alarm.
 - **description** (String) A user-friendly explanation of an object.
 - **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
 - **family** (String) General class for an Action or Bot (e.g., custom, standard, metric, or system check). Defaults to `custom`.
