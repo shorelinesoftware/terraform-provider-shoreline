@@ -191,7 +191,7 @@ func TestAccResourceAlarm(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "raise_for", "local"),
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "check_interval_sec", "50"),
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "compile_eligible", "false"),
-					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "resource_type", "host"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "resource_type", "HOST"),
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "family", "custom"),
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "metric_name", "cpu_usage"),
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "condition_type", "above"),
@@ -211,7 +211,7 @@ func getAccResourceAlarm(prefix string, full bool) string {
 			raise_for               = "local"
 			check_interval_sec      = 50
 			compile_eligible        = false
-			resource_type           = "host"
+			resource_type           = "HOST"
 			family                  = "custom"
 			metric_name             = "cpu_usage"
 			condition_type          = "above"
@@ -303,7 +303,7 @@ func TestAccResourceMetric(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "value", "cpu_usage + 2"),
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "description", "Erroneous CPU usage."),
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "resource_query", "host | pod"),
-					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "resource_type", "pod"),
+					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "resource_type", "POD"),
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "units", "cores"),
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "shell", "/bin/bash"),
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "timeout", "5"),
@@ -320,7 +320,7 @@ func getAccResourceMetric(prefix string) string {
       value = "cpu_usage + 2"
       description = "Erroneous CPU usage."
       resource_query = "host | pod"
-      resource_type = "pod"
+      resource_type = "POD"
 			units = "cores"
 			shell = "/bin/bash"
 			timeout = "5"

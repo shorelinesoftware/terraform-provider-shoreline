@@ -323,12 +323,12 @@ var ObjectConfigJsonStr = `
 			"fire_long_template":     { "type": "string",   "optional": true, "step": "fire_step_class.long_template" },
 			"fire_title_template":    { "type": "string",   "optional": true, "step": "fire_step_class.title_template", "suppress_null_regex": "^fired \\w*$" },
 			"condition_type":         { "type": "command",  "optional": true, "step": "condition_details.[0].condition_type" },
-			"condition_value":        { "type": "string",    "optional": true, "step": "condition_details.[0].condition_value" },
-			"metric_name":            { "type": "command",  "optional": true, "step": "condition_details.[0].metric_name" },
+			"condition_value":        { "type": "string",   "optional": true, "step": "condition_details.[0].condition_value" },
+			"metric_name":            { "type": "string",   "optional": true, "step": "condition_details.[0].metric_name" },
 			"raise_for":              { "type": "command",  "optional": true, "step": "condition_details.[0].raise_for", "default": "local" },
 			"check_interval_sec":     { "type": "command",  "optional": true, "step": "check_interval" },
 			"compile_eligible":       { "type": "bool",     "optional": true, "step": "compile_eligible", "default": true },
-			"resource_type":          { "type": "command",  "optional": true, "step": "resource_type" },
+			"resource_type":          { "type": "resource", "optional": true, "step": "resource_type" },
 			"family":                 { "type": "command",  "optional": true, "step": "config_data.family", "default": "custom" }
 		}
 	},
