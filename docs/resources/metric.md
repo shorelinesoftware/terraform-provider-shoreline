@@ -30,6 +30,7 @@ See the Shoreline [Metrics Documentation](https://docs.shoreline.io/metrics) for
 - **params** (List of String) Named variables to pass to an object (e.g. an Action).
 - **res_env_var** (String) Result environment variable ... an environment variable used to output values through.
 - **resource_query** (String) A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
+- **resource_type** (String)
 - **shell** (String) The commandline shell to use (e.g. /bin/sh).
 - **timeout** (Number) Maximum time to wait, in seconds.
 - **units** (String) Units of a Metric (e.g., bytes, blocks, packets, percent).

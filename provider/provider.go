@@ -362,8 +362,8 @@ var ObjectConfigJsonStr = `
 			"timeout":        { "type": "unsigned", "optional": true },
 			"params":         { "type": "string[]", "optional": true },
 			"res_env_var":    { "type": "string",   "optional": true },
+			"resource_type":  { "type": "resource", "optional": true },
 			"#enabled":        { "type": "intbool",  "optional": true, "default": false },
-			"#resource_type":  { "type": "resource", "optional": true },
 			"#user":           { "type": "string",   "optional": true }
 		}
 	},

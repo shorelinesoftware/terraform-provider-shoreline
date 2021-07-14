@@ -4,11 +4,12 @@ REPODIR=/tmp/tf-repo/providers
 
 NAME=shoreline
 BINARY=terraform-provider-$(NAME)
-VERSION=1.0.5
+VERSION=1.0.6
 
 // NOTE: this only works for 64 bit linux and MacOs ("darwin")
 OS=$(shell uname | tr 'A-Z' 'a-z')
-SUBPATH=shoreline.io/terraform/shoreline/$(VERSION)/$(OS)_amd64
+#SUBPATH=shoreline.io/terraform/shoreline/$(VERSION)/$(OS)_amd64
+SUBPATH=shorelinesoftware/local/shoreline/$(VERSION)/$(OS)_amd64
 
 build: format
 	go build

@@ -3,7 +3,7 @@ terraform {
   required_providers {
     shoreline = {
       source  = "shorelinesoftware/shoreline"
-      version = ">= 1.0.4"
+      version = ">= 1.0.6"
     }
   }
 }

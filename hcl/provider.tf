@@ -1,9 +1,18 @@
 
+#terraform {
+#  required_providers {
+#    shoreline = {
+#      source  = "shorelinesoftware/shoreline"
+#      version = ">= 1.0.4"
+#    }
+#  }
+#}
+
 terraform {
   required_providers {
     shoreline = {
-      source  = "shoreline.io/terraform/shoreline"
-      version = ">= 1.0.4"
+      source  = "shorelinesoftware/local/shoreline"
+      version = ">= 1.0.5"
     }
   }
 }
@@ -11,8 +20,8 @@ terraform {
 provider "shoreline" {
   # provider configuration here
   #token = "xyz1.asdfj.asd3fas..."
-  url = "https://test.us.api.shoreline-vm1.io"
-  #url = "https://test.us.api.shoreline-test6.io"
+  #url = "https://test.us.api.shoreline-vm1.io"
+  url = "https://test.us.api.shoreline-test4.io"
   retries = 2
   debug = true
 }
@@ -57,7 +66,7 @@ resource "shoreline_alarm" "cpu_alarm" {
 
   fire_short_template = "fired blah123"
   resolve_short_template = "cleared blah123"
-  check_interval_sec = 50
+  #check_interval_sec = "50"
   compile_eligible = false
   condition_type = "above"
   condition_value = 10.1
@@ -70,6 +79,7 @@ resource "shoreline_metric" "cpu_plus_one" {
   value = "cpu_usage + 2"
   description = "Erroneous CPU usage."
   #resource_query = "host| pod"
+  resource_type = "POD"
 }
 
 resource "shoreline_resource" "books" {
