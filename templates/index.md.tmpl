@@ -19,6 +19,12 @@ Check out [Getting Started with Shoreline](https://docs.shoreline.io/getting-sta
 
 ## Example Usage
 
-{{tffile "examples/provider/provider.tf"}}
+The following configuration creates a basic auto-remediation loop within Shoreline via Terraform:
+
+- The [Alarm](https://docs.shoreline.io/alarms) defines when there is an issue.
+- The [Action](https://docs.shoreline.io/actions) defines what to do about the issue.
+- The [Bot](https://docs.shoreline.io/bots) connects the two by triggering the [Action](https://docs.shoreline.io/actions) when the [Alarm](https://docs.shoreline.io/alarms) fires.
+
+{{tffile "examples/aaa/basic.tf"}}
 
 {{ .SchemaMarkdown | trimspace }}
