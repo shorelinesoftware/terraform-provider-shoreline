@@ -15,6 +15,25 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+
+
+func CanonicalizeUrl(url string) (urlOut string, err error) {
+	urlRegexStr := "^(http(s)?://)?(?P<customer>[^\\.]*).(?P<region>[^\\.]*).ap[ip].shoreline-(?P<cluster>[^\\.]*).io(/)?$"
+	urlBaseStr := "https://${customer}.${region}.api.shoreline-${cluster}.io"
+	urlRegex := regexp.MustCompile(urlRegexStr)
+	match := urlRegex.FindStringSubmatch(url)
+	if len(match) < 4 {
+		return "", fmt.Errorf("URL -- %s -- couldn't be mapped to canonical form -- %s -- (%d)\n", url, CanonicalUrl, len(match))
+	}
+	for i, name := range urlRegex.SubexpNames() {
+		if i > 0 && i <= len(match) {
+			urlBaseStr = strings.Replace(urlBaseStr, "${"+name+"}", match[i], 1)
+		}
+	}
+	return urlBaseStr, nil
+}
+
+
 func appendActionLog(msg string) {
 	if !DoDebugLog {
 		return
@@ -248,15 +267,22 @@ func configure(version string, p *schema.Provider) func(ctx context.Context, d *
 		AuthUrl = d.Get("url").(string)
 		token, hasToken := d.GetOk("token")
 
-		if hasToken {
-			SetAuth(&GlobalOpts, AuthUrl, token.(string))
+		canonUrl, err := CanonicalizeUrl(AuthUrl)
+		if err != nil {
+			return nil, diag.Errorf("Couldn't map URL to canonical form.\n" + err.Error())
 		} else {
-			GlobalOpts.Url = AuthUrl
+			appendActionLog(fmt.Sprintf("Mapped url: %s -- to -- %s\n", AuthUrl, canonUrl))
+		}
+
+		if hasToken {
+			SetAuth(&GlobalOpts, canonUrl, token.(string))
+		} else {
+			GlobalOpts.Url = canonUrl
 			if !LoadAuthConfig(&GlobalOpts) {
 				return nil, diag.Errorf("Failed to load auth credentials file.\n" + GetManualAuthMessage(&GlobalOpts))
 			}
-			if !selectAuth(&GlobalOpts, AuthUrl) {
-				return nil, diag.Errorf("Failed to load auth credentials for %s\n"+GetManualAuthMessage(&GlobalOpts), AuthUrl)
+			if !selectAuth(&GlobalOpts, canonUrl) {
+				return nil, diag.Errorf("Failed to load auth credentials for %s\n"+GetManualAuthMessage(&GlobalOpts), canonUrl)
 			}
 		}
 

@@ -223,8 +223,8 @@ func getAccResourceAlarm(prefix string, full bool) string {
 	return `
 		resource "shoreline_alarm" "` + prefix + `_cpu_alarm" {
 			name = "` + prefix + `_cpu_alarm"
-	    fire_query = "(cpu_usage > 0 | sum(5)) >= 2"
-	    clear_query = "(cpu_usage < 0 | sum(5)) >= 2"
+	    fire_query = "( cpu_usage > 0 | sum ( 5 ) ) >= 2"
+	    clear_query = "( cpu_usage < 0 | sum ( 5 ) ) >= 2"
 	    description = "Watch CPU usage."
 	    resource_query = "host"
 	    enabled = true
@@ -302,11 +302,11 @@ func TestAccResourceMetric(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "name", pre+"_cpu_plus_one"),
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "value", "cpu_usage + 2"),
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "description", "Erroneous CPU usage."),
-					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "resource_query", "host | pod"),
+					//resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "resource_query", "host | pod"),
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "resource_type", "POD"),
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "units", "cores"),
-					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "shell", "/bin/bash"),
-					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "timeout", "5"),
+					//resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "shell", "/bin/bash"),
+					//resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "timeout", "5"),
 				),
 			},
 		},
@@ -319,11 +319,11 @@ func getAccResourceMetric(prefix string) string {
 			name = "` + prefix + `_cpu_plus_one"
       value = "cpu_usage + 2"
       description = "Erroneous CPU usage."
-      resource_query = "host | pod"
+      #resource_query = "host | pod"
       resource_type = "POD"
 			units = "cores"
-			shell = "/bin/bash"
-			timeout = "5"
+			#shell = "/bin/bash"
+			#timeout = "5"
 		}
 `
 }
@@ -345,9 +345,9 @@ func TestAccResourceResource(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "name", pre+"_books"),
 					resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "description", "Pods with books app."),
 					resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "value", "host | pod | app = 'bookstore'"),
-					resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "shell", "/bin/bash"),
-					resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "timeout", "5"),
-					resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "res_env_var", "FOO"),
+					//resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "shell", "/bin/bash"),
+					//resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "timeout", "5"),
+					//resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "res_env_var", "FOO"),
 				),
 			},
 		},
@@ -359,10 +359,10 @@ func getAccResourceResource(prefix string) string {
 		resource "shoreline_resource" "` + prefix + `_books" {
 			name = "` + prefix + `_books"
       description = "Pods with books app."
-      value = "host | pod | app='bookstore'"
-			shell = "/bin/bash"
-			res_env_var = "FOO"
-			timeout = "5"
+      value = "host | pod | app = 'bookstore'"
+			#shell = "/bin/bash"
+			#res_env_var = "FOO"
+			#timeout = "5"
 		}
 `
 }
