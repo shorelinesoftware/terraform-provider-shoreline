@@ -4,7 +4,7 @@ REPODIR=/tmp/tf-repo/providers
 
 NAME=shoreline
 BINARY=terraform-provider-$(NAME)
-VERSION=1.0.8
+VERSION=1.0.9
 
 // NOTE: this only works for 64 bit linux and MacOs ("darwin")
 OS=$(shell uname | tr 'A-Z' 'a-z')
@@ -40,7 +40,7 @@ release:
 
 # Run acceptance tests
 #############
-# NOTE: SHORELINE_URL and SHORELINE_TOKEN should be set externally, e.g. 
+# NOTE: SHORELINE_URL and SHORELINE_TOKEN should be set externally, e.g.
 #   SHORELINE_URL=https://test.us.api.shoreline-vm10.io
 #   SHORELINE_TOKEN=xyz1lkajsdf8.kjalksdjfl...
 

@@ -318,7 +318,7 @@ var ObjectConfigJsonStr = `
 			"res_env_var":             { "type": "string",   "optional": true },
 			"resource_query":          { "type": "command",  "optional": true },
 			"shell":                   { "type": "string",   "optional": true },
-			"timeout":                 { "type": "unsigned", "optional": true, "default": 60 },
+			"timeout":                 { "type": "unsigned", "optional": true, "default": 60000 },
 			"start_short_template":    { "type": "string",   "optional": true, "step": "start_step_class.short_template" },
 			"start_long_template":     { "type": "string",   "optional": true, "step": "start_step_class.long_template" },
 			"start_title_template":    { "type": "string",   "optional": true, "step": "start_step_class.title_template" },
