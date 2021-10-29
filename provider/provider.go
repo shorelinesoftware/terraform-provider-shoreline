@@ -15,8 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-
-
 func CanonicalizeUrl(url string) (urlOut string, err error) {
 	urlRegexStr := "^(http(s)?://)?(?P<customer>[^\\.]*).(?P<region>[^\\.]*).ap[ip].shoreline-(?P<cluster>[^\\.]*).io(/)?$"
 	urlBaseStr := "https://${customer}.${region}.api.shoreline-${cluster}.io"
@@ -32,7 +30,6 @@ func CanonicalizeUrl(url string) (urlOut string, err error) {
 	}
 	return urlBaseStr, nil
 }
-
 
 func appendActionLog(msg string) {
 	if !DoDebugLog {
@@ -206,8 +203,6 @@ func New(version string) func() *schema.Provider {
 			//	"shoreline_datasource": dataSourceShoreline(),
 			//},
 			ResourcesMap: map[string]*schema.Resource{
-				//"shoreline_resource": resourceShorelineBasic(),
-				//"shoreline_action":   resourceShorelineAction(),
 				"shoreline_action":   resourceShorelineObject(ObjectConfigJsonStr, "action"),
 				"shoreline_alarm":    resourceShorelineObject(ObjectConfigJsonStr, "alarm"),
 				"shoreline_bot":      resourceShorelineObject(ObjectConfigJsonStr, "bot"),
@@ -352,7 +347,7 @@ var ObjectConfigJsonStr = `
 			"condition_value":        { "type": "string",   "optional": true, "step": "condition_details.[0].condition_value" },
 			"metric_name":            { "type": "string",   "optional": true, "step": "condition_details.[0].metric_name" },
 			"raise_for":              { "type": "command",  "optional": true, "step": "condition_details.[0].raise_for", "default": "local" },
-			"check_interval_sec":     { "type": "command",  "optional": true, "step": "check_interval" },
+			"check_interval_sec":     { "type": "command",  "optional": true, "step": "check_interval_sec", "default": 1 },
 			"compile_eligible":       { "type": "bool",     "optional": true, "step": "compile_eligible", "default": true },
 			"resource_type":          { "type": "resource", "optional": true, "step": "resource_type" },
 			"family":                 { "type": "command",  "optional": true, "step": "config_data.family", "default": "custom" }
@@ -383,9 +378,7 @@ var ObjectConfigJsonStr = `
 			"description":    { "type": "string",   "optional": true },
 			"units":          { "type": "string",   "optional": true },
 
-			"resource_query": { "type": "command",   "optional": true },
 			"shell":          { "type": "string",   "optional": true },
-			"timeout":        { "type": "unsigned", "optional": true },
 			"params":         { "type": "string[]", "optional": true },
 			"res_env_var":    { "type": "string",   "optional": true },
 			"resource_type":  { "type": "resource", "optional": true },
@@ -403,7 +396,6 @@ var ObjectConfigJsonStr = `
 			"params":         { "type": "string[]", "optional": true },
 			"res_env_var":    { "type": "string",   "optional": true },
 			"shell":          { "type": "string",   "optional": true },
-			"timeout":        { "type": "unsigned", "optional": true },
 			"#units":          { "type": "string",   "optional": true },
 			"#resource_type":  { "type": "resource", "optional": true },
 			"#user":           { "type": "string",   "optional": true },
@@ -419,7 +411,7 @@ var ObjectConfigJsonStr = `
 			"description":      { "type": "string",   "optional": true },
 			"resource_query":   { "type": "string",   "optional": true },
 			"enabled":          { "type": "intbool",  "optional": true, "default": false },
-			"input_file":       { "type": "string",   "required": true, "skip": true },
+			"input_file":       { "type": "string",   "required": true, "skip": true, "not_stored": true },
 			"file_data":        { "type": "string",   "computed": true },
 			"file_length":      { "type": "int",      "computed": true },
 			"checksum":         { "type": "string",   "computed": true },
@@ -478,7 +470,7 @@ var ObjectConfigJsonStr = `
 				"start_short_template":    "The short description when starting the Action.",
 				"start_long_template":     "The long description when starting the Action.",
 				"start_title_template":    "UI title of the start of the Action.",
-				"timeout":                 "Maximum time to wait, in seconds.",
+				"timeout":                 "Maximum time to wait, in milliseconds.",
 				"units":                   "Units of a Metric (e.g., bytes, blocks, packets, percent).",
 				"value":                   "The Op statement that defines a Metric or Resource."
 		}
@@ -595,10 +587,24 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 				return false
 			}
 		}
+
+		// NOTE: This actually messes up the file objects. Need a suppress function that's just for acceptance test comparisions.
+		//notStored, isBool := GetNestedValueOrDefault(attrMap, ToKeyPath("not_stored"), nil).(bool)
+		//if isBool && notStored {
+		//	sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
+		//		//appendActionLog(fmt.Sprintf("Not Stored Value: '%s': '%s' -- vs -- '%s'\n", k, old, nu))
+		//		if old == nu || nu == "" || old == "" {
+		//			return true
+		//		}
+		//		return false
+		//	}
+		//}
+
 		if GetNestedValueOrDefault(attrMap, ToKeyPath("primary"), false).(bool) {
 			primary = k
 		}
 		params[k] = sch
+
 	}
 
 	objDescription := CastToString(GetNestedValueOrDefault(objects, ToKeyPath("docs.objects."+key), ""))
@@ -610,6 +616,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		ReadContext:   resourceShorelineObjectRead(key, attributes),
 		UpdateContext: resourceShorelineObjectUpdate(key, attributes),
 		DeleteContext: resourceShorelineObjectDelete(key),
+		Importer:      &schema.ResourceImporter{State: schema.ImportStatePassthrough},
 
 		Schema: params,
 	}
@@ -866,6 +873,10 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 
 		var diags diag.Diagnostics
 		name := d.Get("name").(string)
+		if name == "" {
+			// fallback for 'terraform import'
+			name = d.Id()
+		}
 		// valid-variable-name check
 		idFromAPI := name
 		appendActionLog(fmt.Sprintf("Reading %s: '%s' (%v) :: %+v\n", typ, idFromAPI, name, d))
