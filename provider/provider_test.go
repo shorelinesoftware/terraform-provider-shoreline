@@ -111,6 +111,12 @@ func TestAccResourceAction(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "error_long_template", "failed..."),
 				),
 			},
+			{
+				// Test Importer..
+				ResourceName:      "shoreline_action." + pre + "_ls_action",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 
@@ -198,6 +204,12 @@ func TestAccResourceAlarm(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "condition_value", "0"),
 				),
 			},
+			{
+				// Test Importer..
+				ResourceName:      "shoreline_alarm." + pre + "_cpu_alarm",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -223,11 +235,11 @@ func getAccResourceAlarm(prefix string, full bool) string {
 	return `
 		resource "shoreline_alarm" "` + prefix + `_cpu_alarm" {
 			name = "` + prefix + `_cpu_alarm"
-	    fire_query = "( cpu_usage > 0 | sum ( 5 ) ) >= 2"
-	    clear_query = "( cpu_usage < 0 | sum ( 5 ) ) >= 2"
-	    description = "Watch CPU usage."
-	    resource_query = "host"
-	    enabled = true
+			fire_query = "( cpu_usage > 0 | sum ( 5 ) ) >= 2"
+			clear_query = "( cpu_usage < 0 | sum ( 5 ) ) >= 2"
+			description = "Watch CPU usage."
+			resource_query = "host"
+			enabled = true
 			fire_title_template     = "alarm fired"
 			resolve_title_template  = "alarm resolved"
 			` + extra + `
@@ -250,12 +262,17 @@ func TestAccResourceBot(t *testing.T) {
 				Config: getProviderConfigString() + getAccResourceAction(pre, false) + getAccResourceAlarm(pre, false) + getAccResourceBot(pre),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_bot."+pre+"_cpu_bot", "name", pre+"_cpu_bot"),
-					//resource.TestCheckResourceAttr("shoreline_bot."+pre+"_cpu_bot", "alarm_statement", pre+"_cpu_alarm"),
 					resource.TestCheckResourceAttr("shoreline_bot."+pre+"_cpu_bot", "command", "if "+pre+"_cpu_alarm then "+pre+"_ls_action(dir=\"/tmp\") fi"),
 					resource.TestCheckResourceAttr("shoreline_bot."+pre+"_cpu_bot", "description", "Act on CPU usage."),
 					resource.TestCheckResourceAttr("shoreline_bot."+pre+"_cpu_bot", "enabled", "true"),
 					resource.TestCheckResourceAttr("shoreline_bot."+pre+"_cpu_bot", "family", "custom"),
 				),
+			},
+			{
+				// Test Importer..
+				ResourceName:      "shoreline_bot." + pre + "_cpu_bot",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -265,25 +282,13 @@ func getAccResourceBot(prefix string) string {
 	return `
 		resource "shoreline_bot" "` + prefix + `_cpu_bot" {
 			name        = "` + prefix + `_cpu_bot"
-      command     = "if ${shoreline_alarm.` + prefix + `_cpu_alarm.name} then ${shoreline_action.` + prefix + `_ls_action.name}(dir=\"/tmp\") fi"
-      description = "Act on CPU usage."
-      enabled     = true
+			command     = "if ${shoreline_alarm.` + prefix + `_cpu_alarm.name} then ${shoreline_action.` + prefix + `_ls_action.name}(dir=\"/tmp\") fi"
+			description = "Act on CPU usage."
+			enabled     = true
 			family      = "custom"
 		}
 `
 }
-
-//func getAccResourceBot(prefix string) string {
-//	return `
-//		resource "shoreline_bot" "` + prefix + `_cpu_bot" {
-//			name = "` + prefix + `_cpu_bot"
-//      alarm_statement = "${shoreline_alarm.` + prefix + `_cpu_alarm.name}"
-//      action_statement = "${shoreline_action.` + prefix + `_ls_action.name}"
-//      description = "Act on CPU usage."
-//      enabled = true
-//		}
-//`
-//}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -302,12 +307,15 @@ func TestAccResourceMetric(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "name", pre+"_cpu_plus_one"),
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "value", "cpu_usage + 2"),
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "description", "Erroneous CPU usage."),
-					//resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "resource_query", "host | pod"),
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "resource_type", "POD"),
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "units", "cores"),
-					//resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "shell", "/bin/bash"),
-					//resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "timeout", "5"),
 				),
+			},
+			{
+				// Test Importer..
+				ResourceName:      "shoreline_metric." + pre + "_cpu_plus_one",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -317,13 +325,10 @@ func getAccResourceMetric(prefix string) string {
 	return `
 		resource "shoreline_metric" "` + prefix + `_cpu_plus_one" {
 			name = "` + prefix + `_cpu_plus_one"
-      value = "cpu_usage + 2"
-      description = "Erroneous CPU usage."
-      #resource_query = "host | pod"
-      resource_type = "POD"
+			value = "cpu_usage + 2"
+			description = "Erroneous CPU usage."
+			resource_type = "POD"
 			units = "cores"
-			#shell = "/bin/bash"
-			#timeout = "5"
 		}
 `
 }
@@ -345,10 +350,13 @@ func TestAccResourceResource(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "name", pre+"_books"),
 					resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "description", "Pods with books app."),
 					resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "value", "host | pod | app = 'bookstore'"),
-					//resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "shell", "/bin/bash"),
-					//resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "timeout", "5"),
-					//resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "res_env_var", "FOO"),
 				),
+			},
+			{
+				// Test Importer..
+				ResourceName:      "shoreline_resource." + pre + "_books",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -358,11 +366,8 @@ func getAccResourceResource(prefix string) string {
 	return `
 		resource "shoreline_resource" "` + prefix + `_books" {
 			name = "` + prefix + `_books"
-      description = "Pods with books app."
-      value = "host | pod | app = 'bookstore'"
-			#shell = "/bin/bash"
-			#res_env_var = "FOO"
-			#timeout = "5"
+			description = "Pods with books app."
+			value = "host | pod | app = 'bookstore'"
 		}
 `
 }
@@ -393,6 +398,15 @@ func TestAccResourceFile(t *testing.T) {
 					resource.TestCheckResourceAttrSet("shoreline_file."+pre+"_ex_file", "file_length"),
 				),
 			},
+			{
+				// Test Importer..
+				ResourceName:      "shoreline_file." + pre + "_ex_file",
+				ImportState:       true,
+				ImportStateVerify: true,
+				//// The filename (input_file) is not stored in the Op DB, and so can't be recreated for "import".
+				ImportStateVerifyIgnore: []string{"input_file"},
+				//ExpectError: regexp.MustCompile("input_file"), // Despite tickets to the contrary, this doesn't seem to work with ImportStateVerify
+			},
 		},
 	})
 }
@@ -401,11 +415,11 @@ func getAccResourceFile(prefix string) string {
 	return `
 		resource "shoreline_file" "` + prefix + `_ex_file" {
 			name = "` + prefix + `_ex_file"
-      input_file = "${path.module}/../data/opcp_example.sh"
-      destination_path = "/tmp/opcp_example.sh"
-      resource_query = "host"
-      description = "op_copy example script."
-      enabled = false
+			input_file = "${path.module}/../data/opcp_example.sh"
+			destination_path = "/tmp/opcp_example.sh"
+			resource_query = "host"
+			description = "op_copy example script."
+			enabled = false
 		}
 `
 }
