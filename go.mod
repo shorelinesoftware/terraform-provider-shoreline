@@ -1,6 +1,6 @@
 module shoreline.io/terraform/terraform-provider-shoreline
 
-go 1.15
+go 1.16
 
 require (
 	github.com/MichaelMure/go-term-markdown v0.1.4
