@@ -20,6 +20,7 @@ jobs:
           version: ${{ github.event.inputs.version }}
         run: |
           aws s3 cp s3://shoreline-terraform-provider/${version}/terraform-provider-shoreline_${version}_darwin_amd64 ./terraform-provider-shoreline_${version}_darwin_amd64
+          aws s3 cp s3://shoreline-terraform-provider/${version}/terraform-provider-shoreline_${version}_darwin_arm64 ./terraform-provider-shoreline_${version}_darwin_arm64
       - name: Import Code-Signing Certificates
         uses: Apple-Actions/import-codesign-certs@v1
         with:
@@ -29,7 +30,7 @@ jobs:
         run: |
           brew tap mitchellh/gon
           brew install mitchellh/gon/gon
-      - name: Sign and notarize mac cli
+      - name: Sign and notarize mac x86 cli
         env:
           AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
           version: ${{ github.event.inputs.version }}
@@ -53,9 +54,35 @@ jobs:
             }
           }' | jq '' > gon.json
           gon -log-level=debug -log-json ./gon.json
+      - name: Sign and notarize mac M1 cli
+        env:
+          AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
+          version: ${{ github.event.inputs.version }}
+        run: |
+          chmod 755 ./terraform-provider-shoreline_${version}_darwin_arm64
+          mv ./terraform-provider-shoreline_${version}_darwin_arm64 ./terraform-provider-shoreline_${version}_darwin_arm64.command
+          chmod 755 ./terraform-provider-shoreline_${version}_darwin_arm64.command
+          echo '{
+            "source" : ["./terraform-provider-shoreline_'"${version}"'_darwin_arm64.command"],
+            "bundle_id" : "io.shoreline.terraform",
+            "apple_id": {
+               "username" : "build@shorelinesoftware.com",
+               "password":  "@env:AC_PASSWORD"
+            },
+            "sign" :{
+               "application_identity" : "E4C09D7E61638C54FFD01886C778C5474B9F958D"
+            },
+            "dmg" :{
+               "output_path":  "./terraform-provider-shoreline_'"${version}"'_darwin_arm64.dmg",
+               "volume_name":  "terraform-provider-shoreline_'"${version}"'_darwin_arm64.command"
+            }
+          }' | jq '' > gon.json
+          gon -log-level=debug -log-json ./gon.json
       - name: Upload signed cli to S3
         env:
           version: ${{ github.event.inputs.version }}
         run: |
           aws s3 rm s3://shoreline-terraform-provider/${version}/terraform-provider-shoreline_${version}_darwin_amd64
           aws s3 cp ./terraform-provider-shoreline_${version}_darwin_amd64.dmg s3://shoreline-terraform-provider/${version}/terraform-provider-shoreline_${version}_darwin_amd64.dmg
+          aws s3 rm s3://shoreline-terraform-provider/${version}/terraform-provider-shoreline_${version}_darwin_arm64
+          aws s3 cp ./terraform-provider-shoreline_${version}_darwin_arm64.dmg s3://shoreline-terraform-provider/${version}/terraform-provider-shoreline_${version}_darwin_arm64.dmg
