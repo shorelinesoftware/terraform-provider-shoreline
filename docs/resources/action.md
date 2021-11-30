@@ -41,7 +41,7 @@ See the Shoreline [Actions Documentation](https://docs.shoreline.io/actions) for
 - **start_long_template** (String) The long description when starting the Action.
 - **start_short_template** (String) The short description when starting the Action.
 - **start_title_template** (String) UI title of the start of the Action.
-- **timeout** (Number) Maximum time to wait, in seconds. Defaults to `60`.
+- **timeout** (Number) Maximum time to wait, in milliseconds. Defaults to `60000`.
 
 ### Read-Only
 

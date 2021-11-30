@@ -25,7 +25,7 @@ See the Shoreline [Alarms Documentation](https://docs.shoreline.io/alarms) for m
 
 ### Optional
 
-- **check_interval_sec** (String)
+- **check_interval_sec** (String) Defaults to `1`.
 - **clear_query** (String) The Alarm's resolution condition.
 - **compile_eligible** (Boolean) If the Alarm can be effectively optimized. Defaults to `true`.
 - **condition_type** (String) Kind of check in an Alarm (e.g. above or below) vs a threshold for a Metric.

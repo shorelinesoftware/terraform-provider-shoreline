@@ -30,7 +30,6 @@ See the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/r
 - **params** (List of String) Named variables to pass to an object (e.g. an Action).
 - **res_env_var** (String) Result environment variable ... an environment variable used to output values through.
 - **shell** (String) The commandline shell to use (e.g. /bin/sh).
-- **timeout** (Number) Maximum time to wait, in seconds.
 
 ### Read-Only
 
