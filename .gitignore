@@ -15,3 +15,8 @@ terraform.tfstate.backup
 # idea files
 .idea
 
+# notes
+.notes
+
+# node
+node_modules
