@@ -1,0 +1,308 @@
+{
+  "blacklist": [
+    {
+      "type": "article",
+      "path": "internal/writing-guide"
+    }
+  ],
+  "terms": [
+    {
+      "patterns": [
+        "access-control"
+      ],
+      "path": "administration/access-control",
+      "wildcard": true
+    },
+    {
+      "patterns": [
+        "action"
+      ],
+      "path": "actions",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "action/property"
+      ],
+      "path": "actions/properties",
+      "wildcard": true
+    },
+    {
+      "patterns": [
+        "alarm"
+      ],
+      "path": "alarms",
+      "wildcard": true
+    },
+    {
+      "patterns": [
+        "alarm/property"
+      ],
+      "path": "alarms/properties",
+      "wildcard": true
+    },
+    {
+      "patterns": [
+        "audit"
+      ],
+      "path": "administration/audit",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "bot"
+      ],
+      "path": "bots",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "bot/property"
+      ],
+      "path": "bots/properties",
+      "wildcard": true
+    },
+    {
+      "patterns": [
+        "cli"
+      ],
+      "path": "installation#cli",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "configuration"
+      ],
+      "path": "configuration",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "derived-metric"
+      ],
+      "path": "configuration/derived-metrics",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "dynamic-filter"
+      ],
+      "path": "op/dynamic-filters",
+      "wildcard": true
+    },
+    {
+      "patterns": [
+        "event"
+      ],
+      "path": "op/events",
+      "wildcard": true
+    },
+    {
+      "patterns": [
+        "file"
+      ],
+      "path": "op/commands/cp",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "installation"
+      ],
+      "path": "installation",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "installation/k8s",
+        "installation/kubernetes"
+      ],
+      "path": "installation/kubernetes",
+      "wildcard": true
+    },
+    {
+      "patterns": [
+        "installation/vm",
+        "installation/virtual-machine"
+      ],
+      "path": "installation/virtual-machines",
+      "wildcard": true
+    },
+    {
+      "patterns": [
+        "installation#agents"
+      ],
+      "path": "installation#agents",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "datadog",
+        "i/datadog",
+        "integrations/datadog"
+      ],
+      "path": "integrations/datadog",
+      "wildcard": true
+    },
+    {
+      "patterns": [
+        "job"
+      ],
+      "path": "op/jobs",
+      "wildcard": true
+    },
+    {
+      "patterns": [
+        "metric"
+      ],
+      "path": "metrics",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "metric/transformation"
+      ],
+      "path": "metrics/transformations",
+      "wildcard": true
+    },
+    {
+      "patterns": [
+        "metric/standard"
+      ],
+      "path": "metrics/standard",
+      "wildcard": true
+    },
+    {
+      "patterns": [
+        "metric-query"
+      ],
+      "path": "metrics#metric-queries",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "metric-set"
+      ],
+      "path": "configuration/metric-sets",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "op"
+      ],
+      "path": "op",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "op/config"
+      ],
+      "path": "op/config",
+      "wildcard": true
+    },
+    {
+      "patterns": [
+        "op/command"
+      ],
+      "path": "op/commands",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "/op/commands/config"
+      ],
+      "path": "/op/commands/config",
+      "wildcard": true
+    },
+    {
+      "patterns": [
+        "/op/command/job"
+      ],
+      "path": "/op/commands/jobs",
+      "wildcard": true
+    },
+    {
+      "patterns": [
+        "op/pack"
+      ],
+      "path": "op/packs",
+      "wildcard": true
+    },
+    {
+      "patterns": [
+        "op/pipe"
+      ],
+      "path": "op#pipe",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "resource"
+      ],
+      "path": "platform/resources",
+      "wildcard": true
+    },
+    {
+      "patterns": [
+        "transformations"
+      ],
+      "path": "op/transformations",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "agent"
+      ],
+      "path": "platform/agents",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "ui"
+      ],
+      "path": "ui",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "ui/alarm"
+      ],
+      "path": "/ui/alarms",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "ui/audit"
+      ],
+      "path": "administration/audit#audit-ui",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "ui/configuration"
+      ],
+      "path": "ui/configuration",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "ui/monitoring"
+      ],
+      "path": "ui/monitoring",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "ui/resources"
+      ],
+      "path": "ui/resources",
+      "wildcard": false
+    },
+    {
+      "patterns": [
+        "webcli"
+      ],
+      "path": "ui/webcli",
+      "wildcard": true
+    }
+  ]
+}
