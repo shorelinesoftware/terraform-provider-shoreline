@@ -9,5 +9,9 @@
   },
   "resolutions": {
     "glob-parent": "5.1.2"
+  },
+  "scripts": {
+    "gulp:build": "gulp build",
+    "gulp:build:templates": "gulp buildTemplates"
   }
 }

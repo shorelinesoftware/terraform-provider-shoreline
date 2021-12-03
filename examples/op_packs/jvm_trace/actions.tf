@@ -7,7 +7,6 @@ resource "shoreline_action" "jvm_trace_check_heap" {
   params = ["JVM_PROCESS_REGEX"]
   # Extract the heap used for the matching process and return 1 if above threshold.
   command = "`hm=$(jstat -gc $(jps | grep \"$${JVM_PROCESS_REGEX}\" | awk '{print $1}') | tail -n 1 | awk '{split($0,a,\" \"); sum=a[3]+a[4]+a[6]+a[8]; print sum/1024}'); hm=$${hm%.*}; if [ $hm -gt ${var.mem_threshold} ]; then echo \"heap memory $hm MB > threshold ${var.mem_threshold} MB\"; exit 1; fi`"
-  # Select the shell to run 'command' with.
 
   # UI / CLI annotation informational messages:
   start_short_template    = "Checking JVM heap usage."

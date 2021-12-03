@@ -8,16 +8,14 @@ description: |-
 
 Actions execute shell commands on associated [Resources](https://docs.shoreline.io/platform/resources). Whenever an [Alarm](https://docs.shoreline.io/alarms) fires the associated [Bot](https://docs.shoreline.io/bots) triggers the corresponding [Action](https://docs.shoreline.io/actions), closing the basic auto-remediation loop of Shoreline.
 
-## Action Properties
+## Required Properties
 
 Each Action has many properties that determine its behavior. The required properties are:
 
 - [name](https://docs.shoreline.io/actions/properties#name) - The name of the Action.
 - [command](https://docs.shoreline.io/actions/properties#command) - The shell command executed when the Action triggers.
 
--> Check out [Action Properties](https://docs.shoreline.io/actions/properties) for details on all available properties and how to use them.
-
-## Example Usage
+## Usage
 
 The following [Action](https://docs.shoreline.io/actions) definition creates a `cpu_threshold_action` that compares host CPU usage against a `cpu_threshold` parameter value.
 
@@ -115,7 +113,6 @@ resource "shoreline_action" "jvm_trace_check_heap" {
   params = ["JVM_PROCESS_REGEX"]
   # Extract the heap used for the matching process and return 1 if above threshold.
   command = "`hm=$(jstat -gc $(jps | grep \"$${JVM_PROCESS_REGEX}\" | awk '{print $1}') | tail -n 1 | awk '{split($0,a,\" \"); sum=a[3]+a[4]+a[6]+a[8]; print sum/1024}'); hm=$${hm%.*}; if [ $hm -gt ${var.mem_threshold} ]; then echo \"heap memory $hm MB > threshold ${var.mem_threshold} MB\"; exit 1; fi`"
-  # Select the shell to run 'command' with.
 
   # UI / CLI annotation informational messages:
   start_short_template    = "Checking JVM heap usage."
