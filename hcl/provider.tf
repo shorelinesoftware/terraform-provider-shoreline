@@ -46,6 +46,7 @@ resource "shoreline_action" "ls_action" {
   res_env_var = "FOO"
   resource_query = "host"
   #timeout = 60
+  file_deps = [ "${shoreline_file.ex_file.name}" ]
   start_title_template    = "JVM dump started"
   complete_title_template = "JVM dump  completed"
   error_title_template    = "JVM dump failed"

@@ -83,10 +83,12 @@ func TestAccResourceAction(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "command", "`ls ${dir}; export FOO='bar'`"),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "description", "List some files"),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "enabled", "true"),
+					// FIXME: there array type attribute can be checked correctly.
 					//resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "params", "[\"dir\"]"),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "start_title_template", "my_action started"),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "complete_title_template", "my_action completed"),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "error_title_template", "my_action failed"),
+					// resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "file_deps", "[\""+pre+"_action_file\"]"),
 				),
 			},
 			{
@@ -109,6 +111,7 @@ func TestAccResourceAction(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "complete_long_template", "completed..."),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "error_short_template", "failed"),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "error_long_template", "failed..."),
+					// resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "file_deps", "[\""+pre+"_action_file\"]"),
 				),
 			},
 			{
@@ -139,10 +142,20 @@ func getAccResourceAction(prefix string, full bool) string {
 			error_short_template    = "failed"
 			error_long_template    = "failed..."
 `
+	depFile := `
+		resource "shoreline_file" "` + prefix + `_action_file" {
+			name = "` + prefix + `_action_file"
+			input_file = "${path.module}/../data/opcp_example.sh"
+			destination_path = "/tmp/opcp_action.sh"
+			resource_query = "host"
+			description = "op_copy action script."
+			enabled = false
+		}
+`
 	if !full {
 		extra = ""
 	}
-	return `
+	return depFile + `
 		resource "shoreline_action" "` + prefix + `_ls_action" {
 			name = "` + prefix + `_ls_action"
 			command = "` + "`ls $${dir}; export FOO='bar'`" + `"
@@ -152,6 +165,7 @@ func getAccResourceAction(prefix string, full bool) string {
 			start_title_template    = "my_action started"
 			complete_title_template = "my_action completed"
 			error_title_template    = "my_action failed"
+			file_deps = ["` + prefix + `_action_file"]
 			` + extra + `
 		}
 `

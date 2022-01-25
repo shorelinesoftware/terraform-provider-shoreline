@@ -146,6 +146,7 @@ resource "shoreline_action" "jvm_trace_check_heap" {
 - **error_long_template** (String) The long description of the Action's error condition.
 - **error_short_template** (String) The short description of the Action's error condition.
 - **error_title_template** (String) UI title of the Action's error condition.
+- **file_deps** (List of String) file object dependencies.
 - **id** (String) The ID of this resource.
 - **params** (List of String) Named variables to pass to an object (e.g. an Action).
 - **res_env_var** (String) Result environment variable ... an environment variable used to output values through.
