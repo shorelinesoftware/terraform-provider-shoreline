@@ -314,6 +314,7 @@ var ObjectConfigJsonStr = `
 			"resource_query":          { "type": "command",  "optional": true },
 			"shell":                   { "type": "string",   "optional": true },
 			"timeout":                 { "type": "unsigned", "optional": true, "default": 60000 },
+			"file_deps":               { "type": "string[]", "optional": true },
 			"start_short_template":    { "type": "string",   "optional": true, "step": "start_step_class.short_template" },
 			"start_long_template":     { "type": "string",   "optional": true, "step": "start_step_class.long_template" },
 			"start_title_template":    { "type": "string",   "optional": true, "step": "start_step_class.title_template" },
@@ -464,6 +465,7 @@ var ObjectConfigJsonStr = `
 				"start_long_template":     "The long description when starting the Action.",
 				"start_title_template":    "UI title of the start of the Action.",
 				"timeout":                 "Maximum time to wait, in milliseconds.",
+				"file_deps":               "file object dependencies.",
 				"units":                   "Units of a Metric (e.g., bytes, blocks, packets, percent).",
 				"value":                   "The Op statement that defines a Metric or Resource."
 		}
