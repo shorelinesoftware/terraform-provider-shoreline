@@ -11,6 +11,7 @@ require (
 	github.com/hashicorp/terraform-plugin-docs v0.4.0
 	github.com/hashicorp/terraform-plugin-sdk v1.17.2
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
+	github.com/hashicorp/terraform-json v0.13.0
 	github.com/jedib0t/go-pretty/v6 v6.2.2
 	github.com/klauspost/compress v1.11.2
 	github.com/spf13/viper v1.7.1
