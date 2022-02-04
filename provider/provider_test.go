@@ -165,7 +165,7 @@ func getAccResourceAction(prefix string, full bool) string {
 			start_title_template    = "my_action started"
 			complete_title_template = "my_action completed"
 			error_title_template    = "my_action failed"
-			file_deps = ["` + prefix + `_action_file"]
+			file_deps = [shoreline_file.` + prefix + `_action_file.name]
 			` + extra + `
 		}
 `
