@@ -8,9 +8,9 @@ resource "shoreline_alarm" "jvm_trace_heap_alarm" {
   # The query that ends the alarm: is the JVM memory usage lower than the threshold.
   clear_query = "${shoreline_action.jvm_trace_check_heap.name}('${var.jvm_process_regex}') == 0"
   # How often is the alarm evaluated. This is a more slowly changing metric, so every 60 seconds is fine.
-  check_interval_sec = "${var.check_interval}"
+  check_interval_sec = var.check_interval
   # User-provided resource selection
-  resource_query = "${var.resource_query}"
+  resource_query = var.resource_query
 
   # UI / CLI annotation informational messages:
   fire_short_template    = "JVM heap usage exceeded memory threshold."
@@ -27,7 +27,7 @@ resource "shoreline_alarm" "jvm_trace_heap_alarm" {
   # raised on a linux command (not a standard metric)
   metric_name = "jvm_trace_check_heap"
   # threshold value
-  condition_value = "${var.mem_threshold}"
+  condition_value = var.mem_threshold
   # fires when above the threshold
   condition_type = "above"
   # general type of alarm ("metric", "custom", or "system check")

@@ -262,9 +262,13 @@ func configure(version string, p *schema.Provider) func(ctx context.Context, d *
 		AuthUrl = d.Get("url").(string)
 		token, hasToken := d.GetOk("token")
 
+		var diags diag.Diagnostics = nil
+
 		canonUrl, err := CanonicalizeUrl(AuthUrl)
 		if err != nil {
-			return nil, diag.Errorf("Couldn't map URL to canonical form.\n" + err.Error())
+			//return nil, diag.Errorf("Couldn't map URL to canonical form.\n" + err.Error())
+			diags = diag.FromErr(err)
+			diags[0].Severity = diag.Warning
 		} else {
 			appendActionLog(fmt.Sprintf("Mapped url: %s -- to -- %s\n", AuthUrl, canonUrl))
 		}
@@ -293,7 +297,7 @@ func configure(version string, p *schema.Provider) func(ctx context.Context, d *
 			DoDebugLog = debugLog.(bool)
 		}
 
-		return &apiClient{}, nil
+		return &apiClient{}, diags
 	}
 }
 
