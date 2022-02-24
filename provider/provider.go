@@ -42,7 +42,8 @@ func appendActionLog(msg string) {
 		return
 	}
 	defer f.Close()
-	if _, err = f.WriteString(msg); err != nil {
+	id := fmt.Sprintf("gid:%d - ", curGoroutineID())
+	if _, err = f.WriteString(id + msg); err != nil {
 		//panic(err)
 		return
 	}
@@ -145,9 +146,13 @@ func ExtractRegexToMap(expr string, regex string) map[string]interface{} {
 	vals := re.FindStringSubmatch(expr)
 	keys := re.SubexpNames()
 
+	vlen := len(vals)
 	// skip index 0, which is the entire expression
 	for i := 1; i < len(keys); i++ {
-		result[keys[i]] = vals[i]
+		if i < vlen {
+			result[keys[i]] = vals[i]
+		}
+		// XXX else error, capture group didn't match (but need diags passed in)
 	}
 	return result
 }
@@ -364,7 +369,7 @@ var ObjectConfigJsonStr = `
 			"type":             { "type": "string",   "computed": true, "value": "BOT" },
 			"name":             { "type": "label",    "required": true, "forcenew": true, "skip": true },
 			"command":          { "type": "command",  "required": true, "primary": true, 
-				"compound_in": "if (?P<alarm_statement>.*?) then (?P<action_statement>.*?) fi", 
+				"compound_in": "^\\s*if\\s*(?P<alarm_statement>.*?)\\s*then\\s*(?P<action_statement>.*?)\\s*fi\\s*$",
 				"compound_out": "if ${alarm_statement} then ${action_statement} fi"
 			},
 			"description":      { "type": "string",   "optional": true },

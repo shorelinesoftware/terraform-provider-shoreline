@@ -296,7 +296,7 @@ func getAccResourceBot(prefix string) string {
 	return `
 		resource "shoreline_bot" "` + prefix + `_cpu_bot" {
 			name        = "` + prefix + `_cpu_bot"
-			command     = "if ${shoreline_alarm.` + prefix + `_cpu_alarm.name} then ${shoreline_action.` + prefix + `_ls_action.name}(dir=\"/tmp\") fi"
+			command     = "if ${shoreline_alarm.` + prefix + `_cpu_alarm.name} then ${shoreline_action.` + prefix + `_ls_action.name}(dir=\"/tmp\")fi "
 			description = "Act on CPU usage."
 			enabled     = true
 			family      = "custom"
