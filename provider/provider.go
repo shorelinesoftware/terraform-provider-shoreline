@@ -735,16 +735,25 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 			continue
 		}
 
+		// CS-336 workaround: Force explicit set of action_statement/alarm_statement to patch quoting issue
+		forceSet := false
+		_, botEnvDefined := os.LookupEnv("BOT_SKIP_PATCH")
 		isPrimary := GetNestedValueOrDefault(attrs, ToKeyPath(key+".primary"), false).(bool)
 		if isCreate && isPrimary && typ == "bot" {
-			// primary value is set on creation, and redundant set currently triggers an issue with bots
-			continue
+			if botEnvDefined {
+				appendActionLog(fmt.Sprintf("Bot skipping post-ctor set: %s: '%s'.'%s' HasChange(%v)\n", typ, name, key, d.HasChange(key)))
+				// primary value is set on creation, and redundant set currently triggers an issue with bots
+				continue
+			} else {
+				appendActionLog(fmt.Sprintf("Bot running post-ctor set: %s: '%s'.'%s'  HasChange(%v)\n", typ, name, key, d.HasChange(key)))
+				forceSet = true
+			}
 		}
 
 		val, exists := d.GetOk(key)
 		// NOTE: Terraform reports !exists when a value is explicitly supplied, but matches the 'default'
-		if !exists && !d.HasChange(key) {
-			appendActionLog(fmt.Sprintf("FieldDoesNotExist: %s: '%s'.'%s' val(%v) HasChange(%v)\n", typ, name, key, val, d.HasChange(key)))
+		if !exists && !d.HasChange(key) && !forceSet {
+			appendActionLog(fmt.Sprintf("FieldDoesNotExist: %s: '%s'.'%s' val(%v) HasChange(%v), forceSet(%v)\n", typ, name, key, val, d.HasChange(key), forceSet))
 			continue
 		}
 
