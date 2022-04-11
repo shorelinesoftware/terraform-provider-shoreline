@@ -5,6 +5,7 @@ package provider
 
 import (
 	//"regexp"
+	"os"
 	"testing"
 
 	//"github.com/hashicorp/terraform-plugin-sdk/acctest"
@@ -15,9 +16,14 @@ import (
 )
 
 func getProviderConfigString() string {
+	url := "https://opsstage.us.api.shoreline-stage.io"
+	envUrl, urlDefined := os.LookupEnv("SHORELINE_URL")
+	if urlDefined {
+		url = envUrl
+	}
 	return `
 	provider "shoreline" {
-		url = "https://opsstage.us.api.shoreline-stage.io"
+		url = "` + url + `"
 		retries = 2
 		debug = true
 	}
