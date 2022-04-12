@@ -160,8 +160,10 @@ func GetManualAuthMessage(GlobalOpts *CliOpts) string {
 }
 
 func ValidateApiUrl(url string) bool {
-	// NOTE: URLs are in the form -- "https://<customer>.<region>.api.shoreline-<cluster>.io"
-	urlRegex := regexp.MustCompile(`^https://\w+\.\w+\.api\.shoreline-\w+\.io$`)
+	// NOTE: standard URLs are in the form -- "https://<customer>.<region>.api.shoreline-<cluster>.io"
+	//   However, users can have custom backends with arbitrary URLs
+	//urlRegex := regexp.MustCompile(`^https://\w+\.\w+\.api\.shoreline-\w+\.io$`)
+	urlRegex := regexp.MustCompile(`^https://[\.a-z0-9-]+$`)
 	if !urlRegex.MatchString(url) {
 		WriteMsg("ERROR: Invalid URL to auth! (%s)\n", url)
 		WriteMsg("It should be of the form: '" + CanonicalUrl + "' \n")
