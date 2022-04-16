@@ -5,9 +5,11 @@ package provider
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -29,6 +31,48 @@ func CanonicalizeUrl(url string) (urlOut string, err error) {
 		}
 	}
 	return urlBaseStr, nil
+}
+
+func StringToJsonArray(data string) ([]interface{}, error) {
+	//jsObj := map[string]interface{}{}
+	jsObj := []interface{}{}
+	jsErr := json.Unmarshal([]byte(data), &jsObj)
+	return jsObj, jsErr
+}
+
+//func Base64ToJsonArray(data string) (map[string]interface{}, error) {
+func Base64ToJsonArray(data string) ([]interface{}, error) {
+	//b64Str := base64.URLEncoding.EncodeToString([]byte(data))
+	//b64Str := base64.StdEncoding.EncodeToString([]byte(data))
+	jsStr, bError := base64.StdEncoding.DecodeString(data)
+	if bError != nil {
+		return []interface{}{}, bError
+	}
+	return StringToJsonArray(string(jsStr))
+}
+
+func OmitJsonArrayFields(val interface{}, omitList []interface{}) {
+	appendActionLog(fmt.Sprintf("Omitting keys: %+v\n", omitList))
+	omitKeys := map[string]bool{}
+	for _, o := range omitList {
+		oStr, isStr := o.(string)
+		if isStr {
+			omitKeys[oStr] = true
+		}
+	}
+	valArr, isArr := val.([]interface{})
+	if isArr {
+		for _, elem := range valArr {
+			eMap, isMap := elem.(map[string]interface{})
+			if isMap {
+				for k, _ := range eMap {
+					if omitKeys[k] {
+						delete(eMap, k)
+					}
+				}
+			}
+		}
+	}
 }
 
 func appendActionLog(msg string) {
@@ -115,7 +159,7 @@ func CheckUpdateResult(result string) error {
 	}
 
 	actions := []string{"define", "delete", "update"}
-	types := []string{"resource", "metric", "alarm", "action", "bot", "file"}
+	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "notebook"}
 	for _, act := range actions {
 		for _, typ := range types {
 			key := act + "_" + typ
@@ -123,7 +167,22 @@ func CheckUpdateResult(result string) error {
 			if def != nil {
 				errKey := key + ".error.message"
 				err := GetNestedValueOrDefault(js, ToKeyPath(errKey), nil)
-				if err == nil {
+				if typ == "notebook" && (err == nil || err == "") {
+					// have to special-case for notebooks
+					err = ""
+					errArray := []string{}
+					ve, isArray := GetNestedValueOrDefault(js, ToKeyPath(key+".error.validation_errors"), nil).([]interface{})
+					if isArray {
+						for i, _ := range ve {
+							errn, isStr := GetNestedValueOrDefault(js, ToKeyPath(fmt.Sprintf(key+".error.validation_errors.[%d].message", i)), nil).(string)
+							if isStr && errn != "" {
+								errArray = append(errArray, errn)
+							}
+							err = strings.Join(errArray, "\n")
+						}
+					}
+				}
+				if err == nil || err == "" {
 					// success ...
 					return nil
 				} else {
@@ -214,6 +273,7 @@ func New(version string) func() *schema.Provider {
 				"shoreline_metric":   resourceShorelineObject(ObjectConfigJsonStr, "metric"),
 				"shoreline_resource": resourceShorelineObject(ObjectConfigJsonStr, "resource"),
 				"shoreline_file":     resourceShorelineObject(ObjectConfigJsonStr, "file"),
+				"shoreline_notebook": resourceShorelineObject(ObjectConfigJsonStr, "notebook"),
 			},
 			Schema: map[string]*schema.Schema{
 				"url": {
@@ -423,6 +483,17 @@ var ObjectConfigJsonStr = `
 		}
 	},
 
+	"notebook": {
+		"attributes": {
+			"type":                   { "type": "string",   "computed": true, "value": "ALARM" },
+			"name":                   { "type": "label",    "required": true, "forcenew": true, "skip": true },
+			"cells":                  { "type": "b64json",  "required": true, "step": "cells", "primary": true, "omit": "dynamic_cell_fields" },
+			"description":            { "type": "string",   "optional": true },
+			"enabled":                { "type": "intbool",  "optional": true, "default": false },
+			"timeout_ms":             { "type": "unsigned", "optional": true, "default": 60000 }
+		}
+	},
+
 	"docs": {
 		"objects": {
 				"action":   "A command that can be run.\n\nSee the Shoreline [Actions Documentation](https://docs.shoreline.io/actions) for more info.",
@@ -430,11 +501,13 @@ var ObjectConfigJsonStr = `
 				"bot":      "An automation that ties an Action to an Alert.\n\nSee the Shoreline [Bots Documentation](https://docs.shoreline.io/bots) for more info.",
 				"metric":   "A periodic measurement of a system property.\n\nSee the Shoreline [Metrics Documentation](https://docs.shoreline.io/metrics) for more info.",
 				"resource": "A server or compute resource in the system (e.g. host, pod, container).\n\nSee the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info.",
-				"file":     "A datafile that is automatically copied/distributed to defined Resources.\n\nSee the Shoreline [OpCp Documentation](https://docs.shoreline.io/op/commands/cp) for more info."
+				"file":     "A datafile that is automatically copied/distributed to defined Resources.\n\nSee the Shoreline [OpCp Documentation](https://docs.shoreline.io/op/commands/cp) for more info.",
+				"notebook":     "An interactive notebook of Op commands and user documentation .\n\nSee the Shoreline [Notebook Documentation](https://docs.shoreline.io/ui/notebooks) for more info."
 		},
 
 		"attributes": {
 				"type":                    "The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).",
+				"cells":                   "The data cells inside a notebook.",
 				"check_interval":          "Interval (in seconds) between Alarm evaluations.",
 				"checksum":                "Cryptographic hash (e.g. md5) of a File Resource.",
 				"clear_query":             "The Alarm's resolution condition.",
@@ -524,9 +597,26 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		switch typ {
 		case "command":
 			sch.Type = schema.TypeString
-			sch.DiffSuppressFunc = func(k, old, new string, d *schema.ResourceData) bool {
+			sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
 				// ignore whitespace changes in command strings
-				if strings.ReplaceAll(old, " ", "") == strings.ReplaceAll(new, " ", "") {
+				if strings.ReplaceAll(old, " ", "") == strings.ReplaceAll(nu, " ", "") {
+					return true
+				}
+				return false
+			}
+		case "b64json":
+			sch.Type = schema.TypeString
+			// special case for notebook cells
+			sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
+				if old == "" && nu == "" {
+					return true
+				}
+				oldJs, oldErr := StringToJsonArray(old)
+				nuJs, nuErr := StringToJsonArray(nu)
+				if oldErr != nil || nuErr != nil {
+					return false
+				}
+				if reflect.DeepEqual(oldJs, nuJs) {
 					return true
 				}
 				return false
@@ -633,6 +723,12 @@ func attrValueString(typ string, key string, val interface{}, attrs map[string]i
 	switch attrTyp {
 	case "command":
 		strVal = fmt.Sprintf("%s", val)
+	case "b64json":
+		jsStr, isStr := val.(string)
+		if !isStr {
+			jsStr = ""
+		}
+		strVal = fmt.Sprintf("\"%s\"", base64.StdEncoding.EncodeToString([]byte(jsStr)))
 	case "string":
 		strVal = fmt.Sprintf("\"%s\"", val)
 	case "string[]":
@@ -845,6 +941,7 @@ func resourceShorelineObjectCreate(typ string, primary string, attrs map[string]
 		appendActionLog(fmt.Sprintf("Creating %s: '%s' (%v) :: %+v\n", typ, idFromAPI, name, d))
 
 		primaryValStr := attrValueString(typ, primary, primaryVal, attrs)
+		//appendActionLog(fmt.Sprintf("primaryValStr is ((( %+v )))\n", primaryValStr))
 		//op := fmt.Sprintf("%s %s = \"%s\"", typ, name, primaryVal)
 		op := fmt.Sprintf("%s %s = %s", typ, name, primaryValStr)
 		//if typ == "bot" {
@@ -903,7 +1000,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 
 		stepsJs := map[string]interface{}{}
 
-		if typ == "alarm" || typ == "action" || typ == "bot" {
+		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "notebook" {
 			// extract fields from step objects
 			op := fmt.Sprintf("get_%s_class( %s_name = \"%s\" )", typ, typ, name)
 			extraJs, err := runOpCommandToJson(op)
@@ -955,6 +1052,25 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 				stepPath, isStr := GetNestedValueOrDefault(attr, ToKeyPath("step"), nil).(string)
 				if isStr {
 					val = GetNestedValueOrDefault(stepsJs, ToKeyPath(stepPath), nil)
+
+					// special handling (notebooks)... field is base64 outgoing, and json incoming
+					attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
+					if attrTyp == "b64json" {
+						omitKey := GetNestedValueOrDefault(attr, ToKeyPath("omit"), "").(string)
+						if omitKey != "" {
+							omitList, isList := GetNestedValueOrDefault(stepsJs, ToKeyPath(omitKey), nil).([]interface{})
+							if isList {
+								OmitJsonArrayFields(val, omitList)
+							}
+						}
+						b, err := json.Marshal(val)
+						if err != nil {
+							diags = diag.Errorf("Failed to marshall JSON %s:%s '%s'", typ, key, name)
+							return diags
+						}
+						//val = base64.URLEncoding.EncodeToString(b)
+						val = string(b)
+					}
 				} else {
 					val = GetNestedValueOrDefault(record, ToKeyPath("attributes."+key), nil)
 				}
