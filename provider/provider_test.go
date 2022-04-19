@@ -5,13 +5,17 @@ package provider
 
 import (
 	//"regexp"
+	"fmt"
 	"os"
+	"reflect"
+	"strings"
 	"testing"
 
 	//"github.com/hashicorp/terraform-plugin-sdk/acctest"
 	//"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"math/rand"
 )
 
@@ -440,6 +444,74 @@ func getAccResourceFile(prefix string) string {
 			resource_query = "host"
 			description = "op_copy example script."
 			enabled = false
+		}
+`
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// Notebook
+
+func testAccCompareNotebookCells(resourceName string, expected string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		// retrieve the resource by name from state
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Not found: %s", resourceName)
+		}
+		appendActionLog(fmt.Sprintf("rs resource is: %+v, cells: %+v\n", rs, rs.Primary.Attributes["cells"]))
+		//inJs, inErr := Base64ToJsonArray(rs.Primary.Attributes["cells"])
+		//exJs, exErr := Base64ToJsonArray(expected)
+		inJs, inErr := StringToJsonArray(rs.Primary.Attributes["cells"])
+		exJs, exErr := StringToJsonArray(expected)
+		if inErr != nil || exErr != nil {
+			return fmt.Errorf("Notebook cells failed to decode/unmarshall: %s", resourceName)
+		}
+		if !reflect.DeepEqual(inJs, exJs) {
+			return fmt.Errorf("Notebook cells differs from expected: %s", resourceName)
+		}
+		return nil
+	}
+}
+
+///// TODO XXX re-enable this when the CI backend is updated
+// func TestAccResourceNotebook(t *testing.T) {
+// 	pre := RandomAlphaPrefix(5)
+//
+// 	resource.UnitTest(t, resource.TestCase{
+// 		PreCheck:          func() { testAccPreCheck(t) },
+// 		ProviderFactories: providerFactories,
+// 		Steps: []resource.TestStep{
+// 			{
+// 				Config: getProviderConfigString() + getAccResourceNotebook(pre),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					resource.TestCheckResourceAttr("shoreline_notebook."+pre+"_notebook", "name", pre+"_notebook"),
+// 					resource.TestCheckResourceAttr("shoreline_notebook."+pre+"_notebook", "description", "A sample notebook."),
+// 					resource.TestCheckResourceAttr("shoreline_notebook."+pre+"_notebook", "enabled", "true"),
+// 					testAccCompareNotebookCells("shoreline_notebook."+pre+"_notebook", getNotebookData()),
+// 				),
+// 			},
+// 			{
+// 				// Test Importer..
+// 				ResourceName:      "shoreline_notebook." + pre + "_notebook",
+// 				ImportState:       true,
+// 				ImportStateVerify: true,
+// 			},
+// 		},
+// 	})
+// }
+
+func getNotebookData() string {
+	return `[{"type":"MARKDOWN","name":"K","enabled":true,"content":"## This is a title"},{"type":"TEXT","name":"K2","enabled":false,"content":"Insert Text Here"},{"type":"MARKDOWN","name":"K2","enabled":true,"content":"Lorem ipsum in exemplum ad naseum."},{"type":"OP_LANG","name":"resource query","enabled":false,"content":"host"}]`
+}
+
+func getAccResourceNotebook(prefix string) string {
+	return `
+		resource "shoreline_notebook" "` + prefix + `_notebook" {
+			name = "` + prefix + `_notebook"
+			description = "A sample notebook."
+			cells = "` + strings.Replace(getNotebookData(), "\"", "\\\"", -1) + `"
+			enabled = true
 		}
 `
 }
