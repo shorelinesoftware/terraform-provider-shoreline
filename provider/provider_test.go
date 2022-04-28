@@ -412,7 +412,7 @@ func TestAccResourceCircuitBreaker(t *testing.T) {
 					resource.TestCheckResourceAttr(fullName, "command", "hosts | id=[1,2] | "+pre+"_ls_action"),
 					resource.TestCheckResourceAttr(fullName, "breaker_type", "blackout"),
 					resource.TestCheckResourceAttr(fullName, "blackout_limit", "5"),
-					resource.TestCheckResourceAttr(fullName, "duration", "10"),
+					resource.TestCheckResourceAttr(fullName, "duration", "10s"),
 					resource.TestCheckResourceAttr(fullName, "fail_over", "safe"),
 				),
 			},
