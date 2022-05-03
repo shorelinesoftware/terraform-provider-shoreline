@@ -11,6 +11,7 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -73,6 +74,34 @@ func OmitJsonArrayFields(val interface{}, omitList []interface{}) {
 			}
 		}
 	}
+}
+
+func timeSuffixToIntSec(tv string) int {
+	sz := len(tv)
+	l := sz - 1
+	if sz < 1 {
+		return 0
+	}
+	mult := 0
+	switch tv[sz-1] {
+	case 's':
+		mult = 1
+	case 'm':
+		mult = 60
+	case 'h':
+		mult = 60 * 60
+	case 'd':
+		mult = 60 * 60 * 24
+	default:
+		l = sz
+		mult = 1
+	}
+	val := tv[:l]
+	i, err := strconv.Atoi(val)
+	if err != nil {
+		return -1
+	}
+	return i * mult
 }
 
 func appendActionLog(msg string) {
@@ -267,13 +296,14 @@ func New(version string) func() *schema.Provider {
 			//	"shoreline_datasource": dataSourceShoreline(),
 			//},
 			ResourcesMap: map[string]*schema.Resource{
-				"shoreline_action":   resourceShorelineObject(ObjectConfigJsonStr, "action"),
-				"shoreline_alarm":    resourceShorelineObject(ObjectConfigJsonStr, "alarm"),
-				"shoreline_bot":      resourceShorelineObject(ObjectConfigJsonStr, "bot"),
-				"shoreline_metric":   resourceShorelineObject(ObjectConfigJsonStr, "metric"),
-				"shoreline_resource": resourceShorelineObject(ObjectConfigJsonStr, "resource"),
-				"shoreline_file":     resourceShorelineObject(ObjectConfigJsonStr, "file"),
-				"shoreline_notebook": resourceShorelineObject(ObjectConfigJsonStr, "notebook"),
+				"shoreline_action":          resourceShorelineObject(ObjectConfigJsonStr, "action"),
+				"shoreline_alarm":           resourceShorelineObject(ObjectConfigJsonStr, "alarm"),
+				"shoreline_bot":             resourceShorelineObject(ObjectConfigJsonStr, "bot"),
+				"shoreline_circuit_breaker": resourceShorelineObject(ObjectConfigJsonStr, "circuit_breaker"),
+				"shoreline_metric":          resourceShorelineObject(ObjectConfigJsonStr, "metric"),
+				"shoreline_resource":        resourceShorelineObject(ObjectConfigJsonStr, "resource"),
+				"shoreline_file":            resourceShorelineObject(ObjectConfigJsonStr, "file"),
+				"shoreline_notebook":        resourceShorelineObject(ObjectConfigJsonStr, "notebook"),
 			},
 			Schema: map[string]*schema.Schema{
 				"url": {
@@ -440,7 +470,26 @@ var ObjectConfigJsonStr = `
 		}
 	},
 
-	"metric": {
+	"circuit_breaker": {
+		"attributes": {
+			"type": { "type": "string", "computed": true, "value": "CIRCUIT_BREAKER" },
+			"name": { "type": "label", "required": true, "forcenew": true, "skip": true },
+			"command": { "type": "command", "required": true, "primary": true, 
+				"compound_in": "^\\s*(?P<resource_query>.+)\\s*\\|\\s*(?P<action_name>[a-zA-Z_][a-zA-Z_]*)\\s*$",
+				"compound_out": "${resource_query} | ${action_name}"
+			},
+			"breaker_type": { "type": "string", "required": true },
+			"blackout_limit": { "type": "int", "required": true },
+			"brownout_limit": { "type": "int", "optional": true, "default": -1 },
+			"duration": { "type": "time_s", "required": true },
+			"fail_over": { "type": "string", "required": true },
+			"enabled": { "type": "bool", "optional": true, "default": false },
+			"action_name": { "type": "command", "internal": true },
+			"resource_query": { "type": "command", "internal": true }
+		}
+	},
+
+"metric": {
 		"attributes": {
 			"type":           { "type": "string",   "computed": true, "value": "METRIC" },
 			"name":           { "type": "label",    "required": true, "forcenew": true, "skip": true },
@@ -604,6 +653,18 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 				}
 				return false
 			}
+		case "time_s":
+			sch.Type = schema.TypeString
+			// special case for notebook cells
+			sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
+				oldT := timeSuffixToIntSec(old)
+				nuT := timeSuffixToIntSec(nu)
+				appendActionLog(fmt.Sprintf("time_s DiffSuppressFunc: diffing (%s)=(%d) and (%s)=(%d)", old, oldT, nu, nuT))
+				if oldT == nuT {
+					return true
+				}
+				return false
+			}
 		case "b64json":
 			sch.Type = schema.TypeString
 			// special case for notebook cells
@@ -722,6 +783,8 @@ func attrValueString(typ string, key string, val interface{}, attrs map[string]i
 	attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
 	switch attrTyp {
 	case "command":
+		strVal = fmt.Sprintf("%s", val)
+	case "time_s":
 		strVal = fmt.Sprintf("%s", val)
 	case "b64json":
 		jsStr, isStr := val.(string)
@@ -1102,6 +1165,8 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 				d.Set(key, CastToString(val))
 			case "label":
 				d.Set(key, CastToString(val))
+			case "time_s":
+				d.Set(key, CastToString(val)+"s")
 			default:
 				d.Set(key, val)
 			}
