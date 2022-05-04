@@ -133,30 +133,30 @@ resource "shoreline_action" "jvm_trace_check_heap" {
 
 ### Required
 
-- **command** (String) A specific action to run.
-- **name** (String) The name of the object (must be unique).
+- `command` (String) A specific action to run.
+- `name` (String) The name of the object (must be unique).
 
 ### Optional
 
-- **complete_long_template** (String) The long description of the Action's completion.
-- **complete_short_template** (String) The short description of the Action's completion.
-- **complete_title_template** (String) UI title of the Action's completion.
-- **description** (String) A user-friendly explanation of an object.
-- **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
-- **error_long_template** (String) The long description of the Action's error condition.
-- **error_short_template** (String) The short description of the Action's error condition.
-- **error_title_template** (String) UI title of the Action's error condition.
-- **file_deps** (List of String) file object dependencies.
-- **id** (String) The ID of this resource.
-- **params** (List of String) Named variables to pass to an object (e.g. an Action).
-- **res_env_var** (String) Result environment variable ... an environment variable used to output values through.
-- **resource_query** (String) A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
-- **shell** (String) The commandline shell to use (e.g. /bin/sh).
-- **start_long_template** (String) The long description when starting the Action.
-- **start_short_template** (String) The short description when starting the Action.
-- **start_title_template** (String) UI title of the start of the Action.
-- **timeout** (Number) Maximum time to wait, in milliseconds. Defaults to `60000`.
+- `complete_long_template` (String) The long description of the Action's completion.
+- `complete_short_template` (String) The short description of the Action's completion.
+- `complete_title_template` (String) UI title of the Action's completion.
+- `description` (String) A user-friendly explanation of an object.
+- `enabled` (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
+- `error_long_template` (String) The long description of the Action's error condition.
+- `error_short_template` (String) The short description of the Action's error condition.
+- `error_title_template` (String) UI title of the Action's error condition.
+- `file_deps` (List of String) file object dependencies.
+- `params` (List of String) Named variables to pass to an object (e.g. an Action).
+- `res_env_var` (String) Result environment variable ... an environment variable used to output values through.
+- `resource_query` (String) A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
+- `shell` (String) The commandline shell to use (e.g. /bin/sh).
+- `start_long_template` (String) The long description when starting the Action.
+- `start_short_template` (String) The short description when starting the Action.
+- `start_title_template` (String) UI title of the start of the Action.
+- `timeout` (Number) Maximum time to wait, in milliseconds. Defaults to `60000`.
 
 ### Read-Only
 
-- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
+- `id` (String) The ID of this resource.
+- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
