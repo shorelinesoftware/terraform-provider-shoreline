@@ -153,16 +153,16 @@ Now, anytime JVM memory exceeds our defined threshold the JVM is automatically r
 
 ### Required
 
-- **command** (String) A specific action to run.
-- **name** (String) The name of the object (must be unique).
+- `command` (String) A specific action to run.
+- `name` (String) The name of the object (must be unique).
 
 ### Optional
 
-- **description** (String) A user-friendly explanation of an object.
-- **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
-- **family** (String) General class for an Action or Bot (e.g., custom, standard, metric, or system check). Defaults to `custom`.
-- **id** (String) The ID of this resource.
+- `description` (String) A user-friendly explanation of an object.
+- `enabled` (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
+- `family` (String) General class for an Action or Bot (e.g., custom, standard, metric, or system check). Defaults to `custom`.
 
 ### Read-Only
 
-- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
+- `id` (String) The ID of this resource.
+- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
