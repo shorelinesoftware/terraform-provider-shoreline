@@ -4,7 +4,7 @@ REPODIR=/tmp/tf-repo/providers
 
 NAME=shoreline
 BINARY=terraform-provider-$(NAME)
-VERSION=1.4.0
+VERSION=1.4.1
 
 // NOTE: this only works for 64 bit linux and MacOs ("darwin")
 OS=$(shell uname | tr 'A-Z' 'a-z')
@@ -36,6 +36,7 @@ release:
 	GOOS=darwin  GOARCH=arm64 go build -o ./bin/$(BINARY)_$(VERSION)_darwin_arm64
 	GOOS=linux   GOARCH=amd64 go build -o ./bin/$(BINARY)_$(VERSION)_linux_amd64
 	GOOS=linux   GOARCH=arm64 go build -o ./bin/$(BINARY)_$(VERSION)_linux_arm64
+	GOOS=linux   GOARCH=arm   go build -o ./bin/$(BINARY)_$(VERSION)_linux_arm
 	GOOS=openbsd GOARCH=amd64 go build -o ./bin/$(BINARY)_$(VERSION)_openbsd_amd64
 	GOOS=windows GOARCH=amd64 go build -o ./bin/$(BINARY)_$(VERSION)_windows_amd64
 
