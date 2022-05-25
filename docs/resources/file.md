@@ -82,20 +82,20 @@ variable "s3_bucket" {
 
 ### Required
 
-- `destination_path` (String) Target location for a copied distributed File object.  See [Op: cp](https://docs.shoreline.io/op/commands/cp).
-- `input_file` (String) The local source of a distributed File object.
-- `name` (String) The name of the object (must be unique).
-- `resource_query` (String) A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
+- **destination_path** (String) Target location for a copied distributed File object.  See [Op: cp](https://docs.shoreline.io/op/commands/cp).
+- **input_file** (String) The local source of a distributed File object.
+- **name** (String) The name of the object (must be unique).
+- **resource_query** (String) A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
 
 ### Optional
 
-- `description` (String) A user-friendly explanation of an object.
-- `enabled` (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
+- **description** (String) A user-friendly explanation of an object.
+- **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
+- **id** (String) The ID of this resource.
 
 ### Read-Only
 
-- `checksum` (String) Cryptographic hash (e.g. md5) of a File Resource.
-- `file_data` (String) Internal representation of a distributed File object's data (computed).
-- `file_length` (Number) Length, in bytes, of a distributed File object (computed)
-- `id` (String) The ID of this resource.
-- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
+- **checksum** (String) Cryptographic hash (e.g. md5) of a File Resource.
+- **file_data** (String) Internal representation of a distributed File object's data (computed).
+- **file_length** (Number) Length, in bytes, of a distributed File object (computed)
+- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).

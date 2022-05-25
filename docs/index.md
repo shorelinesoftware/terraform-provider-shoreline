@@ -87,10 +87,11 @@ resource "shoreline_bot" "cpu_bot" {
 
 ### Required
 
-- `url` (String) Customer-specific URL for the Shoreline API server. It should be of the form ```https://<customer>.<region>.api.shoreline-<cluster>.io``` .
+- **url** (String) Customer-specific URL for the Shoreline API server. It should be of the form ```https://<customer>.<region>.api.shoreline-<cluster>.io``` .
 
 ### Optional
 
-- `debug` (Boolean) Debug logging to `/tmp/tf-shoreline.log`.
-- `retries` (Number) Number of retries for API calls, in case of e.g. transient network failures.
-- `token` (String, Sensitive) Customer/user-specific authorization token for the Shoreline API server. May be provided via `SHORELINE_TOKEN` env variable.
+- **debug** (Boolean) Debug logging to `/tmp/tf-shoreline.log`.
+- **min_version** (String) Minimum version required on the Shoreline backend (API server).
+- **retries** (Number) Number of retries for API calls, in case of e.g. transient network failures.
+- **token** (String, Sensitive) Customer/user-specific authorization token for the Shoreline API server. May be provided via `SHORELINE_TOKEN` env variable.
