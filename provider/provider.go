@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -289,6 +290,68 @@ func init() {
 	}
 }
 
+func ExtractVersionData(verStr string) (major int64, minor int64, patch int64, err *error) {
+	verRe := regexp.MustCompile(`(\d+)\.(\d+)\.(\d+)`)
+	if verRe.MatchString(verStr) {
+		match := verRe.FindStringSubmatch(verStr)
+		return CastToInt(match[1]), CastToInt(match[2]), CastToInt(match[3]), nil
+	}
+	major, minor, patch = 0, 0, 0
+	erf := fmt.Errorf("Couldn't find version number in string '%s'", verStr)
+	err = &erf
+	return
+}
+
+func GetBackendVersionInfo() (build string, version string, major int64, minor int64, patch int64, err *error) {
+	err = nil
+	build = "unknown"
+	version = "unknown"
+	major, minor, patch = 0, 0, 0
+	// op> backend_version
+	// ... "get_backend_version": "{ \"tag\": \"release-1.2.3-stuff\", \"build_date\": \"Wed_May_18_00:07:11_UTC_2022\" }", ...
+	js, opErr := runOpCommandToJson("backend_version")
+	if opErr != nil {
+		return
+	}
+	build = GetNestedValueOrDefault(js, ToKeyPath("get_backend_version"), "unknown").(string)
+	buildJs := CastToObject(build)
+	if buildJs == nil {
+		// TODO set error
+		return
+	}
+	version = GetNestedValueOrDefault(buildJs, ToKeyPath("tag"), "unknown").(string)
+	if strings.HasPrefix(version, "stable") || strings.HasPrefix(version, "release") {
+		// parse out '\d+\.\d+.\d+' suffix
+		major, minor, patch, err = ExtractVersionData(version)
+	} else {
+		// dev build, special case
+		major, minor, patch = 9999, 9999, 9999
+	}
+	return
+}
+
+func dataSourceVersionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	//client := &http.Client{Timeout: 10 * time.Second}
+
+	// Warning or errors can be collected in a slice type
+	var diags diag.Diagnostics
+	build, version, major, minor, patch, err := GetBackendVersionInfo()
+	if err != nil {
+		diags = diag.Errorf("Failed to read backend_version: %s", (*err).Error())
+		return diags
+	}
+
+	d.Set("build_info", CastToString(build))
+	d.Set("version", CastToString(version))
+	d.Set("major", major)
+	d.Set("minor", minor)
+	d.Set("patch", patch)
+	// always run
+	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+
+	return diags
+}
+
 func New(version string) func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
@@ -304,6 +367,33 @@ func New(version string) func() *schema.Provider {
 				"shoreline_resource":        resourceShorelineObject(ObjectConfigJsonStr, "resource"),
 				"shoreline_file":            resourceShorelineObject(ObjectConfigJsonStr, "file"),
 				"shoreline_notebook":        resourceShorelineObject(ObjectConfigJsonStr, "notebook"),
+			},
+			DataSourcesMap: map[string]*schema.Resource{
+				"shoreline_version": &schema.Resource{
+					ReadContext: dataSourceVersionRead,
+					Schema: map[string]*schema.Schema{
+						"build_info": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"version": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"major": &schema.Schema{
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"minor": &schema.Schema{
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"patch": &schema.Schema{
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+					},
+				},
 			},
 			Schema: map[string]*schema.Schema{
 				"url": {
@@ -336,6 +426,11 @@ func New(version string) func() *schema.Provider {
 					Optional:    true,
 					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_DEBUG", nil),
 					Description: "Debug logging to `/tmp/tf-shoreline.log`.",
+				},
+				"min_version": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "Minimum version required on the Shoreline backend (API server).",
 				},
 			},
 		}
@@ -390,6 +485,37 @@ func configure(version string, p *schema.Provider) func(ctx context.Context, d *
 		debugLog, hasDebugLog := d.GetOk("debug")
 		if hasDebugLog {
 			DoDebugLog = debugLog.(bool)
+		}
+
+		minVer, hasMinVer := d.GetOk("min_version")
+		if hasMinVer {
+			var diags diag.Diagnostics
+			_, version, major, minor, patch, err := GetBackendVersionInfo()
+			if err != nil {
+				diags = diag.Errorf("Failed to read backend_version: %s", (*err).Error())
+				return nil, diags
+			}
+			minMajor, minMinor, minPatch, err := ExtractVersionData(minVer.(string))
+			if err != nil {
+				diags = diag.Errorf("Failed to parse min_version: %s", (*err).Error())
+				return nil, diags
+			}
+			wantVer := []int64{minMajor, minMinor, minPatch}
+			haveVer := []int64{major, minor, patch}
+			verOk := true
+			for i, want := range wantVer {
+				if haveVer[i] < want {
+					verOk = false
+					break
+				}
+				if haveVer[i] > want {
+					break
+				}
+			}
+			if !verOk {
+				diags = diag.Errorf("Backend version '%s' (%d, %d, %d) does not meet min_version: '%s' (%d, %d, %d)", version, major, minor, patch, minVer.(string), minMajor, minMinor, minPatch)
+				return nil, diags
+			}
 		}
 
 		return &apiClient{}, diags
@@ -458,7 +584,7 @@ var ObjectConfigJsonStr = `
 		"attributes": {
 			"type":             { "type": "string",   "computed": true, "value": "BOT" },
 			"name":             { "type": "label",    "required": true, "forcenew": true, "skip": true },
-			"command":          { "type": "command",  "required": true, "primary": true, 
+			"command":          { "type": "command",  "required": true, "primary": true,
 				"compound_in": "^\\s*if\\s*(?P<alarm_statement>.*?)\\s*then\\s*(?P<action_statement>.*?)\\s*fi\\s*$",
 				"compound_out": "if ${alarm_statement} then ${action_statement} fi"
 			},
@@ -474,7 +600,7 @@ var ObjectConfigJsonStr = `
 		"attributes": {
 			"type": { "type": "string", "computed": true, "value": "CIRCUIT_BREAKER" },
 			"name": { "type": "label", "required": true, "forcenew": true, "skip": true },
-			"command": { "type": "command", "required": true, "primary": true, 
+			"command": { "type": "command", "required": true, "primary": true,
 				"compound_in": "^\\s*(?P<resource_query>.+)\\s*\\|\\s*(?P<action_name>[a-zA-Z_][a-zA-Z_]*)\\s*$",
 				"compound_out": "${resource_query} | ${action_name}"
 			},
@@ -489,7 +615,7 @@ var ObjectConfigJsonStr = `
 		}
 	},
 
-"metric": {
+	"metric": {
 		"attributes": {
 			"type":           { "type": "string",   "computed": true, "value": "METRIC" },
 			"name":           { "type": "label",    "required": true, "forcenew": true, "skip": true },
@@ -548,6 +674,7 @@ var ObjectConfigJsonStr = `
 				"action":   "A command that can be run.\n\nSee the Shoreline [Actions Documentation](https://docs.shoreline.io/actions) for more info.",
 				"alarm":    "A condition that triggers Alerts or Actions.\n\nSee the Shoreline [Alarms Documentation](https://docs.shoreline.io/alarms) for more info.",
 				"bot":      "An automation that ties an Action to an Alert.\n\nSee the Shoreline [Bots Documentation](https://docs.shoreline.io/bots) for more info.",
+				"circuit_breaker":      "An automatic rate limit on actions.\n\nSee the Shoreline [CircuitBreakers Documentation](https://docs.shoreline.io/circuit_breakers) for more info.",
 				"metric":   "A periodic measurement of a system property.\n\nSee the Shoreline [Metrics Documentation](https://docs.shoreline.io/metrics) for more info.",
 				"resource": "A server or compute resource in the system (e.g. host, pod, container).\n\nSee the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info.",
 				"file":     "A datafile that is automatically copied/distributed to defined Resources.\n\nSee the Shoreline [OpCp Documentation](https://docs.shoreline.io/op/commands/cp) for more info.",

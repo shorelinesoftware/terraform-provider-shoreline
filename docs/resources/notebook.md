@@ -20,18 +20,18 @@ See the Shoreline [Notebook Documentation](https://docs.shoreline.io/ui/notebook
 
 ### Required
 
-- `cells` (String) The data cells inside a notebook.
-- `name` (String) The name of the object (must be unique).
+- **cells** (String) The data cells inside a notebook.
+- **name** (String) The name of the object (must be unique).
 
 ### Optional
 
-- `description` (String) A user-friendly explanation of an object.
-- `enabled` (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
-- `timeout_ms` (Number) Defaults to `60000`.
+- **description** (String) A user-friendly explanation of an object.
+- **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
+- **id** (String) The ID of this resource.
+- **timeout_ms** (Number) Defaults to `60000`.
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
-- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
+- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
 
 

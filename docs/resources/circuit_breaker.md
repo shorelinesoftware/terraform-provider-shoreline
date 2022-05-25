@@ -3,12 +3,15 @@
 page_title: "shoreline_circuit_breaker Resource - terraform-provider-shoreline"
 subcategory: ""
 description: |-
-  Shoreline circuit_breaker.
+  Shoreline circuit_breaker. An automatic rate limit on actions.
+  See the Shoreline CircuitBreakers Documentation https://docs.shoreline.io/circuit_breakers for more info.
 ---
 
 # shoreline_circuit_breaker (Resource)
 
-Shoreline circuit_breaker.
+Shoreline circuit_breaker. An automatic rate limit on actions.
+
+See the Shoreline [CircuitBreakers Documentation](https://docs.shoreline.io/circuit_breakers) for more info.
 
 
 
@@ -17,21 +20,21 @@ Shoreline circuit_breaker.
 
 ### Required
 
-- `blackout_limit` (Number)
-- `breaker_type` (String)
-- `command` (String) A specific action to run.
-- `duration` (String)
-- `fail_over` (String)
-- `name` (String) The name of the object (must be unique).
+- **blackout_limit** (Number)
+- **breaker_type** (String)
+- **command** (String) A specific action to run.
+- **duration** (String)
+- **fail_over** (String)
+- **name** (String) The name of the object (must be unique).
 
 ### Optional
 
-- `brownout_limit` (Number) Defaults to `-1`.
-- `enabled` (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
+- **brownout_limit** (Number) Defaults to `-1`.
+- **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
+- **id** (String) The ID of this resource.
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
-- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
+- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
 
 
