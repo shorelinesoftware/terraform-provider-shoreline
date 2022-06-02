@@ -42,10 +42,7 @@ func StringToJsonArray(data string) ([]interface{}, error) {
 	return jsObj, jsErr
 }
 
-//func Base64ToJsonArray(data string) (map[string]interface{}, error) {
 func Base64ToJsonArray(data string) ([]interface{}, error) {
-	//b64Str := base64.URLEncoding.EncodeToString([]byte(data))
-	//b64Str := base64.StdEncoding.EncodeToString([]byte(data))
 	jsStr, bError := base64.StdEncoding.DecodeString(data)
 	if bError != nil {
 		return []interface{}{}, bError
@@ -53,26 +50,40 @@ func Base64ToJsonArray(data string) ([]interface{}, error) {
 	return StringToJsonArray(string(jsStr))
 }
 
-func OmitJsonArrayFields(val interface{}, omitList []interface{}) {
-	appendActionLog(fmt.Sprintf("Omitting keys: %+v\n", omitList))
-	omitKeys := map[string]bool{}
+func StringToJson(data string) (map[string]interface{}, error) {
+	jsObj := map[string]interface{}{}
+	jsErr := json.Unmarshal([]byte(data), &jsObj)
+	return jsObj, jsErr
+}
+
+func Base64ToJson(data string) (map[string]interface{}, error) {
+	// NOTE: there are different encoding styles, i.e.:
+	//   b64Str := base64.URLEncoding.EncodeToString([]byte(data))
+	//   b64Str := base64.StdEncoding.EncodeToString([]byte(data))
+	jsStr, bError := base64.StdEncoding.DecodeString(data)
+	if bError != nil {
+		return map[string]interface{}{}, bError
+	}
+	return StringToJson(string(jsStr))
+}
+
+func OmitJsonObjectFields(val map[string]interface{}, omitList []interface{}) map[string]interface{} {
+	appendActionLog(fmt.Sprintf("Omitting (obj) keys: %+v\n", omitList))
 	for _, o := range omitList {
 		oStr, isStr := o.(string)
 		if isStr {
-			omitKeys[oStr] = true
+			delete(val, oStr)
 		}
 	}
-	valArr, isArr := val.([]interface{})
-	if isArr {
-		for _, elem := range valArr {
-			eMap, isMap := elem.(map[string]interface{})
-			if isMap {
-				for k, _ := range eMap {
-					if omitKeys[k] {
-						delete(eMap, k)
-					}
-				}
-			}
+	return val
+}
+
+func OmitJsonArrayFields(val *[]interface{}, omitList []interface{}) {
+	//appendActionLog(fmt.Sprintf("Omitting (array) keys: %+v\n", omitList))
+	for idx, elem := range *val {
+		eMap, isMap := elem.(map[string]interface{})
+		if isMap {
+			(*val)[idx] = OmitJsonObjectFields(eMap, omitList)
 		}
 	}
 }
@@ -660,11 +671,14 @@ var ObjectConfigJsonStr = `
 
 	"notebook": {
 		"attributes": {
-			"type":                   { "type": "string",   "computed": true, "value": "ALARM" },
+			"type":                   { "type": "string",   "computed": true, "value": "NOTEBOOK" },
 			"name":                   { "type": "label",    "required": true, "forcenew": true, "skip": true },
-			"cells":                  { "type": "b64json",  "required": true, "step": "cells", "primary": true, "omit": "dynamic_cell_fields" },
+			"data":                   { "type": "b64json",  "required": true, "step": ".", "primary": true,
+				                          "omit": {"cells": "dynamic_cell_fields", ".": "dynamic_fields" },
+				                          "cast": { "params": "string[]", "params_values": "string[]" }
+			                          },
 			"description":            { "type": "string",   "optional": true },
-			"enabled":                { "type": "intbool",  "optional": true, "default": false },
+			"#enabled":                { "type": "intbool",  "optional": true, "default": false },
 			"timeout_ms":             { "type": "unsigned", "optional": true, "default": 60000 }
 		}
 	},
@@ -694,6 +708,7 @@ var ObjectConfigJsonStr = `
 				"complete_title_template": "UI title of the Action's completion.",
 				"condition_type":          "Kind of check in an Alarm (e.g. above or below) vs a threshold for a Metric.",
 				"condition_value":         "Switching value (threshold) for a Metric in an Alarm.",
+				"data":                    "The downloaded (JSON) representation of a Notebook.",
 				"description":             "A user-friendly explanation of an object.",
 				"destination_path":        "Target location for a copied distributed File object.  See [Op: cp](https://docs.shoreline.io/op/commands/cp).",
 				"enabled":                 "If the object is currently enabled or disabled.",
@@ -794,16 +809,19 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 			}
 		case "b64json":
 			sch.Type = schema.TypeString
-			// special case for notebook cells
+			// special case for notebook JSON data
 			sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
 				if old == "" && nu == "" {
 					return true
 				}
-				oldJs, oldErr := StringToJsonArray(old)
-				nuJs, nuErr := StringToJsonArray(nu)
+				oldJs, oldErr := StringToJson(old)
+				nuJs, nuErr := StringToJson(nu)
 				if oldErr != nil || nuErr != nil {
 					return false
 				}
+				// special case top-level notebook "enabled" which may be returned by old backends
+				delete(nuJs, "enabled")
+				delete(oldJs, "enabled")
 				if reflect.DeepEqual(oldJs, nuJs) {
 					return true
 				}
@@ -1222,6 +1240,11 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 		for key, attr := range attrs {
 			var val interface{}
 
+			if strings.HasPrefix(key, "#") {
+				// skip commented fields
+				continue
+			}
+
 			internal := GetNestedValueOrDefault(attrs, ToKeyPath(key+".internal"), false).(bool)
 			if internal {
 				continue
@@ -1241,16 +1264,80 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 			} else {
 				stepPath, isStr := GetNestedValueOrDefault(attr, ToKeyPath("step"), nil).(string)
 				if isStr {
-					val = GetNestedValueOrDefault(stepsJs, ToKeyPath(stepPath), nil)
+					if stepPath == "." {
+						val = stepsJs
+					} else {
+						val = GetNestedValueOrDefault(stepsJs, ToKeyPath(stepPath), nil)
+					}
 
 					// special handling (notebooks)... field is base64 outgoing, and json incoming
 					attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
 					if attrTyp == "b64json" {
-						omitKey := GetNestedValueOrDefault(attr, ToKeyPath("omit"), "").(string)
-						if omitKey != "" {
-							omitList, isList := GetNestedValueOrDefault(stepsJs, ToKeyPath(omitKey), nil).([]interface{})
-							if isList {
-								OmitJsonArrayFields(val, omitList)
+						// handle cast-map, as get_notebook_class() returns objects with some string-wrapped sub-fields
+						castMap := GetNestedValueOrDefault(attr, ToKeyPath("cast"), map[string]interface{}{}).(map[string]interface{})
+						for castPath, castType := range castMap {
+							cur := GetNestedValueOrDefault(val, ToKeyPath(castPath), nil)
+							if cur != nil {
+								// TODO add additional types as needed
+								switch castType {
+								case "string[]":
+									SetNestedValue(val, ToKeyPath(castPath), CastToArray(cur))
+								case "object":
+									SetNestedValue(val, ToKeyPath(castPath), CastToObject(cur))
+								}
+							}
+						}
+						// handle omit map, and nested deletions, as get_notebook_class() returns objects with dynamic/temporary fields
+						omitMap := GetNestedValueOrDefault(attr, ToKeyPath("omit"), map[string]interface{}{}).(map[string]interface{})
+						// "." has to be last, or it will wipe out other objects
+						omitPaths := []string{}
+						hasDot := false
+						for omitPath, _ := range omitMap {
+							if omitPath != "." {
+								omitPaths = append(omitPaths, omitPath)
+							} else {
+								hasDot = true
+							}
+						}
+						if hasDot {
+							omitPaths = append(omitPaths, ".")
+						}
+						for _, omitPath := range omitPaths {
+							omitTag := omitMap[omitPath]
+							appendActionLog(fmt.Sprintf("Omit path:'%+v' tag: '%+v'\n", omitPath, omitTag))
+							var cur interface{}
+							if omitPath == "." {
+								cur = val
+							} else {
+								cur = GetNestedValueOrDefault(val, ToKeyPath(omitPath), nil)
+							}
+							omitTagStr, isStr := omitTag.(string)
+							if !isStr {
+								continue
+							}
+							omitList, isList := GetNestedValueOrDefault(stepsJs, ToKeyPath(omitTagStr), []interface{}{}).([]interface{})
+							//appendActionLog(fmt.Sprintf("Omit-list path:'%+v' tag: '%+v' list:'%+v'\n", omitPath, omitTag, omitList))
+							if cur != nil && isList {
+								if typ == "notebook" && omitPath == "." {
+									// NOTE: The top-level object returned by get_notebook_class contains most/all of the object attributes.
+									// So remove them from the inner object
+									for akey, _ := range attrs {
+										omitList = append(omitList, akey)
+									}
+									omitList = append(omitList, "enabled")
+								}
+								switch cur.(type) {
+								case map[string]interface{}:
+									OmitJsonObjectFields(cur.(map[string]interface{}), omitList)
+								case []interface{}:
+									curArr := cur.([]interface{})
+									OmitJsonArrayFields(&curArr, omitList)
+								}
+								if omitPath == "." {
+									val = cur
+								} else {
+									SetNestedValue(val, ToKeyPath(omitPath), cur)
+								}
 							}
 						}
 						b, err := json.Marshal(val)
