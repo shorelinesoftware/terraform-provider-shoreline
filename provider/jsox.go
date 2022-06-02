@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	//logging "shoreline.io/go/src/op/oplang_cli/op/logging"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -842,15 +843,36 @@ func CastToObject(val interface{}) interface{} {
 }
 
 func CastToArray(val interface{}) []interface{} {
-	var objects interface{}
-	err := json.Unmarshal([]byte("{ \"arr\": "+val.(string)+"}"), &objects)
-	if err != nil {
-		//logging.WriteMsg("CastToObject(string) Unmarshal error: %v\n", err)
-		WriteMsg("CastToObject(string) Unmarshal error: %v\n", err)
-		return nil
+	switch val.(type) {
+	case []interface{}:
+		return val.([]interface{})
+	case string:
+		var objects interface{}
+		err := json.Unmarshal([]byte("{ \"arr\": "+val.(string)+"}"), &objects)
+		if err != nil {
+			//logging.WriteMsg("CastToObject(string) Unmarshal error: %v\n", err)
+			WriteMsg("CastToObject(string) Unmarshal error: %v\n", err)
+			return nil
+		}
+		arr, _ := GetNestedValueOrDefault(objects, ToKeyPath("arr"), nil).([]interface{})
+		return arr
 	}
-	arr, _ := GetNestedValueOrDefault(objects, ToKeyPath("arr"), nil).([]interface{})
-	return arr
+
+	kind := reflect.TypeOf(val).Kind()
+	if kind == reflect.Slice {
+		// It's something like []string{}, or []MyClass{}...
+		// So, convert it to a generic array, via reflection.
+		ar := []interface{}{}
+
+		valr := reflect.ValueOf(val)
+		vlen := valr.Len()
+		for i := 0; i < vlen; i++ {
+			ar = append(ar, valr.Index(i))
+		}
+
+		return ar
+	}
+	return nil
 }
 
 // Merge the fields from object 'src' into object 'dest', recursing for sub-objects
