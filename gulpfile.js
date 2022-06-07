@@ -1,5 +1,5 @@
 const gulp = require('gulp');
-const { dest, series, src } = require('gulp');
+const {dest, series, src} = require('gulp');
 const replace = require('gulp-replace');
 const rename = require('gulp-rename');
 const shell = require('gulp-shell');
@@ -36,7 +36,7 @@ function buildTemplates() {
  * @returns Transformed URL, if applicable
  */
 function getTermUrl(value) {
-  let { terms } = data;
+  let {terms} = data;
 
   // Ensure pattern isn't empty
   terms = terms.filter((term) =>
@@ -52,7 +52,23 @@ function getTermUrl(value) {
     }
   }
 
-  const wildcardTerms = terms.filter((element) => element.wildcard);
+  const wildcardTerms = terms
+    .filter(
+      element => element.wildcard === undefined || element.wildcard === true
+    )
+    .sort((a, b) => {
+      return a.patterns.reduce((previousValue, currentValue) => {
+        const curr = (currentValue.match(/\//g) || []).length;
+        return curr > previousValue ? curr : previousValue;
+      }, 0) >
+      b.patterns.reduce((previousValue, currentValue) => {
+        const curr = (currentValue.match(/\//g) || []).length;
+        return curr > previousValue ? curr : previousValue;
+      }, 0)
+        ? -1
+        : 1;
+    });
+
   // Process remaining partial matches/wildcards
   for (const term of wildcardTerms) {
     for (const pattern of term.patterns) {
