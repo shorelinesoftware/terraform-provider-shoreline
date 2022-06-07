@@ -10,129 +10,158 @@
       "patterns": [
         "access-control"
       ],
-      "path": "administration/access-control",
-      "wildcard": true
+      "path": "administration/access-control"
     },
     {
       "patterns": [
         "action"
       ],
-      "path": "actions",
-      "wildcard": false
+      "path": "actions"
     },
     {
       "patterns": [
         "action/property"
       ],
-      "path": "actions/properties",
-      "wildcard": true
+      "path": "actions/properties"
+    },
+    {
+      "patterns": [
+        "action/sequence",
+        "action-sequence"
+      ],
+      "path": "actions/sequences"
     },
     {
       "patterns": [
         "alarm"
       ],
-      "path": "alarms",
-      "wildcard": true
+      "path": "alarms"
     },
     {
       "patterns": [
         "alarm/property"
       ],
-      "path": "alarms/properties",
-      "wildcard": true
+      "path": "alarms/properties"
     },
     {
       "patterns": [
         "audit"
       ],
-      "path": "administration/audit",
-      "wildcard": false
+      "path": "administration/audit"
     },
     {
       "patterns": [
         "bot"
       ],
-      "path": "bots",
-      "wildcard": false
+      "path": "bots"
     },
     {
       "patterns": [
         "bot/property"
       ],
-      "path": "bots/properties",
-      "wildcard": true
+      "path": "bots/properties"
+    },
+    {
+      "patterns": [
+        "cb",
+        "circuit-breaker"
+      ],
+      "path": "circuit-breakers"
+    },
+    {
+      "patterns": [
+        "cb/property",
+        "circuit-breaker/property"
+      ],
+      "path": "circuit-breakers/properties"
     },
     {
       "patterns": [
         "cli"
       ],
-      "path": "installation#cli",
-      "wildcard": false
+      "path": "cli"
+    },
+    {
+      "patterns": [
+        "cli/command"
+      ],
+      "path": "cli/commands/"
+    },
+    {
+      "patterns": [
+        "cli/config"
+      ],
+      "path": "cli/commands/config"
+    },
+    {
+      "patterns": [
+        "component"
+      ],
+      "path": "documentation/components"
     },
     {
       "patterns": [
         "configuration"
       ],
-      "path": "configuration",
-      "wildcard": false
+      "path": "configuration"
+    },
+    {
+      "patterns": [
+        "documentation"
+      ],
+      "path": "documentation"
     },
     {
       "patterns": [
         "derived-metric"
       ],
-      "path": "configuration/derived-metrics",
-      "wildcard": false
+      "path": "configuration/derived-metrics"
     },
     {
       "patterns": [
         "dynamic-filter"
       ],
-      "path": "op/dynamic-filters",
-      "wildcard": true
+      "path": "op/dynamic-filters"
     },
     {
       "patterns": [
         "event"
       ],
-      "path": "op/events",
-      "wildcard": true
+      "path": "op/events"
     },
     {
       "patterns": [
+        "cp",
+        "copy",
         "file"
       ],
-      "path": "op/commands/cp",
-      "wildcard": false
+      "path": "op/commands/cp"
     },
     {
       "patterns": [
         "installation"
       ],
-      "path": "installation",
-      "wildcard": false
+      "path": "installation"
     },
     {
       "patterns": [
         "installation/k8s",
         "installation/kubernetes"
       ],
-      "path": "installation/kubernetes",
-      "wildcard": true
+      "path": "installation/kubernetes"
     },
     {
       "patterns": [
         "installation/vm",
         "installation/virtual-machine"
       ],
-      "path": "installation/virtual-machines",
-      "wildcard": true
+      "path": "installation/virtual-machines"
     },
     {
       "patterns": [
         "installation#agents"
       ],
-      "path": "installation#agents",
-      "wildcard": false
+      "path": "installation#agents"
     },
     {
       "patterns": [
@@ -140,169 +169,166 @@
         "i/datadog",
         "integrations/datadog"
       ],
-      "path": "integrations/datadog",
-      "wildcard": true
+      "path": "integrations/datadog"
     },
     {
       "patterns": [
         "job"
       ],
-      "path": "op/jobs",
-      "wildcard": true
+      "path": "op/jobs"
     },
     {
       "patterns": [
         "metric"
       ],
-      "path": "metrics",
-      "wildcard": false
+      "path": "metrics"
     },
     {
       "patterns": [
         "metric/transformation"
       ],
-      "path": "metrics/transformations",
-      "wildcard": true
+      "path": "metrics/transformations"
     },
     {
       "patterns": [
         "metric/standard"
       ],
-      "path": "metrics/standard",
-      "wildcard": true
+      "path": "metrics/standard"
     },
     {
       "patterns": [
         "metric-query"
       ],
-      "path": "metrics#metric-queries",
-      "wildcard": false
+      "path": "metrics#metric-queries"
     },
     {
       "patterns": [
         "metric-set"
       ],
-      "path": "configuration/metric-sets",
-      "wildcard": false
+      "path": "configuration/metric-sets"
     },
     {
       "patterns": [
         "op"
       ],
-      "path": "op",
-      "wildcard": false
-    },
-    {
-      "patterns": [
-        "op/config"
-      ],
-      "path": "op/config",
-      "wildcard": true
+      "path": "op"
     },
     {
       "patterns": [
         "op/command"
       ],
-      "path": "op/commands",
-      "wildcard": false
+      "path": "op/commands"
     },
     {
       "patterns": [
-        "/op/commands/config"
+        "/op/command/list"
       ],
-      "path": "/op/commands/config",
-      "wildcard": true
+      "path": "op/commands/list"
     },
     {
       "patterns": [
         "/op/command/job"
       ],
-      "path": "/op/commands/jobs",
-      "wildcard": true
+      "path": "op/commands/jobs"
     },
     {
       "patterns": [
         "op/pack"
       ],
-      "path": "op/packs",
-      "wildcard": true
+      "path": "op/packs"
     },
     {
       "patterns": [
-        "op/pipe"
+        "op/pipe",
+        "pipe"
       ],
-      "path": "op#pipe",
-      "wildcard": false
+      "path": "op#pipe"
     },
     {
       "patterns": [
-        "resource"
+        "resource",
+        "resource-query"
       ],
-      "path": "platform/resources",
-      "wildcard": true
+      "path": "platform/resources"
     },
     {
       "patterns": [
         "transformations"
       ],
-      "path": "op/transformations",
-      "wildcard": false
+      "path": "op/transformations"
     },
     {
       "patterns": [
         "agent"
       ],
-      "path": "platform/agents",
-      "wildcard": false
+      "path": "platform/agents"
+    },
+    {
+      "patterns": [
+        "slack",
+        "i/slack",
+        "integrations/slack"
+      ],
+      "path": "integrations/slack"
     },
     {
       "patterns": [
         "ui"
       ],
-      "path": "ui",
-      "wildcard": false
+      "path": "ui"
     },
     {
       "patterns": [
         "ui/alarm"
       ],
-      "path": "/ui/alarms",
-      "wildcard": false
+      "path": "/ui/alarms"
     },
     {
       "patterns": [
         "ui/audit"
       ],
-      "path": "administration/audit#audit-ui",
-      "wildcard": false
+      "path": "administration/audit#audit-ui"
     },
     {
       "patterns": [
         "ui/configuration"
       ],
-      "path": "ui/configuration",
-      "wildcard": false
+      "path": "ui/configuration"
     },
     {
       "patterns": [
         "ui/monitoring"
       ],
-      "path": "ui/monitoring",
-      "wildcard": false
+      "path": "ui/monitoring"
     },
     {
       "patterns": [
         "ui/resources"
       ],
-      "path": "ui/resources",
-      "wildcard": false
+      "path": "ui/resources"
     },
     {
       "patterns": [
+        "notebook-run",
+        "notebook/run"
+      ],
+      "path": "notebooks/runs"
+    },
+    {
+      "patterns": [
+        "notebook/param",
+        "notebook-param",
+        "notebook/parameter",
+        "notebook-parameter"
+      ],
+      "path": "notebooks/parameters"
+    },
+    {
+      "patterns": [
+        "notebook",
         "webcli"
       ],
-      "path": "ui/webcli",
-      "wildcard": true
+      "path": "notebooks"
     }
   ]
 }

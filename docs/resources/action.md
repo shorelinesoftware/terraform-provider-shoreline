@@ -6,7 +6,8 @@ description: |-
 
 # shoreline_action (Resource)
 
-Actions execute shell commands on associated [Resources](https://docs.shoreline.io/platform/resources). Whenever an [Alarm](https://docs.shoreline.io/alarms) fires the associated [Bot](https://docs.shoreline.io/bots) triggers the corresponding [Action](https://docs.shoreline.io/actions), closing the basic auto-remediation loop of Shoreline.
+Actions execute shell commands on associated [Resources](https://docs.shoreline.io/platform/resources). Whenever an [Alarm](https://docs.shoreline.io/alarms) fires the associated [Bot](https://docs.shoreline.io/bots) triggers the corresponding [Action](https://docs.shoreline.io/actions), closing the basic auto-remediation loop of
+Shoreline.
 
 ## Required Properties
 
@@ -14,6 +15,8 @@ Each Action has many properties that determine its behavior. The required proper
 
 - [name](https://docs.shoreline.io/actions/properties#name) - The name of the Action.
 - [command](https://docs.shoreline.io/actions/properties#command) - The shell command executed when the Action triggers.
+
+-> Check out [Action Properties](https://docs.shoreline.io/actions/properties) for details on all available properties and how to use them.
 
 ## Usage
 
@@ -41,7 +44,8 @@ resource "shoreline_action" "cpu_threshold_action" {
 }
 ```
 
-This Action can be executed via an [Alarm's](https://docs.shoreline.io/alarms) [clear_query](https://docs.shoreline.io/alarms/properties#clear_query) / [fire_query](https://docs.shoreline.io/alarms/properties#fire_query), or directly via an [Op](https://docs.shoreline.io/op) command.
+This Action can be executed via an [Alarm's](https://docs.shoreline.io/alarms) [clear_query](https://docs.shoreline.io/alarms/properties#clear_query)
+/ [fire_query](https://docs.shoreline.io/alarms/properties#fire_query), or directly via an [Op](https://docs.shoreline.io/op) command.
 
 For example, the following [Alarm](https://docs.shoreline.io/alarms) fires and clears based on the result of the previously-generated `cpu_threshold_action`:
 

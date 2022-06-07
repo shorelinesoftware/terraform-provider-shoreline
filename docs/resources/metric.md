@@ -16,7 +16,7 @@ resource.
 A [Metric](https://docs.shoreline.io/metrics) has only a few required properties:
 
 - name - A unique name for the metric resource.
-- value - A valid [Op](https://docs.shoreline.io/op) statement that defines a valid [Metric query](https://docs.shoreline.io/t/metric#creating-new-metrics).
+- value - A valid [Op](https://docs.shoreline.io/op) statement that defines a valid [Metric query](https://docs.shoreline.io/metrics#creating-new-metrics).
 
 ## Usage
 
