@@ -470,6 +470,8 @@ func configure(version string, p *schema.Provider) func(ctx context.Context, d *
 			//return nil, diag.Errorf("Couldn't map URL to canonical form.\n" + err.Error())
 			diags = diag.FromErr(err)
 			diags[0].Severity = diag.Warning
+			canonUrl = AuthUrl
+			appendActionLog(fmt.Sprintf("Non-standard url: %s -- to -- %s\n", AuthUrl, canonUrl))
 		} else {
 			appendActionLog(fmt.Sprintf("Mapped url: %s -- to -- %s\n", AuthUrl, canonUrl))
 		}
