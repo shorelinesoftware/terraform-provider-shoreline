@@ -253,6 +253,20 @@
     },
     {
       "patterns": [
+        "sso/jumpcloud",
+        "jumpcloud"
+      ],
+      "path": "installation/sso/jumpcloud"
+    },
+    {
+      "patterns": [
+        "sso/okta",
+        "okta"
+      ],
+      "path": "installation/sso/okta"
+    },
+    {
+      "patterns": [
         "transformations"
       ],
       "path": "op/transformations"
