@@ -13,10 +13,10 @@ Shoreline.
 
 Each Action has many properties that determine its behavior. The required properties are:
 
-- [name](/actions/properties#name) - The name of the Action.
-- [command](/actions/properties#command) - The shell command executed when the Action triggers.
+- [name](/t/action/property#name) - The name of the Action.
+- [command](/t/action/property#command) - The shell command executed when the Action triggers.
 
--> Check out [Action Properties](/actions/properties) for details on all available properties and how to use them.
+-> Check out [Action Properties](/t/action/property) for details on all available properties and how to use them.
 
 ## Usage
 
