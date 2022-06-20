@@ -618,8 +618,8 @@ var ObjectConfigJsonStr = `
 				"compound_out": "${resource_query} | ${action_name}"
 			},
 			"breaker_type": { "type": "string", "required": true },
-			"blackout_limit": { "type": "int", "required": true },
-			"brownout_limit": { "type": "int", "optional": true, "default": -1 },
+			"hard_limit": { "type": "int", "required": true },
+			"soft_limit": { "type": "int", "optional": true, "default": -1 },
 			"duration": { "type": "time_s", "required": true },
 			"fail_over": { "type": "string", "required": true },
 			"enabled": { "type": "bool", "optional": true, "default": false },
