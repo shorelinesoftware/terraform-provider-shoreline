@@ -410,8 +410,8 @@ func TestAccResourceCircuitBreaker(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(fullName, "name", name),
 					resource.TestCheckResourceAttr(fullName, "command", "hosts | id=[1,2] | "+pre+"_ls_action"),
-					resource.TestCheckResourceAttr(fullName, "breaker_type", "blackout"),
-					resource.TestCheckResourceAttr(fullName, "blackout_limit", "5"),
+					resource.TestCheckResourceAttr(fullName, "breaker_type", "hard"),
+					resource.TestCheckResourceAttr(fullName, "hard_limit", "5"),
 					resource.TestCheckResourceAttr(fullName, "duration", "10s"),
 					resource.TestCheckResourceAttr(fullName, "fail_over", "safe"),
 				),
@@ -432,8 +432,8 @@ func getAccResourceCircuitBreaker(prefix string) string {
 		resource "shoreline_circuit_breaker" "` + name + `" {
 			name = "` + name + `"
 			command = "hosts | id=[1,2] | ${shoreline_action.` + prefix + `_ls_action.name} "
-			breaker_type = "blackout"
-			blackout_limit = 5
+			breaker_type = "hard"
+			hard_limit = 5
 			duration = "10s"
 			fail_over = "safe"
 			enabled = true

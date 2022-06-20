@@ -20,18 +20,18 @@ See the Shoreline [CircuitBreakers Documentation](https://docs.shoreline.io/circ
 
 ### Required
 
-- **blackout_limit** (Number)
 - **breaker_type** (String)
 - **command** (String) A specific action to run.
 - **duration** (String)
 - **fail_over** (String)
+- **hard_limit** (Number)
 - **name** (String) The name of the object (must be unique).
 
 ### Optional
 
-- **brownout_limit** (Number) Defaults to `-1`.
 - **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
 - **id** (String) The ID of this resource.
+- **soft_limit** (Number) Defaults to `-1`.
 
 ### Read-Only
 
