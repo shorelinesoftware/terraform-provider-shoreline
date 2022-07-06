@@ -613,7 +613,7 @@ var ObjectConfigJsonStr = `
 		"attributes": {
 			"type": { "type": "string", "computed": true, "value": "CIRCUIT_BREAKER" },
 			"name": { "type": "label", "required": true, "forcenew": true, "skip": true },
-			"command": { "type": "command", "required": true, "primary": true,
+			"command": { "type": "command", "required": true, "primary": true, "forcenew": true,
 				"compound_in": "^\\s*(?P<resource_query>.+)\\s*\\|\\s*(?P<action_name>[a-zA-Z_][a-zA-Z_]*)\\s*$",
 				"compound_out": "${resource_query} | ${action_name}"
 			},
@@ -666,6 +666,7 @@ var ObjectConfigJsonStr = `
 			"file_data":        { "type": "string",   "computed": true },
 			"file_length":      { "type": "int",      "computed": true },
 			"checksum":         { "type": "string",   "computed": true },
+			"md5":              { "type": "string",   "optional": true, "proxy": "file_length,checksum,file_data" },
 			"#resource_type":    { "type": "resource", "optional": true },
 			"#last_modified_timestamp": { "type": "string",   "optional": true }
 		}
@@ -727,6 +728,7 @@ var ObjectConfigJsonStr = `
 				"input_file":              "The local source of a distributed File object.",
 				"metric_name":             "The Alarm's triggering Metric.",
 				"mute_query":              "The Alarm's mute condition.",
+				"md5":                     "The md5 checksum of a file, e.g. filemd5(\"${path.module}/data/example-file.txt\")",
 				"name":                    "The name of the object (must be unique).",
 				"params":                  "Named variables to pass to an object (e.g. an Action).",
 				"raise_for":               "Where an Alarm is raised (e.g., local to a resource, or global to the system).",
@@ -1009,12 +1011,32 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	var diags diag.Diagnostics
 	name := d.Get("name").(string)
 	// valid-variable-name check (and non-null)
+	//appendActionLog(fmt.Sprintf("RESOURCE TYPE IS: %s\n", typ))
+
+	forcedChangeKeys := map[string]bool{}
+	forcedChangeVals := map[string]interface{}{}
+
+	for key, _ := range attrs {
+		proxy := GetNestedValueOrDefault(attrs, ToKeyPath(key+".proxy"), "").(string)
+		if proxy != "" {
+			proxyKeys := strings.Split(proxy, ",")
+			for _, k := range proxyKeys {
+				forcedChangeKeys[k] = true
+			}
+		}
+	}
+
 	if typ == "file" {
 		infile, exists := d.GetOk("input_file")
 		if exists {
 			base64Data, ok, fileSize, md5sum := FileToBase64(infile.(string))
 			if ok {
 				appendActionLog(fmt.Sprintf("file_length is %d (%v)\n", int(fileSize), fileSize))
+				if forcedChangeKeys["file_data"] {
+					forcedChangeVals["file_length"] = int(fileSize)
+					forcedChangeVals["checksum"] = md5sum
+					forcedChangeVals["file_data"] = base64Data
+				}
 				d.Set("file_length", int(fileSize))
 				d.Set("checksum", md5sum)
 				d.Set("file_data", base64Data)
@@ -1040,9 +1062,13 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		if internal {
 			continue
 		}
+		proxy := GetNestedValueOrDefault(attrs, ToKeyPath(key+".proxy"), "").(string)
+		if proxy != "" {
+			continue
+		}
 
-		// CS-336 workaround: Force explicit set of action_statement/alarm_statement to patch quoting issue
 		forceSet := false
+		// CS-336 workaround: Force explicit set of action_statement/alarm_statement to patch quoting issue
 		_, botEnvDefined := os.LookupEnv("BOT_SKIP_PATCH")
 		isPrimary := GetNestedValueOrDefault(attrs, ToKeyPath(key+".primary"), false).(bool)
 		if isCreate && isPrimary && typ == "bot" {
@@ -1058,7 +1084,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 
 		val, exists := d.GetOk(key)
 		// NOTE: Terraform reports !exists when a value is explicitly supplied, but matches the 'default'
-		if !exists && !d.HasChange(key) && !forceSet {
+		if !exists && !d.HasChange(key) && !forceSet && !forcedChangeKeys[key] {
 			appendActionLog(fmt.Sprintf("FieldDoesNotExist: %s: '%s'.'%s' val(%v) HasChange(%v), forceSet(%v)\n", typ, name, key, val, d.HasChange(key), forceSet))
 			continue
 		}
@@ -1073,7 +1099,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 			appendActionLog(fmt.Sprintf("CheckEnableState: %s: '%s' write(%v) val(%v) change(%v) hasChange:(%v) doDiff(%v)\n", typ, name, writeEnable, enableVal, anyChange, d.HasChange(key), doDiff))
 			continue
 		}
-		if doDiff && !d.HasChange(key) {
+		if doDiff && !d.HasChange(key) && !forcedChangeKeys[key] {
 			continue
 		}
 
@@ -1108,7 +1134,12 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 			continue
 		}
 
-		result := setFieldViaOp(typ, attrs, name, key, val)
+		result := diag.Diagnostics(nil)
+		if forcedChangeKeys[key] {
+			result = setFieldViaOp(typ, attrs, name, key, forcedChangeVals[key])
+		} else {
+			result = setFieldViaOp(typ, attrs, name, key, val)
+		}
 		if result != nil {
 			return result
 		}

@@ -92,6 +92,7 @@ variable "s3_bucket" {
 - **description** (String) A user-friendly explanation of an object.
 - **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
 - **id** (String) The ID of this resource.
+- **md5** (String) The md5 checksum of a file, e.g. filemd5("${path.module}/data/example-file.txt")
 
 ### Read-Only
 
