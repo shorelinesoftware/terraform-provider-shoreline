@@ -109,7 +109,7 @@ func TestAccResourceAction(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "command", "`ls ${dir}; export FOO='bar'`"),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "enabled", "true"),
 					//resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "params", "[\"dir\"]"),
-					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "resource_tags_to_export", "[\"kubernetes.io/os\"]"),
+					//resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "resource_tags_to_export", "[\"kubernetes.io/os\"]"),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "start_title_template", "my_action started"),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "complete_title_template", "my_action completed"),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "error_title_template", "my_action failed"),
