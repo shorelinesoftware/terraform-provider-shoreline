@@ -617,11 +617,11 @@ var ObjectConfigJsonStr = `
 				"compound_in": "^\\s*(?P<resource_query>.+)\\s*\\|\\s*(?P<action_name>[a-zA-Z_][a-zA-Z_]*)\\s*$",
 				"compound_out": "${resource_query} | ${action_name}"
 			},
-			"breaker_type": { "type": "string", "required": true },
+			"breaker_type": { "type": "string", "optional": true },
 			"hard_limit": { "type": "int", "required": true },
 			"soft_limit": { "type": "int", "optional": true, "default": -1 },
 			"duration": { "type": "time_s", "required": true },
-			"fail_over": { "type": "string", "required": true },
+			"fail_over": { "type": "string", "optional": true },
 			"enabled": { "type": "bool", "optional": true, "default": false },
 			"action_name": { "type": "command", "internal": true },
 			"resource_query": { "type": "command", "internal": true }
