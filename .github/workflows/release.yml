@@ -27,12 +27,11 @@ jobs:
       -
         name: Debug Info
         run:  |
-          lsb_release -a
-          apt list --installed | grep gpg
-          pgrep gpg-agent
-          gpgconf --list-dirs agent-ssh-socket
-          ls -al `gpgconf --list-dirs agent-ssh-socket`
-          /bin/true
+          lsb_release -a || /bin/true
+          apt list --installed | grep gpg || /bin/true
+          pgrep gpg-agent || /bin/true
+          gpgconf --list-dirs agent-ssh-socket || /bin/true
+          ls -al `gpgconf --list-dirs agent-ssh-socket` || /bin/true
       -
         name: Set up Go
         uses: actions/setup-go@v2
