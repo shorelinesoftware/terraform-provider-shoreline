@@ -26,7 +26,13 @@ jobs:
         run: git fetch --prune --unshallow
       -
         name: Debug Info
-        run: lsb_release -a && apt list --installed | grep gpg && pgrep gpg-agent
+        run:  |
+          lsb_release -a
+          apt list --installed | grep gpg
+          pgrep gpg-agent
+          gpgconf --list-dirs agent-ssh-socket
+          ls -al `gpgconf --list-dirs agent-ssh-socket`
+          /bin/true
       -
         name: Set up Go
         uses: actions/setup-go@v2
