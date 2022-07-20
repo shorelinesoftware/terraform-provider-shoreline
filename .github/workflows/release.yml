@@ -25,6 +25,9 @@ jobs:
         name: Unshallow
         run: git fetch --prune --unshallow
       -
+        name: Debug Info
+        run: lsb_release -a && apt list --installed | grep gpg && pgrep gpg-agent
+      -
         name: Set up Go
         uses: actions/setup-go@v2
         with:
