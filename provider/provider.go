@@ -548,6 +548,7 @@ var ObjectConfigJsonStr = `
 			"description":             { "type": "string",   "optional": true },
 			"enabled":                 { "type": "intbool",  "optional": true, "default": false },
 			"params":                  { "type": "string[]", "optional": true },
+			"resource_tags_to_export": { "type": "string[]", "optional": true },
 			"res_env_var":             { "type": "string",   "optional": true },
 			"resource_query":          { "type": "command",  "optional": true },
 			"shell":                   { "type": "string",   "optional": true },

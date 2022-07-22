@@ -13,10 +13,11 @@ import (
 
 	//"github.com/hashicorp/terraform-plugin-sdk/acctest"
 	//"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"math/rand"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"math/rand"
 )
 
 func getProviderConfigString() string {
@@ -108,6 +109,7 @@ func TestAccResourceAction(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "command", "`ls ${dir}; export FOO='bar'`"),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "enabled", "true"),
 					//resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "params", "[\"dir\"]"),
+					//resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "resource_tags_to_export", "[\"kubernetes.io/os\"]"),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "start_title_template", "my_action started"),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "complete_title_template", "my_action completed"),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "error_title_template", "my_action failed"),
@@ -148,6 +150,7 @@ func getAccResourceAction(prefix string, full bool) string {
 			timeout = 20
 			shell = "/bin/bash"
 			res_env_var = "FOO"
+			resource_tags_to_export = ["kubernetes.io/os"]
 			start_short_template    = "started"
 			start_long_template    = "started..."
 			complete_short_template = "completed"
