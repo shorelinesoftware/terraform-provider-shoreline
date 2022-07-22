@@ -123,6 +123,9 @@ func TestAccResourceAction(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "complete_long_template", "completed..."),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "error_short_template", "failed"),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "error_long_template", "failed..."),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "allowed_entities.#", "2"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "allowed_entities.0", "user1"),
+					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "allowed_entities.1", "user2"),
 					// resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "file_deps", "[\""+pre+"_action_file\"]"),
 				),
 			},
@@ -154,6 +157,7 @@ func getAccResourceAction(prefix string, full bool) string {
 			complete_long_template = "completed..."
 			error_short_template    = "failed"
 			error_long_template    = "failed..."
+			allowed_entities = ["user1", "user2"]
 `
 	depFile := `
 		resource "shoreline_file" "` + prefix + `_action_file" {
@@ -535,7 +539,10 @@ func testAccCompareNotebookCells(resourceName string, expected string) resource.
 // 				Check: resource.ComposeTestCheckFunc(
 // 					resource.TestCheckResourceAttr("shoreline_notebook."+pre+"_notebook", "name", pre+"_notebook"),
 // 					resource.TestCheckResourceAttr("shoreline_notebook."+pre+"_notebook", "description", "A sample notebook."),
-// 					resource.TestCheckResourceAttr("shoreline_notebook."+pre+"_notebook", "enabled", "true"),
+// 				        resource.TestCheckResourceAttr("shoreline_notebook."+pre+"_notebook", "enabled", "true"),
+//                                      resource.TestCheckResourceAttr("shoreline_notebook."+pre+"_ls_notebook", "allowed_entities.#", "2"),
+//					resource.TestCheckResourceAttr("shoreline_notebook."+pre+"_ls_notebook", "allowed_entities.0", "user1"),
+//					resource.TestCheckResourceAttr("shoreline_notebook."+pre+"_ls_notebook", "allowed_entities.1", "user2"),
 // 					testAccCompareNotebookCells("shoreline_notebook."+pre+"_notebook", getNotebookData()),
 // 				),
 // 			},
@@ -560,6 +567,7 @@ func getAccResourceNotebook(prefix string) string {
 			description = "A sample notebook."
 			cells = "` + strings.Replace(getNotebookData(), "\"", "\\\"", -1) + `"
 			enabled = true
+			allowed_entities = ["user1", "user2"]
 		}
 `
 }

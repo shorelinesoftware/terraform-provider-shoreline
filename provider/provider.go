@@ -563,7 +563,8 @@ var ObjectConfigJsonStr = `
 			"complete_short_template": { "type": "string",   "optional": true, "step": "complete_step_class.short_template" },
 			"complete_long_template":  { "type": "string",   "optional": true, "step": "complete_step_class.long_template" },
 			"complete_title_template": { "type": "string",   "optional": true, "step": "complete_step_class.title_template" },
-			"#user":                   { "type": "string",   "optional": true }
+			"#user":                   { "type": "string",   "optional": true },
+			"allowed_entities":        { "type": "string[]", "optional": true }
 		}
 	},
 
@@ -683,7 +684,8 @@ var ObjectConfigJsonStr = `
 			                          },
 			"description":            { "type": "string",   "optional": true },
 			"#enabled":                { "type": "intbool",  "optional": true, "default": false },
-			"timeout_ms":             { "type": "unsigned", "optional": true, "default": 60000 }
+			"timeout_ms":             { "type": "unsigned", "optional": true, "default": 60000 },
+			"allowed_entities":        { "type": "string[]", "optional": true }
 		}
 	},
 
@@ -745,7 +747,8 @@ var ObjectConfigJsonStr = `
 				"timeout":                 "Maximum time to wait, in milliseconds.",
 				"file_deps":               "file object dependencies.",
 				"units":                   "Units of a Metric (e.g., bytes, blocks, packets, percent).",
-				"value":                   "The Op statement that defines a Metric or Resource."
+				"value":                   "The Op statement that defines a Metric or Resource.",
+				"allowed_entities":        "The list of users who can run an action or notebook. Any user can run if left empty."
 		}
 	}
 }

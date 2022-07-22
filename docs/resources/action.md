@@ -142,6 +142,7 @@ resource "shoreline_action" "jvm_trace_check_heap" {
 
 ### Optional
 
+- **allowed_entities** (List of String) The list of users who can run an action or notebook. Any user can run if left empty.
 - **complete_long_template** (String) The long description of the Action's completion.
 - **complete_short_template** (String) The short description of the Action's completion.
 - **complete_title_template** (String) UI title of the Action's completion.

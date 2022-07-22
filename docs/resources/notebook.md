@@ -59,6 +59,7 @@ resource "shoreline_notebook" "my_notebook" {
 
 ### Optional
 
+- **allowed_entities** (List of String) The list of users who can run an action or notebook. Any user can run if left empty.
 - **description** (String) A user-friendly explanation of an object.
 - **id** (String) The ID of this resource.
 - **timeout_ms** (Number) Defaults to `60000`.
