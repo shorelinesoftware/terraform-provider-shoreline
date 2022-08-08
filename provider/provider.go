@@ -953,7 +953,11 @@ func attrValueString(typ string, key string, val interface{}, attrs map[string]i
 		sep := ""
 		if isArr {
 			for _, v := range valArr {
-				listStr = listStr + fmt.Sprintf("%s\"%s\"", sep, v)
+				if v == nil {
+					listStr = listStr + fmt.Sprintf("%s\"\"", sep)
+				} else {
+					listStr = listStr + fmt.Sprintf("%s\"%s\"", sep, v)
+				}
 				sep = ", "
 			}
 		}

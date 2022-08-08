@@ -156,6 +156,7 @@ resource "shoreline_action" "jvm_trace_check_heap" {
 - **params** (List of String) Named variables to pass to an object (e.g. an Action).
 - **res_env_var** (String) Result environment variable ... an environment variable used to output values through.
 - **resource_query** (String) A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
+- **resource_tags_to_export** (List of String)
 - **shell** (String) The commandline shell to use (e.g. /bin/sh).
 - **start_long_template** (String) The long description when starting the Action.
 - **start_short_template** (String) The short description when starting the Action.
