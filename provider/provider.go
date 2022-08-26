@@ -754,10 +754,6 @@ var ObjectConfigJsonStr = `
 }
 `
 
-// old bot
-//			"#action_statement": { "type": "command",  "required": true, "primary": true },
-//			"#alarm_statement":  { "type": "command",  "required": true }
-
 func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 	params := map[string]*schema.Schema{}
 
@@ -931,6 +927,17 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 
 }
 
+func EscapeString(val interface{}) string {
+	out := fmt.Sprintf("%s", val)
+
+	slash := regexp.MustCompile(`\\`)
+	out = slash.ReplaceAllString(out, "\\\\")
+	quote := regexp.MustCompile(`"`)
+	out = quote.ReplaceAllString(out, "\\\"")
+
+	return out
+}
+
 func attrValueString(typ string, key string, val interface{}, attrs map[string]interface{}) string {
 	strVal := ""
 	attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
@@ -946,7 +953,7 @@ func attrValueString(typ string, key string, val interface{}, attrs map[string]i
 		}
 		strVal = fmt.Sprintf("\"%s\"", base64.StdEncoding.EncodeToString([]byte(jsStr)))
 	case "string":
-		strVal = fmt.Sprintf("\"%s\"", val)
+		strVal = fmt.Sprintf("\"%s\"", EscapeString(val))
 	case "string[]":
 		valArr, isArr := val.([]interface{})
 		listStr := ""
@@ -956,7 +963,7 @@ func attrValueString(typ string, key string, val interface{}, attrs map[string]i
 				if v == nil {
 					listStr = listStr + fmt.Sprintf("%s\"\"", sep)
 				} else {
-					listStr = listStr + fmt.Sprintf("%s\"%s\"", sep, v)
+					listStr = listStr + fmt.Sprintf("%s\"%s\"", sep, EscapeString(v))
 				}
 				sep = ", "
 			}
