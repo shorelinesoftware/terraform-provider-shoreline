@@ -552,7 +552,7 @@ var ObjectConfigJsonStr = `
 			"res_env_var":             { "type": "string",   "optional": true },
 			"resource_query":          { "type": "command",  "optional": true },
 			"shell":                   { "type": "string",   "optional": true },
-			"timeout":                 { "type": "unsigned", "optional": true, "default": 60000 },
+			"timeout":                 { "type": "int",      "optional": true, "default": 60000 },
 			"file_deps":               { "type": "string[]", "optional": true },
 			"start_short_template":    { "type": "string",   "optional": true, "step": "start_step_class.short_template" },
 			"start_long_template":     { "type": "string",   "optional": true, "step": "start_step_class.long_template" },
@@ -613,19 +613,19 @@ var ObjectConfigJsonStr = `
 
 	"circuit_breaker": {
 		"attributes": {
-			"type": { "type": "string", "computed": true, "value": "CIRCUIT_BREAKER" },
-			"name": { "type": "label", "required": true, "forcenew": true, "skip": true },
-			"command": { "type": "command", "required": true, "primary": true, "forcenew": true,
+			"type":           { "type": "string", "computed": true, "value": "CIRCUIT_BREAKER" },
+			"name":           { "type": "label", "required": true, "forcenew": true, "skip": true },
+			"command":        { "type": "command", "required": true, "primary": true, "forcenew": true,
 				"compound_in": "^\\s*(?P<resource_query>.+)\\s*\\|\\s*(?P<action_name>[a-zA-Z_][a-zA-Z_]*)\\s*$",
 				"compound_out": "${resource_query} | ${action_name}"
 			},
-			"breaker_type": { "type": "string", "optional": true },
-			"hard_limit": { "type": "int", "required": true },
-			"soft_limit": { "type": "int", "optional": true, "default": -1 },
-			"duration": { "type": "time_s", "required": true },
-			"fail_over": { "type": "string", "optional": true },
-			"enabled": { "type": "bool", "optional": true, "default": false },
-			"action_name": { "type": "command", "internal": true },
+			"breaker_type":   { "type": "string", "optional": true },
+			"hard_limit":     { "type": "int", "required": true },
+			"soft_limit":     { "type": "int", "optional": true, "default": -1 },
+			"duration":       { "type": "time_s", "required": true },
+			"fail_over":      { "type": "string", "optional": true },
+			"enabled":        { "type": "bool", "optional": true, "default": false },
+			"action_name":    { "type": "command", "internal": true },
 			"resource_query": { "type": "command", "internal": true }
 		}
 	},
