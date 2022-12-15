@@ -20,8 +20,8 @@ import (
 )
 
 func CanonicalizeUrl(url string) (urlOut string, err error) {
-	urlRegexStr := "^(http(s)?://)?(?P<customer>[^\\.]*).(?P<region>[^\\.]*).ap[ip].shoreline-(?P<cluster>[^\\.]*).io(/)?$"
-	urlBaseStr := "https://${customer}.${region}.api.shoreline-${cluster}.io"
+	urlRegexStr := `^(http(s)?://)?(?P<backend_node>([^\\.]*)\.)?(?P<customer>[^\\.]*)\.(?P<region>[^\\.]*)\.ap[ip]\.shoreline-(?P<cluster>[^\\.]*)\.io(/)?$`
+	urlBaseStr := "https://${backend_node}${customer}.${region}.api.shoreline-${cluster}.io"
 	urlRegex := regexp.MustCompile(urlRegexStr)
 	match := urlRegex.FindStringSubmatch(url)
 	if len(match) < 4 {
