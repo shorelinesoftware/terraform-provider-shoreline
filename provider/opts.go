@@ -31,7 +31,7 @@ type CliOpts struct {
 	Token       string
 }
 
-const CanonicalUrl = "https://<customer>.<region>.api.shoreline-<cluster>.io"
+const CanonicalUrl = "https://(<backend_node>.)?<customer>.<region>.api.shoreline-<cluster>.io"
 
 var AuthUrl string
 var AuthToken string

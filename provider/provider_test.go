@@ -571,3 +571,52 @@ func getAccResourceNotebook(prefix string) string {
 		}
 `
 }
+
+func TestCanonicalizeUrl(t *testing.T) {
+	testCases := []struct {
+		inputUrl  string
+		expected  string
+		shouldErr bool
+	}{
+		{
+			inputUrl:  "test.us.app.shoreline-dev.io/",
+			expected:  "https://test.us.api.shoreline-dev.io",
+			shouldErr: false,
+		},
+		{
+			inputUrl:  "http://test.us.app.shoreline-dev.io",
+			expected:  "https://test.us.api.shoreline-dev.io",
+			shouldErr: false,
+		},
+		{
+			inputUrl:  "http://proxy.test.us.app.shoreline-dev.io",
+			expected:  "https://proxy.test.us.api.shoreline-dev.io",
+			shouldErr: false,
+		},
+		{
+			inputUrl:  "node0.test.us.api.shoreline-dev.io",
+			expected:  "https://node0.test.us.api.shoreline-dev.io",
+			shouldErr: false,
+		},
+		{
+			inputUrl:  "us.api.shoreline-dev.io",
+			expected:  "",
+			shouldErr: true,
+		},
+		{
+			inputUrl:  "test.us.api.shoreline.io",
+			expected:  "",
+			shouldErr: true,
+		},
+	}
+
+	for _, testCase := range testCases {
+		output, err := CanonicalizeUrl(testCase.inputUrl)
+		if err != nil && !testCase.shouldErr {
+			t.Fatalf("test case failed %s, err: %v\n", testCase.inputUrl, err)
+		}
+		if output != testCase.expected && !testCase.shouldErr {
+			t.Fatalf("test case %s output: %s is not expected: %s\n", testCase.inputUrl, output, testCase.expected)
+		}
+	}
+}
