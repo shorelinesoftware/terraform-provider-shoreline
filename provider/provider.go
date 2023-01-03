@@ -778,12 +778,13 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		return nil
 	}
 	attributes := GetNestedValueOrDefault(object, ToKeyPath("attributes"), map[string]interface{}{}).(map[string]interface{})
+	for k, _ := range attributes {
+		if strings.HasPrefix(k, "#") {
+			delete(attributes, k)
+		}
+	}
 	primary := "name"
 	for k, attrs := range attributes {
-		if strings.HasPrefix(k, "#") {
-			continue
-		}
-
 		// internal objects, i.e. components of compound fields
 		internal := GetNestedValueOrDefault(attrs, ToKeyPath("internal"), false).(bool)
 		if internal {
