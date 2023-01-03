@@ -116,10 +116,7 @@ func timeSuffixToIntSec(tv string) int {
 	return i * mult
 }
 
-func appendActionLog(msg string) {
-	if !DoDebugLog {
-		return
-	}
+func appendActionLogInner(msg string) {
 	filename := "/tmp/tf-shoreline.log"
 	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
@@ -132,6 +129,13 @@ func appendActionLog(msg string) {
 		//panic(err)
 		return
 	}
+}
+
+func appendActionLog(msg string) {
+	if !DoDebugLog {
+		return
+	}
+	appendActionLogInner(msg)
 }
 
 func runOpCommand(command string, checkResult bool) (string, error) {
@@ -607,7 +611,9 @@ var ObjectConfigJsonStr = `
 			"enabled":          { "type": "intbool",  "optional": true, "default": false },
 			"family":           { "type": "command",  "optional": true, "step": "config_data.family", "default": "custom" },
 			"action_statement": { "type": "command",  "internal": true },
-			"alarm_statement":  { "type": "command",  "internal": true }
+			"alarm_statement":  { "type": "command",  "internal": true },
+			"event_type":       { "type": "string",   "optional": true, "step": "event_type", "default": "shoreline" },
+			"monitor_id":       { "type": "string",   "optional": true, "step": "monitor_id", "default": "" }
 		}
 	},
 
@@ -721,6 +727,7 @@ var ObjectConfigJsonStr = `
 				"error_short_template":    "The short description of the Action's error condition.",
 				"error_long_template":     "The long description of the Action's error condition.",
 				"error_title_template":    "UI title of the Action's error condition.",
+				"event_type":              "Used to tag 'datadog' monitor triggers vs 'shoreline' alarms (default).",
 				"family":                  "General class for an Action or Bot (e.g., custom, standard, metric, or system check).",
 				"file_data":               "Internal representation of a distributed File object's data (computed).",
 				"file_length":             "Length, in bytes, of a distributed File object (computed)",
@@ -730,6 +737,7 @@ var ObjectConfigJsonStr = `
 				"fire_title_template":     "UI title of the Alarm's triggering condition.",
 				"input_file":              "The local source of a distributed File object.",
 				"metric_name":             "The Alarm's triggering Metric.",
+				"monitor_id":              "For 'datadog' monitor triggered bots, the DD monitor identifier.",
 				"mute_query":              "The Alarm's mute condition.",
 				"md5":                     "The md5 checksum of a file, e.g. filemd5(\"${path.module}/data/example-file.txt\")",
 				"name":                    "The name of the object (must be unique).",
@@ -874,6 +882,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		//defowlt := GetNestedValueOrDefault(attrMap, ToKeyPath("value"), nil)
 		defowlt := GetNestedValueOrDefault(attrMap, ToKeyPath("default"), nil)
 		if defowlt != nil {
+			//appendActionLogInner(fmt.Sprintf("NOTE: DEFAULT resourceShorelineObject(%s) %s.Default = %+v.\n", key, k, defowlt))
 			sch.Default = defowlt
 		}
 		suppressNullDiffRegex, isStr := GetNestedValueOrDefault(attrMap, ToKeyPath("suppress_null_regex"), nil).(string)
@@ -1097,11 +1106,20 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 			}
 		}
 
+		// NOTE: GetOk() has bugs: it checks vs 0/false/"" instead of presence of an explicit value, or even equality to the default
 		val, exists := d.GetOk(key)
 		// NOTE: Terraform reports !exists when a value is explicitly supplied, but matches the 'default'
 		if !exists && !d.HasChange(key) && !forceSet && !forcedChangeKeys[key] {
 			appendActionLog(fmt.Sprintf("FieldDoesNotExist: %s: '%s'.'%s' val(%v) HasChange(%v), forceSet(%v)\n", typ, name, key, val, d.HasChange(key), forceSet))
-			continue
+			// Handle GetOk() bug...
+			if isCreate {
+				defowlt := GetNestedValueOrDefault(attrs, ToKeyPath(key+".default"), nil)
+				if defowlt == nil || val == defowlt {
+					continue
+				}
+			} else {
+				continue
+			}
 		}
 
 		// Because OpLang auto-toggles some objects to "disabled" on *any* property change,
