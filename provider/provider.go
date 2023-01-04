@@ -11,6 +11,7 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -552,12 +553,12 @@ var ObjectConfigJsonStr = `
 			"description":             { "type": "string",   "optional": true },
 			"enabled":                 { "type": "intbool",  "optional": true, "default": false },
 			"params":                  { "type": "string[]", "optional": true },
-			"resource_tags_to_export": { "type": "string[]", "optional": true },
+			"resource_tags_to_export": { "type": "string_set", "optional": true },
 			"res_env_var":             { "type": "string",   "optional": true },
 			"resource_query":          { "type": "command",  "optional": true },
 			"shell":                   { "type": "string",   "optional": true },
 			"timeout":                 { "type": "int",      "optional": true, "default": 60000 },
-			"file_deps":               { "type": "string[]", "optional": true },
+			"file_deps":               { "type": "string_set", "optional": true },
 			"start_short_template":    { "type": "string",   "optional": true, "step": "start_step_class.short_template" },
 			"start_long_template":     { "type": "string",   "optional": true, "step": "start_step_class.long_template" },
 			"start_title_template":    { "type": "string",   "optional": true, "step": "start_step_class.title_template" },
@@ -568,7 +569,7 @@ var ObjectConfigJsonStr = `
 			"complete_long_template":  { "type": "string",   "optional": true, "step": "complete_step_class.long_template" },
 			"complete_title_template": { "type": "string",   "optional": true, "step": "complete_step_class.title_template" },
 			"#user":                   { "type": "string",   "optional": true },
-			"allowed_entities":        { "type": "string[]", "optional": true }
+			"allowed_entities":        { "type": "string_set", "optional": true }
 		}
 	},
 
@@ -691,7 +692,7 @@ var ObjectConfigJsonStr = `
 			"description":            { "type": "string",   "optional": true },
 			"#enabled":                { "type": "intbool",  "optional": true, "default": false },
 			"timeout_ms":             { "type": "unsigned", "optional": true, "default": 60000 },
-			"allowed_entities":        { "type": "string[]", "optional": true }
+			"allowed_entities":        { "type": "string_set", "optional": true }
 		}
 	},
 
@@ -847,6 +848,11 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 			sch.Elem = &schema.Schema{
 				Type: schema.TypeString,
 			}
+		case "string_set":
+			sch.Type = schema.TypeSet
+			sch.Elem = &schema.Schema{
+				Type: schema.TypeString,
+			}
 		case "bool":
 			sch.Type = schema.TypeBool
 		case "intbool":
@@ -948,6 +954,22 @@ func EscapeString(val interface{}) string {
 	return out
 }
 
+func SortListByStrVal(val []interface{}) []interface{} {
+	sortedCopy := make([]interface{}, len(val), len(val))
+	copy(sortedCopy, val)
+	sort.Slice(sortedCopy, func(i, j int) bool {
+		s1, s2 := "\"\"", "\"\""
+		if sortedCopy[i] != nil {
+			s1 = fmt.Sprintf("\"%s\"", EscapeString(sortedCopy[i]))
+		}
+		if sortedCopy[j] != nil {
+			s2 = fmt.Sprintf("\"%s\"", EscapeString(sortedCopy[j]))
+		}
+		return s1 < s2
+	})
+	return sortedCopy
+}
+
 func attrValueString(typ string, key string, val interface{}, attrs map[string]interface{}) string {
 	strVal := ""
 	attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
@@ -969,6 +991,22 @@ func attrValueString(typ string, key string, val interface{}, attrs map[string]i
 		listStr := ""
 		sep := ""
 		if isArr {
+			for _, v := range valArr {
+				if v == nil {
+					listStr = listStr + fmt.Sprintf("%s\"\"", sep)
+				} else {
+					listStr = listStr + fmt.Sprintf("%s\"%s\"", sep, EscapeString(v))
+				}
+				sep = ", "
+			}
+		}
+		return "[ " + listStr + " ]"
+	case "string_set":
+		valArr, isArr := val.([]interface{})
+		listStr := ""
+		sep := ""
+		if isArr {
+			valArr = SortListByStrVal(valArr)
 			for _, v := range valArr {
 				if v == nil {
 					listStr = listStr + fmt.Sprintf("%s\"\"", sep)
@@ -1349,6 +1387,8 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 								switch castType {
 								case "string[]":
 									SetNestedValue(val, ToKeyPath(castPath), CastToArray(cur))
+								case "string_set":
+									SetNestedValue(val, ToKeyPath(castPath), SortListByStrVal(CastToArray(cur)))
 								case "object":
 									SetNestedValue(val, ToKeyPath(castPath), CastToObject(cur))
 								}
@@ -1440,6 +1480,8 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 				d.Set(key, CastToBool(val))
 			case "string[]":
 				d.Set(key, CastToArray(val))
+			case "string_set":
+				d.Set(key, SortListByStrVal(CastToArray(val)))
 			case "string":
 				d.Set(key, CastToString(val))
 			case "command":

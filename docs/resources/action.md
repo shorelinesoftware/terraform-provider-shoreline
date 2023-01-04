@@ -142,7 +142,7 @@ resource "shoreline_action" "jvm_trace_check_heap" {
 
 ### Optional
 
-- **allowed_entities** (List of String) The list of users who can run an action or notebook. Any user can run if left empty.
+- **allowed_entities** (Set of String) The list of users who can run an action or notebook. Any user can run if left empty.
 - **complete_long_template** (String) The long description of the Action's completion.
 - **complete_short_template** (String) The short description of the Action's completion.
 - **complete_title_template** (String) UI title of the Action's completion.
@@ -151,12 +151,12 @@ resource "shoreline_action" "jvm_trace_check_heap" {
 - **error_long_template** (String) The long description of the Action's error condition.
 - **error_short_template** (String) The short description of the Action's error condition.
 - **error_title_template** (String) UI title of the Action's error condition.
-- **file_deps** (List of String) file object dependencies.
+- **file_deps** (Set of String) file object dependencies.
 - **id** (String) The ID of this resource.
 - **params** (List of String) Named variables to pass to an object (e.g. an Action).
 - **res_env_var** (String) Result environment variable ... an environment variable used to output values through.
 - **resource_query** (String) A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
-- **resource_tags_to_export** (List of String)
+- **resource_tags_to_export** (Set of String)
 - **shell** (String) The commandline shell to use (e.g. /bin/sh).
 - **start_long_template** (String) The long description when starting the Action.
 - **start_short_template** (String) The short description when starting the Action.
