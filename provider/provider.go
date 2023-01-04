@@ -849,7 +849,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 				Type: schema.TypeString,
 			}
 		case "string_set":
-			sch.Type = schema.TypeSet
+			sch.Type = schema.TypeList
 			sch.Elem = &schema.Schema{
 				Type: schema.TypeString,
 			}
