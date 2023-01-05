@@ -656,6 +656,7 @@ var ObjectConfigJsonStr = `
 			"name":           { "type": "label",    "required": true, "forcenew": true, "skip": true },
 			"value":          { "type": "command",  "required": true, "primary": true },
 			"description":    { "type": "string",   "optional": true },
+			"params":          { "type": "string[]",   "optional": true },
 			"#units":          { "type": "string",   "optional": true },
 			"#resource_type":  { "type": "resource", "optional": true },
 			"#user":           { "type": "string",   "optional": true },
@@ -853,6 +854,21 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 			sch.Elem = &schema.Schema{
 				Type: schema.TypeString,
 			}
+			sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
+				// special handling because DiffSuppressFunc doesn't natively work for
+				// list-type attributes: https://github.com/hashicorp/terraform-plugin-sdk/issues/477#issue-640263603
+				lastDotIndex := strings.LastIndex(k, ".")
+				if lastDotIndex != -1 {
+					k = string(k[:lastDotIndex])
+				}
+				oldData, newData := d.GetChange(k)
+				if oldData == nil || newData == nil {
+					return false
+				}
+				oldSortedList := SortListByStrVal(CastToArray(oldData)) // from []any to []string
+				newSortedList := SortListByStrVal(CastToArray(newData))
+				return reflect.DeepEqual(oldSortedList, newSortedList)
+			}
 		case "bool":
 			sch.Type = schema.TypeBool
 		case "intbool":
@@ -1006,7 +1022,6 @@ func attrValueString(typ string, key string, val interface{}, attrs map[string]i
 		listStr := ""
 		sep := ""
 		if isArr {
-			valArr = SortListByStrVal(valArr)
 			for _, v := range valArr {
 				if v == nil {
 					listStr = listStr + fmt.Sprintf("%s\"\"", sep)
@@ -1388,7 +1403,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 								case "string[]":
 									SetNestedValue(val, ToKeyPath(castPath), CastToArray(cur))
 								case "string_set":
-									SetNestedValue(val, ToKeyPath(castPath), SortListByStrVal(CastToArray(cur)))
+									SetNestedValue(val, ToKeyPath(castPath), CastToArray(cur))
 								case "object":
 									SetNestedValue(val, ToKeyPath(castPath), CastToObject(cur))
 								}
@@ -1481,7 +1496,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 			case "string[]":
 				d.Set(key, CastToArray(val))
 			case "string_set":
-				d.Set(key, SortListByStrVal(CastToArray(val)))
+				d.Set(key, CastToArray(val))
 			case "string":
 				d.Set(key, CastToString(val))
 			case "command":
