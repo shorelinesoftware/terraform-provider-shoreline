@@ -44,6 +44,7 @@ resource "shoreline_resource" "az_k8s" {
 
 - **description** (String) A user-friendly explanation of an object.
 - **id** (String) The ID of this resource.
+- **params** (List of String) Named variables to pass to an object (e.g. an Action).
 
 ### Read-Only
 
