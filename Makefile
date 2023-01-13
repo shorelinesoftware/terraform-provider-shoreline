@@ -4,7 +4,7 @@ REPODIR=/tmp/tf-repo/providers
 
 NAME=shoreline
 BINARY=terraform-provider-$(NAME)
-VERSION=1.8.2
+VERSION=1.8.3
 
 // NOTE: this only works for 64 bit linux and MacOs ("darwin")
 OS=$(shell uname | tr 'A-Z' 'a-z')
@@ -30,6 +30,15 @@ install: build
 	rm -rf $(REPODIR)/*
 	mkdir -p $(REPODIR)/$(SUBPATH)
 	cp terraform-provider-shoreline $(REPODIR)/$(SUBPATH)/terraform-provider-shoreline
+
+# This sets up your ~/.terraformrc (NOTE: need to re-run when the version changes)
+use_local:
+	@echo 'Setting up local overrides for shoreline provider in ~/.terraformrc'
+	@echo 'NOTE: You need to re-run "make use_local" when the version changes."
+	@echo 'provider_installation { dev_overrides { "shorelinesoftware/shoreline" = "$(REPODIR)/$(SUBPATH)" } }' > ${HOME}/.terraformrc
+use_registry:
+	@echo 'Removing ~/.terraformrc, to use the terraform registry again (https://registry.terraform.io/providers/shorelinesoftware/shoreline/latest)'
+	@rm ${HOME}/.terraformrc
 
 release:
 	GOOS=darwin  GOARCH=amd64 go build -o ./bin/$(BINARY)_$(VERSION)_darwin_amd64

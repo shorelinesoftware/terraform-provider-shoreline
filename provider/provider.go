@@ -561,13 +561,13 @@ var ObjectConfigJsonStr = `
 			"file_deps":               { "type": "string_set", "optional": true },
 			"start_short_template":    { "type": "string",   "optional": true, "step": "start_step_class.short_template" },
 			"start_long_template":     { "type": "string",   "optional": true, "step": "start_step_class.long_template" },
-			"start_title_template":    { "type": "string",   "optional": true, "step": "start_step_class.title_template" },
+			"start_title_template":    { "type": "string",   "optional": true, "step": "start_step_class.title_template", "suppress_null_regex": "^started \\w*$" },
 			"error_short_template":    { "type": "string",   "optional": true, "step": "error_step_class.short_template" },
 			"error_long_template":     { "type": "string",   "optional": true, "step": "error_step_class.long_template" },
-			"error_title_template":    { "type": "string",   "optional": true, "step": "error_step_class.title_template" },
+			"error_title_template":    { "type": "string",   "optional": true, "step": "error_step_class.title_template", "suppress_null_regex": "^failed \\w*$" },
 			"complete_short_template": { "type": "string",   "optional": true, "step": "complete_step_class.short_template" },
 			"complete_long_template":  { "type": "string",   "optional": true, "step": "complete_step_class.long_template" },
-			"complete_title_template": { "type": "string",   "optional": true, "step": "complete_step_class.title_template" },
+			"complete_title_template": { "type": "string",   "optional": true, "step": "complete_step_class.title_template", "suppress_null_regex": "^completed \\w*$" },
 			"#user":                   { "type": "string",   "optional": true },
 			"allowed_entities":        { "type": "string_set", "optional": true }
 		}
