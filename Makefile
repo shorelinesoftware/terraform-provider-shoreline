@@ -34,8 +34,9 @@ install: build
 # This sets up your ~/.terraformrc (NOTE: need to re-run when the version changes)
 use_local:
 	@echo 'Setting up local overrides for shoreline provider in ~/.terraformrc'
-	@echo 'NOTE: You need to re-run "make use_local" when the version changes."
+	@echo 'NOTE: You need to re-run "make use_local" when the version changes."'
 	@echo 'provider_installation { dev_overrides { "shorelinesoftware/shoreline" = "$(REPODIR)/$(SUBPATH)" } }' > ${HOME}/.terraformrc
+
 use_registry:
 	@echo 'Removing ~/.terraformrc, to use the terraform registry again (https://registry.terraform.io/providers/shorelinesoftware/shoreline/latest)'
 	@rm ${HOME}/.terraformrc
