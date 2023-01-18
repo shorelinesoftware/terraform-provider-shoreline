@@ -568,7 +568,6 @@ var ObjectConfigJsonStr = `
 			"complete_short_template": { "type": "string",   "optional": true, "step": "complete_step_class.short_template" },
 			"complete_long_template":  { "type": "string",   "optional": true, "step": "complete_step_class.long_template" },
 			"complete_title_template": { "type": "string",   "optional": true, "step": "complete_step_class.title_template", "suppress_null_regex": "^completed \\w*$" },
-			"#user":                   { "type": "string",   "optional": true },
 			"allowed_entities":        { "type": "string_set", "optional": true }
 		}
 	},
@@ -644,18 +643,16 @@ var ObjectConfigJsonStr = `
 			"value":          { "type": "command",   "required": true, "primary": true, "alias_out": "val" },
 			"description":    { "type": "string",   "optional": true },
 			"units":          { "type": "string",   "optional": true },
-			"resource_type":  { "type": "resource", "optional": true },
-			"#enabled":        { "type": "intbool",  "optional": true, "default": false },
-			"#user":           { "type": "string",   "optional": true }
+			"resource_type":  { "type": "resource", "optional": true }
 		}
 	},
 
 	"resource": {
 		"attributes": {
-			"type":           { "type": "string",   "computed": true, "value": "RESOURCE" },
-			"name":           { "type": "label",    "required": true, "forcenew": true, "skip": true },
-			"value":          { "type": "command",  "required": true, "primary": true },
-			"description":    { "type": "string",   "optional": true },
+			"type":            { "type": "string",   "computed": true, "value": "RESOURCE" },
+			"name":            { "type": "label",    "required": true, "forcenew": true, "skip": true },
+			"value":           { "type": "command",  "required": true, "primary": true },
+			"description":     { "type": "string",   "optional": true },
 			"params":          { "type": "string[]",   "optional": true },
 			"#units":          { "type": "string",   "optional": true },
 			"#resource_type":  { "type": "resource", "optional": true },
@@ -676,9 +673,7 @@ var ObjectConfigJsonStr = `
 			"file_data":        { "type": "string",   "computed": true },
 			"file_length":      { "type": "int",      "computed": true },
 			"checksum":         { "type": "string",   "computed": true },
-			"md5":              { "type": "string",   "optional": true, "proxy": "file_length,checksum,file_data" },
-			"#resource_type":    { "type": "resource", "optional": true },
-			"#last_modified_timestamp": { "type": "string",   "optional": true }
+			"md5":              { "type": "string",   "optional": true, "proxy": "file_length,checksum,file_data" }
 		}
 	},
 
@@ -691,9 +686,9 @@ var ObjectConfigJsonStr = `
 				                          "cast": { "params": "string[]", "params_values": "string[]" }
 			                          },
 			"description":            { "type": "string",   "optional": true },
-			"#enabled":                { "type": "intbool",  "optional": true, "default": false },
 			"timeout_ms":             { "type": "unsigned", "optional": true, "default": 60000 },
-			"allowed_entities":        { "type": "string_set", "optional": true }
+			"allowed_entities":       { "type": "string_set", "optional": true },
+			"#enabled":                { "type": "intbool",  "optional": true, "default": false }
 		}
 	},
 
@@ -706,7 +701,7 @@ var ObjectConfigJsonStr = `
 				"metric":   "A periodic measurement of a system property.\n\nSee the Shoreline [Metrics Documentation](https://docs.shoreline.io/metrics) for more info.",
 				"resource": "A server or compute resource in the system (e.g. host, pod, container).\n\nSee the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info.",
 				"file":     "A datafile that is automatically copied/distributed to defined Resources.\n\nSee the Shoreline [OpCp Documentation](https://docs.shoreline.io/op/commands/cp) for more info.",
-				"notebook":     "An interactive notebook of Op commands and user documentation .\n\nSee the Shoreline [Notebook Documentation](https://docs.shoreline.io/ui/notebooks) for more info."
+				"notebook": "An interactive notebook of Op commands and user documentation .\n\nSee the Shoreline [Notebook Documentation](https://docs.shoreline.io/ui/notebooks) for more info."
 		},
 
 		"attributes": {
@@ -837,6 +832,8 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 				// special case top-level notebook "enabled" which may be returned by old backends
 				delete(nuJs, "enabled")
 				delete(oldJs, "enabled")
+				NormalizeNotebookJson(nuJs)
+				NormalizeNotebookJson(oldJs)
 				if reflect.DeepEqual(oldJs, nuJs) {
 					return true
 				}
@@ -957,6 +954,35 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		Schema: params,
 	}
 
+}
+
+func NormalizeNotebookJsonArray(arr []interface{}) {
+	for _, v := range arr {
+		theMap, isMap := v.(map[string]interface{})
+		if isMap {
+			NormalizeNotebookJson(theMap)
+		}
+	}
+}
+
+func NormalizeNotebookJson(object map[string]interface{}) {
+	for k, v := range object {
+		arr, isArray := v.([]interface{})
+		if isArray {
+			// remove empty lists (e.g. external_params)
+			if len(arr) == 0 {
+				delete(object, k)
+			} else {
+				// NOTE: In future, may need to sort nested non-ordinal lists (ala top-level allowed_entities).
+				NormalizeNotebookJsonArray(arr)
+			}
+		} else {
+			theMap, isMap := v.(map[string]interface{})
+			if isMap {
+				NormalizeNotebookJson(theMap)
+			}
+		}
+	}
 }
 
 func EscapeString(val interface{}) string {
