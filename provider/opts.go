@@ -13,7 +13,9 @@ import (
 	"github.com/spf13/viper"
 	"io/ioutil"
 	prand "math/rand"
+	"os"
 	"os/user"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -52,6 +54,20 @@ func GetHomeDir() string {
 	return homeDir
 }
 
+func GetDotfilePath() string {
+	// TODO patch for windows
+	home := GetHomeDir()
+
+	// default to "~/"
+	thePath := home
+	// check if '~/.shoreline/' exists
+	shorePath := filepath.Join(home, ".shoreline")
+	if _, err := os.Stat(shorePath); !os.IsNotExist(err) {
+		thePath = shorePath
+	}
+	return thePath
+}
+
 func getAuthFilename() string {
 	return ".ops_auth.yaml"
 }
@@ -82,7 +98,8 @@ func getAuthUrls() []string {
 func LoadAuthConfig(GlobalOpts *CliOpts) bool {
 	AuthConfig.SetConfigName(getAuthFilename())
 	AuthConfig.SetConfigType("yaml")
-	AuthConfig.AddConfigPath(GetHomeDir())
+	//AuthConfig.AddConfigPath(GetHomeDir())
+	AuthConfig.AddConfigPath(GetDotfilePath())
 	AuthConfig.ReadInConfig() // ignore errors...
 
 	URL := AuthConfig.GetString("Url")
