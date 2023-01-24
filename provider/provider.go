@@ -613,7 +613,8 @@ var ObjectConfigJsonStr = `
 			"action_statement": { "type": "command",  "internal": true },
 			"alarm_statement":  { "type": "command",  "internal": true },
 			"event_type":       { "type": "string",   "optional": true, "step": "event_type", "default": "shoreline" },
-			"monitor_id":       { "type": "string",   "optional": true, "step": "monitor_id", "default": "" }
+			"monitor_id":       { "type": "string",   "optional": true, "step": "monitor_id", "default": "" },
+			"alarm_resource_query": { "type": "command",  "optional": true }
 		}
 	},
 
