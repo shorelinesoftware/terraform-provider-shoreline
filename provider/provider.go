@@ -1016,9 +1016,14 @@ func SortListByStrVal(val []interface{}) []interface{} {
 func attrValueString(typ string, key string, val interface{}, attrs map[string]interface{}) string {
 	strVal := ""
 	attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
+	optional := GetNestedValueOrDefault(attrs, ToKeyPath(key+".optional"), false).(bool)
 	switch attrTyp {
 	case "command":
-		strVal = fmt.Sprintf("%s", val)
+		if optional && val == "" {
+			strVal = "\"\""
+		} else {
+			strVal = fmt.Sprintf("%s", val)
+		}
 	case "time_s":
 		strVal = fmt.Sprintf("%s", val)
 	case "b64json":
