@@ -21,19 +21,19 @@ import (
 )
 
 func CanonicalizeUrl(url string) (urlOut string, err error) {
-	urlRegexStr := `^(http(s)?://)?(?P<backend_node>([^\\.]*)\.)?(?P<customer>[^\\.]*)\.(?P<region>[^\\.]*)\.ap[ip]\.shoreline-(?P<cluster>[^\\.]*)\.io(/)?$`
-	urlBaseStr := "https://${backend_node}${customer}.${region}.api.shoreline-${cluster}.io"
-	urlRegex := regexp.MustCompile(urlRegexStr)
-	match := urlRegex.FindStringSubmatch(url)
-	if len(match) < 4 {
-		return "", fmt.Errorf("URL -- %s -- couldn't be mapped to canonical form -- %s -- (%d)\n", url, CanonicalUrl, len(match))
-	}
-	for i, name := range urlRegex.SubexpNames() {
-		if i > 0 && i <= len(match) {
-			urlBaseStr = strings.Replace(urlBaseStr, "${"+name+"}", match[i], 1)
-		}
-	}
-	return urlBaseStr, nil
+	// urlRegexStr := `^(http(s)?://)?(?P<backend_node>([^\\.]*)\.)?(?P<customer>[^\\.]*)\.(?P<region>[^\\.]*)\.ap[ip]\.shoreline-(?P<cluster>[^\\.]*)\.io(/)?$`
+	// urlBaseStr := "https://${backend_node}${customer}.${region}.api.shoreline-${cluster}.io"
+	// urlRegex := regexp.MustCompile(urlRegexStr)
+	// match := urlRegex.FindStringSubmatch(url)
+	// if len(match) < 4 {
+	// 	return "", fmt.Errorf("URL -- %s -- couldn't be mapped to canonical form -- %s -- (%d)\n", url, CanonicalUrl, len(match))
+	// }
+	// for i, name := range urlRegex.SubexpNames() {
+	// 	if i > 0 && i <= len(match) {
+	// 		urlBaseStr = strings.Replace(urlBaseStr, "${"+name+"}", match[i], 1)
+	// 	}
+	// }
+	return url, nil
 }
 
 func StringToJsonArray(data string) ([]interface{}, error) {
@@ -87,6 +87,36 @@ func OmitJsonArrayFields(val *[]interface{}, omitList []interface{}) {
 			(*val)[idx] = OmitJsonObjectFields(eMap, omitList)
 		}
 	}
+}
+func JsonFieldsWithValue(val map[string]interface{}, omitList []interface{}) bool {
+	for _, omitKeyValue := range omitList {
+		keyValueMap, isMap := omitKeyValue.(map[string]interface{})
+		if isMap {
+			key, ok := keyValueMap["key"].(string)
+			if !ok {
+				continue
+			}
+			value, ok := keyValueMap["value"]
+			if !ok {
+				continue
+			}
+			if val[key] != value {
+				return false
+			}
+		}
+	}
+	return true
+}
+func OmitJsonArrayItems(val *[]interface{}, omitList []interface{}) {
+	var idx int = 0
+	for _, elem := range *val {
+		eMap, isMap := elem.(map[string]interface{})
+		if !isMap || !JsonFieldsWithValue(eMap, omitList) {
+			(*val)[idx] = elem
+			idx++
+		}
+	}
+	*val = (*val)[:idx]
 }
 
 func timeSuffixToIntSec(tv string) int {
@@ -607,13 +637,15 @@ var ObjectConfigJsonStr = `
 				"compound_in": "^\\s*if\\s*(?P<alarm_statement>.*?)\\s*then\\s*(?P<action_statement>.*?)\\s*fi\\s*$",
 				"compound_out": "if ${alarm_statement} then ${action_statement} fi"
 			},
-			"description":      { "type": "string",   "optional": true },
-			"enabled":          { "type": "intbool",  "optional": true, "default": false },
-			"family":           { "type": "command",  "optional": true, "step": "config_data.family", "default": "custom" },
-			"action_statement": { "type": "command",  "internal": true },
-			"alarm_statement":  { "type": "command",  "internal": true },
-			"event_type":       { "type": "string",   "optional": true, "step": "event_type", "default": "shoreline" },
-			"monitor_id":       { "type": "string",   "optional": true, "step": "monitor_id", "default": "" }
+			"description":         { "type": "string",   "optional": true },
+			"enabled":             { "type": "intbool",  "optional": true, "default": false },
+			"family":              { "type": "command",  "optional": true, "step": "config_data.family", "default": "custom" },
+			"action_statement":    { "type": "command",  "internal": true },
+			"alarm_statement":     { "type": "command",  "internal": true },
+			"event_type":          { "type": "string",   "optional": true, "deprecated": "use trigger_source", "conflicts_with": "trigger_source" },
+			"monitor_id":          { "type": "string",   "optional": true, "deprecated": "use external_trigger_id", "conflicts_with": "external_trigger_id" },
+			"trigger_source":      { "type": "string",   "optional": true, "conflicts_with": "event_type" },
+			"external_trigger_id": { "type": "string",   "optional": true, "conflicts_with": "monitor_id" }
 		}
 	},
 
@@ -683,6 +715,7 @@ var ObjectConfigJsonStr = `
 			"name":                   { "type": "label",    "required": true, "forcenew": true, "skip": true },
 			"data":                   { "type": "b64json",  "required": true, "step": ".", "primary": true,
 				                          "omit": {"cells": "dynamic_cell_fields", ".": "dynamic_fields" },
+				                          "omit_items": {"external_params": "dynamic_params"},
 				                          "cast": { "params": "string[]", "params_values": "string[]" }
 			                          },
 			"description":            { "type": "string",   "optional": true },
@@ -896,6 +929,11 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		sch.Required = GetNestedValueOrDefault(attrMap, ToKeyPath("required"), false).(bool)
 		sch.Computed = GetNestedValueOrDefault(attrMap, ToKeyPath("computed"), false).(bool)
 		sch.ForceNew = GetNestedValueOrDefault(attrMap, ToKeyPath("forcenew"), false).(bool)
+		sch.Deprecated = GetNestedValueOrDefault(attrMap, ToKeyPath("deprecated"), "").(string)
+		conflictsWith, ok := GetNestedValue(attrMap, ToKeyPath("conflicts_with"))
+		if ok {
+			sch.ConflictsWith = []string{conflictsWith.(string)}
+		}
 		//WriteMsg("WARNING: JSON config from resourceShorelineObject(%s) %s.Optional = %+v.\n", key, k, sch.Optional)
 		//WriteMsg("WARNING: JSON config from resourceShorelineObject(%s) %s.Required = %+v.\n", key, k, sch.Required)
 		//WriteMsg("WARNING: JSON config from resourceShorelineObject(%s) %s.Computed = %+v.\n", key, k, sch.Computed)
@@ -1435,6 +1473,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 								}
 							}
 						}
+
 						// handle omit map, and nested deletions, as get_notebook_class() returns objects with dynamic/temporary fields
 						omitMap := GetNestedValueOrDefault(attr, ToKeyPath("omit"), map[string]interface{}{}).(map[string]interface{})
 						// "." has to be last, or it will wipe out other objects
@@ -1488,6 +1527,26 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 								}
 							}
 						}
+
+						// handle
+						omitMap = GetNestedValueOrDefault(attr, ToKeyPath("omit_items"), map[string]interface{}{}).(map[string]interface{})
+						for omitPath, omitTag := range omitMap {
+							cur, isList := GetNestedValueOrDefault(val, ToKeyPath(omitPath), nil).([]interface{})
+							if cur == nil || !isList {
+								continue
+							}
+							omitTagStr, isStr := omitTag.(string)
+							if !isStr {
+								continue
+							}
+							omitList, isList := GetNestedValueOrDefault(stepsJs, ToKeyPath(omitTagStr), []interface{}{}).([]interface{})
+							if !isList {
+								continue
+							}
+							OmitJsonArrayItems(&cur, omitList)
+							SetNestedValue(val, ToKeyPath(omitPath), cur)
+						}
+
 						b, err := json.Marshal(val)
 						if err != nil {
 							diags = diag.Errorf("Failed to marshall JSON %s:%s '%s'", typ, key, name)
