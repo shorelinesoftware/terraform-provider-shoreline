@@ -33,7 +33,7 @@ func CanonicalizeUrl(url string) (urlOut string, err error) {
 			urlBaseStr = strings.Replace(urlBaseStr, "${"+name+"}", match[i], 1)
 		}
 	}
-	return url, nil
+	return urlBaseStr, nil
 }
 
 func StringToJsonArray(data string) ([]interface{}, error) {
