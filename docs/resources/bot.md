@@ -158,6 +158,7 @@ Now, anytime JVM memory exceeds our defined threshold the JVM is automatically r
 
 ### Optional
 
+- **alarm_resource_query** (String)
 - **description** (String) A user-friendly explanation of an object.
 - **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
 - **event_type** (String) Used to tag 'datadog' monitor triggers vs 'shoreline' alarms (default). Defaults to `shoreline`.

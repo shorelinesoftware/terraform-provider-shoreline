@@ -642,8 +642,9 @@ var ObjectConfigJsonStr = `
 			"family":              { "type": "command",  "optional": true, "step": "config_data.family", "default": "custom" },
 			"action_statement":    { "type": "command",  "internal": true },
 			"alarm_statement":     { "type": "command",  "internal": true },
-			"event_type":          { "type": "string",   "optional": true, "deprecated": "use trigger_source", "conflicts_with": "trigger_source" },
-			"monitor_id":          { "type": "string",   "optional": true, "deprecated": "use external_trigger_id", "conflicts_with": "external_trigger_id" },
+			"event_type":          { "type": "string",   "optional": true, "conflicts_with": "trigger_source" },
+			"monitor_id":          { "type": "string",   "optional": true, "conflicts_with": "external_trigger_id" },
+			"alarm_resource_query": { "type": "command",  "optional": true },
 			"trigger_source":      { "type": "string",   "optional": true, "conflicts_with": "event_type" },
 			"external_trigger_id": { "type": "string",   "optional": true, "conflicts_with": "monitor_id" }
 		}
@@ -1053,9 +1054,14 @@ func SortListByStrVal(val []interface{}) []interface{} {
 func attrValueString(typ string, key string, val interface{}, attrs map[string]interface{}) string {
 	strVal := ""
 	attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
+	optional := GetNestedValueOrDefault(attrs, ToKeyPath(key+".optional"), false).(bool)
 	switch attrTyp {
 	case "command":
-		strVal = fmt.Sprintf("%s", val)
+		if optional && val == "" {
+			strVal = "\"\""
+		} else {
+			strVal = fmt.Sprintf("%s", val)
+		}
 	case "time_s":
 		strVal = fmt.Sprintf("%s", val)
 	case "b64json":
