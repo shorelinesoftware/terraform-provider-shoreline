@@ -21,18 +21,18 @@ import (
 )
 
 func CanonicalizeUrl(url string) (urlOut string, err error) {
-	// urlRegexStr := `^(http(s)?://)?(?P<backend_node>([^\\.]*)\.)?(?P<customer>[^\\.]*)\.(?P<region>[^\\.]*)\.ap[ip]\.shoreline-(?P<cluster>[^\\.]*)\.io(/)?$`
-	// urlBaseStr := "https://${backend_node}${customer}.${region}.api.shoreline-${cluster}.io"
-	// urlRegex := regexp.MustCompile(urlRegexStr)
-	// match := urlRegex.FindStringSubmatch(url)
-	// if len(match) < 4 {
-	// 	return "", fmt.Errorf("URL -- %s -- couldn't be mapped to canonical form -- %s -- (%d)\n", url, CanonicalUrl, len(match))
-	// }
-	// for i, name := range urlRegex.SubexpNames() {
-	// 	if i > 0 && i <= len(match) {
-	// 		urlBaseStr = strings.Replace(urlBaseStr, "${"+name+"}", match[i], 1)
-	// 	}
-	// }
+	urlRegexStr := `^(http(s)?://)?(?P<backend_node>([^\\.]*)\.)?(?P<customer>[^\\.]*)\.(?P<region>[^\\.]*)\.ap[ip]\.shoreline-(?P<cluster>[^\\.]*)\.io(/)?$`
+	urlBaseStr := "https://${backend_node}${customer}.${region}.api.shoreline-${cluster}.io"
+	urlRegex := regexp.MustCompile(urlRegexStr)
+	match := urlRegex.FindStringSubmatch(url)
+	if len(match) < 4 {
+		return "", fmt.Errorf("URL -- %s -- couldn't be mapped to canonical form -- %s -- (%d)\n", url, CanonicalUrl, len(match))
+	}
+	for i, name := range urlRegex.SubexpNames() {
+		if i > 0 && i <= len(match) {
+			urlBaseStr = strings.Replace(urlBaseStr, "${"+name+"}", match[i], 1)
+		}
+	}
 	return url, nil
 }
 
@@ -722,6 +722,8 @@ var ObjectConfigJsonStr = `
 			"description":            { "type": "string",   "optional": true },
 			"timeout_ms":             { "type": "unsigned", "optional": true, "default": 60000 },
 			"allowed_entities":       { "type": "string_set", "optional": true },
+			"approvers":              { "type": "string_set", "optional": true },
+			"resource_query":         { "type": "string", "optional": true },
 			"#enabled":                { "type": "intbool",  "optional": true, "default": false }
 		}
 	},
