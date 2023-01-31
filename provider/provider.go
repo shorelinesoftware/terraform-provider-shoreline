@@ -1536,7 +1536,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 							}
 						}
 
-						// handle
+						// handle dynamic parameters (eg. datadog external params)
 						omitMap = GetNestedValueOrDefault(attr, ToKeyPath("omit_items"), map[string]interface{}{}).(map[string]interface{})
 						for omitPath, omitTag := range omitMap {
 							cur, isList := GetNestedValueOrDefault(val, ToKeyPath(omitPath), nil).([]interface{})
