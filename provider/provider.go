@@ -642,11 +642,11 @@ var ObjectConfigJsonStr = `
 			"family":              { "type": "command",  "optional": true, "step": "config_data.family", "default": "custom" },
 			"action_statement":    { "type": "command",  "internal": true },
 			"alarm_statement":     { "type": "command",  "internal": true },
-			"event_type":          { "type": "string",   "optional": true, "conflicts_with": "trigger_source" },
-			"monitor_id":          { "type": "string",   "optional": true, "conflicts_with": "external_trigger_id" },
+			"event_type":          { "type": "string",   "optional": true, "alias": "trigger_source" },
+			"monitor_id":          { "type": "string",   "optional": true, "alias": "external_trigger_id" },
 			"alarm_resource_query": { "type": "command",  "optional": true },
-			"trigger_source":      { "type": "string",   "optional": true, "conflicts_with": "event_type" },
-			"external_trigger_id": { "type": "string",   "optional": true, "conflicts_with": "monitor_id" }
+			"#trigger_source":      { "type": "string",   "optional": true, "preferred_alias": "event_type" },
+			"#external_trigger_id": { "type": "string",   "optional": true, "preferred_alias": "monitor_id" }
 		}
 	},
 
