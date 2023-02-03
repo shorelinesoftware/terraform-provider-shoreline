@@ -162,11 +162,9 @@ Now, anytime JVM memory exceeds our defined threshold the JVM is automatically r
 - **description** (String) A user-friendly explanation of an object.
 - **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
 - **event_type** (String) Used to tag 'datadog' monitor triggers vs 'shoreline' alarms (default).
-- **external_trigger_id** (String)
 - **family** (String) General class for an Action or Bot (e.g., custom, standard, metric, or system check). Defaults to `custom`.
 - **id** (String) The ID of this resource.
 - **monitor_id** (String) For 'datadog' monitor triggered bots, the DD monitor identifier.
-- **trigger_source** (String)
 
 ### Read-Only
 
