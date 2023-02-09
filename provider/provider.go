@@ -933,10 +933,6 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		sch.Computed = GetNestedValueOrDefault(attrMap, ToKeyPath("computed"), false).(bool)
 		sch.ForceNew = GetNestedValueOrDefault(attrMap, ToKeyPath("forcenew"), false).(bool)
 		sch.Deprecated = GetNestedValueOrDefault(attrMap, ToKeyPath("deprecated"), "").(string)
-		conflictsWith, ok := GetNestedValue(attrMap, ToKeyPath("conflicts_with"))
-		if ok {
-			sch.ConflictsWith = []string{conflictsWith.(string)}
-		}
 		//WriteMsg("WARNING: JSON config from resourceShorelineObject(%s) %s.Optional = %+v.\n", key, k, sch.Optional)
 		//WriteMsg("WARNING: JSON config from resourceShorelineObject(%s) %s.Required = %+v.\n", key, k, sch.Required)
 		//WriteMsg("WARNING: JSON config from resourceShorelineObject(%s) %s.Computed = %+v.\n", key, k, sch.Computed)
