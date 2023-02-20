@@ -409,10 +409,11 @@ func New(version string) func() *schema.Provider {
 				"shoreline_alarm":           resourceShorelineObject(ObjectConfigJsonStr, "alarm"),
 				"shoreline_bot":             resourceShorelineObject(ObjectConfigJsonStr, "bot"),
 				"shoreline_circuit_breaker": resourceShorelineObject(ObjectConfigJsonStr, "circuit_breaker"),
-				"shoreline_metric":          resourceShorelineObject(ObjectConfigJsonStr, "metric"),
-				"shoreline_resource":        resourceShorelineObject(ObjectConfigJsonStr, "resource"),
 				"shoreline_file":            resourceShorelineObject(ObjectConfigJsonStr, "file"),
+				"shoreline_metric":          resourceShorelineObject(ObjectConfigJsonStr, "metric"),
 				"shoreline_notebook":        resourceShorelineObject(ObjectConfigJsonStr, "notebook"),
+				"shoreline_principal":       resourceShorelineObject(ObjectConfigJsonStr, "principal"),
+				"shoreline_resource":        resourceShorelineObject(ObjectConfigJsonStr, "resource"),
 			},
 			DataSourcesMap: map[string]*schema.Resource{
 				"shoreline_version": &schema.Resource{
@@ -669,31 +670,6 @@ var ObjectConfigJsonStr = `
 		}
 	},
 
-	"metric": {
-		"attributes": {
-			"type":           { "type": "string",   "computed": true, "value": "METRIC" },
-			"name":           { "type": "label",    "required": true, "forcenew": true, "skip": true },
-			"value":          { "type": "command",   "required": true, "primary": true, "alias_out": "val" },
-			"description":    { "type": "string",   "optional": true },
-			"units":          { "type": "string",   "optional": true },
-			"resource_type":  { "type": "resource", "optional": true }
-		}
-	},
-
-	"resource": {
-		"attributes": {
-			"type":            { "type": "string",   "computed": true, "value": "RESOURCE" },
-			"name":            { "type": "label",    "required": true, "forcenew": true, "skip": true },
-			"value":           { "type": "command",  "required": true, "primary": true },
-			"description":     { "type": "string",   "optional": true },
-			"params":          { "type": "string[]",   "optional": true },
-			"#units":          { "type": "string",   "optional": true },
-			"#resource_type":  { "type": "resource", "optional": true },
-			"#user":           { "type": "string",   "optional": true },
-			"#read_only":      { "type": "bool",     "optional": true }
-		}
-	},
-
 	"file": {
 		"attributes": {
 			"type":             { "type": "string",   "computed": true, "value": "FILE" },
@@ -707,6 +683,17 @@ var ObjectConfigJsonStr = `
 			"file_length":      { "type": "int",      "computed": true },
 			"checksum":         { "type": "string",   "computed": true },
 			"md5":              { "type": "string",   "optional": true, "proxy": "file_length,checksum,file_data" }
+		}
+	},
+
+	"metric": {
+		"attributes": {
+			"type":           { "type": "string",   "computed": true, "value": "METRIC" },
+			"name":           { "type": "label",    "required": true, "forcenew": true, "skip": true },
+			"value":          { "type": "command",   "required": true, "primary": true, "alias_out": "val" },
+			"description":    { "type": "string",   "optional": true },
+			"units":          { "type": "string",   "optional": true },
+			"resource_type":  { "type": "resource", "optional": true }
 		}
 	},
 
@@ -728,68 +715,102 @@ var ObjectConfigJsonStr = `
 		}
 	},
 
+	"resource": {
+		"attributes": {
+			"type":            { "type": "string",   "computed": true, "value": "RESOURCE" },
+			"name":            { "type": "label",    "required": true, "forcenew": true, "skip": true },
+			"value":           { "type": "command",  "required": true, "primary": true },
+			"description":     { "type": "string",   "optional": true },
+			"params":          { "type": "string[]",   "optional": true },
+			"#units":          { "type": "string",   "optional": true },
+			"#resource_type":  { "type": "resource", "optional": true },
+			"#user":           { "type": "string",   "optional": true },
+			"#read_only":      { "type": "bool",     "optional": true }
+		}
+	},
+
+	"principal": {
+		"attributes": {
+			"type":                  { "type": "string",   "computed": true, "value": "PRINCIPAL" },
+			"name":                  { "type": "label",    "required": true, "forcenew": true, "skip": true },
+			"identity":              { "type": "string",   "required": true, "primary": true },
+			"view_limit":            { "type": "int",      "optional": true, "default": 0 },
+			"action_limit":          { "type": "int",      "optional": true, "default": 0 },
+			"execute_limit":         { "type": "int",      "optional": true, "default": 0 },
+			"configure_permission":  { "type": "intbool",  "optional": true, "default": false },
+			"administer_permission": { "type": "intbool",  "optional": true, "default": false }
+		}
+	},
+
 	"docs": {
 		"objects": {
-				"action":   "A command that can be run.\n\nSee the Shoreline [Actions Documentation](https://docs.shoreline.io/actions) for more info.",
-				"alarm":    "A condition that triggers Alerts or Actions.\n\nSee the Shoreline [Alarms Documentation](https://docs.shoreline.io/alarms) for more info.",
-				"bot":      "An automation that ties an Action to an Alert.\n\nSee the Shoreline [Bots Documentation](https://docs.shoreline.io/bots) for more info.",
+				"action":    "A command that can be run.\n\nSee the Shoreline [Actions Documentation](https://docs.shoreline.io/actions) for more info.",
+				"alarm":     "A condition that triggers Alerts or Actions.\n\nSee the Shoreline [Alarms Documentation](https://docs.shoreline.io/alarms) for more info.",
+				"bot":       "An automation that ties an Action to an Alert.\n\nSee the Shoreline [Bots Documentation](https://docs.shoreline.io/bots) for more info.",
 				"circuit_breaker":      "An automatic rate limit on actions.\n\nSee the Shoreline [CircuitBreakers Documentation](https://docs.shoreline.io/circuit_breakers) for more info.",
-				"metric":   "A periodic measurement of a system property.\n\nSee the Shoreline [Metrics Documentation](https://docs.shoreline.io/metrics) for more info.",
-				"resource": "A server or compute resource in the system (e.g. host, pod, container).\n\nSee the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info.",
-				"file":     "A datafile that is automatically copied/distributed to defined Resources.\n\nSee the Shoreline [OpCp Documentation](https://docs.shoreline.io/op/commands/cp) for more info.",
-				"notebook": "An interactive notebook of Op commands and user documentation .\n\nSee the Shoreline [Notebook Documentation](https://docs.shoreline.io/ui/notebooks) for more info."
+				"file":      "A datafile that is automatically copied/distributed to defined Resources.\n\nSee the Shoreline [OpCp Documentation](https://docs.shoreline.io/op/commands/cp) for more info.",
+				"metric":    "A periodic measurement of a system property.\n\nSee the Shoreline [Metrics Documentation](https://docs.shoreline.io/metrics) for more info.",
+				"notebook":  "An interactive notebook of Op commands and user documentation .\n\nSee the Shoreline [Notebook Documentation](https://docs.shoreline.io/ui/notebooks) for more info.",
+				"principal": "An authorization group (e.g. Okta groups).",
+				"resource":  "A server or compute resource in the system (e.g. host, pod, container).\n\nSee the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info."
 		},
 
 		"attributes": {
+				"name":                    "The name of the object (must be unique).",
 				"type":                    "The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).",
+				"action_limit":            "The number of simultaneous actions allowed for a permissions group.",
+				"administer_permission":   "If a permissions group is allowed to perform \"administer\" actions.",
+				"allowed_entities":        "The list of users who can run an action or notebook. Any user can run if left empty.",
 				"cells":                   "The data cells inside a notebook.",
 				"check_interval":          "Interval (in seconds) between Alarm evaluations.",
 				"checksum":                "Cryptographic hash (e.g. md5) of a File Resource.",
 				"clear_query":             "The Alarm's resolution condition.",
 				"command":                 "A specific action to run.",
 				"compile_eligible":        "If the Alarm can be effectively optimized.",
-				"complete_short_template": "The short description of the Action's completion.",
 				"complete_long_template":  "The long description of the Action's completion.",
+				"complete_short_template": "The short description of the Action's completion.",
 				"complete_title_template": "UI title of the Action's completion.",
 				"condition_type":          "Kind of check in an Alarm (e.g. above or below) vs a threshold for a Metric.",
 				"condition_value":         "Switching value (threshold) for a Metric in an Alarm.",
+				"configure_permission":    "If a permissions group is allowed to perform \"configure\" actions.",
 				"data":                    "The downloaded (JSON) representation of a Notebook.",
 				"description":             "A user-friendly explanation of an object.",
 				"destination_path":        "Target location for a copied distributed File object.  See [Op: cp](https://docs.shoreline.io/op/commands/cp).",
 				"enabled":                 "If the object is currently enabled or disabled.",
-				"error_short_template":    "The short description of the Action's error condition.",
 				"error_long_template":     "The long description of the Action's error condition.",
+				"error_short_template":    "The short description of the Action's error condition.",
 				"error_title_template":    "UI title of the Action's error condition.",
 				"event_type":              "Used to tag 'datadog' monitor triggers vs 'shoreline' alarms (default).",
+				"execute_limit":           "The number of simultaneous linux (shell) commands allowed for a permissions group.",
 				"family":                  "General class for an Action or Bot (e.g., custom, standard, metric, or system check).",
 				"file_data":               "Internal representation of a distributed File object's data (computed).",
+				"file_deps":               "file object dependencies.",
 				"file_length":             "Length, in bytes, of a distributed File object (computed)",
+				"fire_long_template":      "The long description of the Alarm's triggering condition.",
 				"fire_query":              "The Alarm's trigger condition.",
 				"fire_short_template":     "The short description of the Alarm's triggering condition.",
-				"fire_long_template":      "The long description of the Alarm's triggering condition.",
 				"fire_title_template":     "UI title of the Alarm's triggering condition.",
+				"identity":                "The email address for a permissions group.",
 				"input_file":              "The local source of a distributed File object.",
+				"md5":                     "The md5 checksum of a file, e.g. filemd5(\"${path.module}/data/example-file.txt\")",
 				"metric_name":             "The Alarm's triggering Metric.",
 				"monitor_id":              "For 'datadog' monitor triggered bots, the DD monitor identifier.",
 				"mute_query":              "The Alarm's mute condition.",
-				"md5":                     "The md5 checksum of a file, e.g. filemd5(\"${path.module}/data/example-file.txt\")",
-				"name":                    "The name of the object (must be unique).",
 				"params":                  "Named variables to pass to an object (e.g. an Action).",
 				"raise_for":               "Where an Alarm is raised (e.g., local to a resource, or global to the system).",
 				"res_env_var":             "Result environment variable ... an environment variable used to output values through.",
-				"resolve_short_template":  "The short description of the Alarm's resolution.",
 				"resolve_long_template":   "The long description of the Alarm's resolution.",
+				"resolve_short_template":  "The short description of the Alarm's resolution.",
 				"resolve_title_template":  "UI title of the Alarm's' resolution.",
 				"resource_query":          "A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.",
 				"shell":                   "The commandline shell to use (e.g. /bin/sh).",
-				"start_short_template":    "The short description when starting the Action.",
 				"start_long_template":     "The long description when starting the Action.",
+				"start_short_template":    "The short description when starting the Action.",
 				"start_title_template":    "UI title of the start of the Action.",
 				"timeout":                 "Maximum time to wait, in milliseconds.",
-				"file_deps":               "file object dependencies.",
 				"units":                   "Units of a Metric (e.g., bytes, blocks, packets, percent).",
 				"value":                   "The Op statement that defines a Metric or Resource.",
-				"allowed_entities":        "The list of users who can run an action or notebook. Any user can run if left empty."
+				"view_limit":            "The number of simultaneous metrics allowed for a permissions group."
 		}
 	}
 }
