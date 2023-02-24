@@ -20,7 +20,9 @@ A [File](https://docs.shoreline.io/op/commands/cp) must know where to copy from 
 
 ## Usage
 
-The following example distributes the local `<terraform_module_directory>/data/jvm_dumps.sh` file the target Shoreline [Resources](https://docs.shoreline.io/platform/resources) defined by the `resource_query` Terraform variable:
+The following example distributes the local `<terraform_module_directory>/data/jvm_dumps.sh` file to the target Shoreline [Resources](https://docs.shoreline.io/platform/resources) defined by the `resource_query` Terraform variable:
+
+-> Note the use of the `md5` property to auto update file-objects on `terraform apply`.
 
 {{tffile "examples/op_packs/jvm_trace/files.tf"}}
 
