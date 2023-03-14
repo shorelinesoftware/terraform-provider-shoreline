@@ -11,8 +11,10 @@ import (
 	"fmt"
 	zstd "github.com/klauspost/compress/zstd"
 	"github.com/spf13/viper"
+	"io"
 	"io/ioutil"
 	prand "math/rand"
+	"net/http"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -258,24 +260,207 @@ func ExecuteOpCommand(GlobalOpts *CliOpts, expr string) (string, error) {
 }
 
 // Returns base64 data, success/failure, file size, md5 checksum.
-func FileToBase64(filename string) (string, bool, int64, string) {
-	raw, err := ioutil.ReadFile(filename)
-	if err != nil {
-		//logging.WriteMsgColor(Red, "ERROR: Couldn't read input file: %s !\n", filename)
+func FileToBase64(filename string, skipData bool) (string, bool, int64, string) {
+	encoded := ""
+	fstat, err := os.Stat(filename)
+	if err != nil || fstat.Size() == 0 { // skip non-existent or empty files
 		return "", false, 0, ""
 	}
+	fileLen := fstat.Size()
+	file, err := os.Open(filename)
+	if err != nil {
+		return "", false, 0, ""
+	}
+	defer file.Close()
+	// streaming md5sum
+	hash := md5.New()
+	_, err = io.Copy(hash, file)
+	if err != nil {
+		return "", false, 0, ""
+	}
+	md5Sum := fmt.Sprintf("%x", hash.Sum(nil))
 
-	fileLen := int64(len(raw))
+	if !skipData {
+		raw, err := ioutil.ReadFile(filename)
+		if err != nil {
+			//logging.WriteMsgColor(Red, "ERROR: Couldn't read input file: %s !\n", filename)
+			return "", false, 0, ""
+		}
+		// Create a writer that caches compressors.
+		// For this operation type we supply a nil Reader.
+		var encoder, _ = zstd.NewWriter(nil)
 
-	// Create a writer that caches compressors.
-	// For this operation type we supply a nil Reader.
-	var encoder, _ = zstd.NewWriter(nil)
+		// Compress a buffer.
+		// If you have a destination buffer, the allocation in the call can also be eliminated.
+		compressed := encoder.EncodeAll(raw, make([]byte, 0, len(raw)))
 
-	// Compress a buffer.
-	// If you have a destination buffer, the allocation in the call can also be eliminated.
-	compressed := encoder.EncodeAll(raw, make([]byte, 0, len(raw)))
-
-	encoded := base64.StdEncoding.EncodeToString(compressed)
-	md5Sum := fmt.Sprintf("%x", md5.Sum(raw))
+		encoded = base64.StdEncoding.EncodeToString(compressed)
+	}
 	return encoded, true, fileLen, md5Sum
 }
+
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+func DownloadFileHttps(src string, dst string, token string) error {
+	out, err := os.Create(dst)
+	if err != nil {
+		return fmt.Errorf("Couldn't open local download file '%s'\n", dst)
+	}
+	defer out.Close()
+
+	resp, err := http.Get(src)
+	if err != nil {
+		return fmt.Errorf("Couldn't open download url '%s'\n", src)
+	}
+	defer resp.Body.Close()
+
+	// NOTE: This processes a block at a time, which is important for large files and mem usage
+	// TODO download to temp and mv/rm on success/fail
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return fmt.Errorf("Couldn't process download data from url '%s'\n", src)
+	}
+
+	return nil
+}
+
+func UploadFileHttps(src string, dst string, token string) error {
+	file, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("couldn't open local upload file '%s'\n", src)
+	}
+	defer file.Close()
+
+	stat, err := os.Stat(src)
+	if err != nil {
+		return fmt.Errorf("Couldn't stat file to upload: " + err.Error())
+	}
+	fileSize := stat.Size()
+
+	reqOb, err := http.NewRequest("PUT", dst, file)
+	//reqOb, err := http.NewRequest("POST", dst, file)
+	//reqOb, err := http.NewRequest(http.MethodPut, dst, file)
+	if err != nil {
+		fmt.Printf("Couldn't create upload request object: " + err.Error())
+		return fmt.Errorf("Couldn't create upload request object: " + err.Error())
+	}
+	//reqOb.Header.Set("Content-Type", "application/octet-stream")
+	//reqOb.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	reqOb.ContentLength = fileSize
+
+	response, err := http.DefaultClient.Do(reqOb)
+	defer response.Body.Close()
+	if err != nil {
+		fmt.Printf("Couldn't upload file: " + err.Error())
+		return fmt.Errorf("Couldn't upload file: " + err.Error())
+	} else {
+		fmt.Printf("Uploaded file '%s' (%d bytes) status: %v - %v\n", src, fileSize, response.StatusCode, http.StatusText(response.StatusCode))
+	}
+	return nil
+}
+
+func DeleteFileHttps(dst string, token string) error {
+	resp, err := http.Get(dst)
+	if err != nil {
+		fmt.Printf("Couldn't open delete url '%s'\n", dst)
+		return fmt.Errorf("Couldn't open delete url '%s'\n", dst)
+	}
+	defer resp.Body.Close()
+
+	return nil
+}
+
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+
+//func ExtractPresignedUrl(jsonData []byte) (string, error) {
+//	var objects interface{}
+//	err := json.Unmarshal(jsonData, &objects)
+//	if err != nil {
+//		return "", fmt.Errorf("WARNING: Failed to parse JSON from ExtractPresignedUrl().")
+//	}
+//	url, ok := pretty.GetNestedValueOrDefault(objects, pretty.ToKeyPath("get_file_attribute"), nil).(string)
+//	if !ok {
+//		return "", fmt.Errorf("WARNING: Missing get_file_attribute key from ExtractPresignedUrl().\n")
+//	}
+//	return url, nil
+//}
+//
+//func CheckOpCopyUriField(GlobalOpts *opts.CliOpts, symbolName string) (string, bool) {
+//	timeout := viper.GetString("background_timeout")
+//	pre_command := fmt.Sprintf("%s.uri", symbolName)
+//	results_pre, err :=  ExecuteOpCommand(GlobalOpts, pre_command, timeout)
+//	if viper.GetBool("debug") {
+//		logging.WriteMsgColor(Red, "OpCp legacy test error: %v\n", err)
+//	}
+//	if err != nil {
+//		return "", true
+//	}
+//	uri, err := ExtractPresignedUrl(results_pre)
+//	if err != nil {
+//		return "", true
+//	}
+//	// "get file attribute failed: field does not exist"
+//	if strings.Contains(uri, "failed:") || strings.Contains(uri, "field does not exist") {
+//		return "", true
+//	}
+//	// XXX could explicitly check for "s3:"/"gs:"/"https:"(AZ) or "/<symbolName>"
+//	return uri, false
+//}
+//
+//func PushOpCopyFileData(GlobalOpts *opts.CliOpts, symbolName string, fileName string) bool {
+//	rpath, legacyPush := CheckOpCopyUriField(GlobalOpts, symbolName)
+//	timeout := viper.GetString("background_timeout")
+//	//pre_command := fmt.Sprintf("%s.uri", symbolName)
+//	//results_pre, err :=  ExecuteOpCommand(GlobalOpts, pre_command, timeout)
+//	//logging.WriteMsgColor(Red, "OpCp legacy test error: %v\n", err)
+//	//if err != nil {
+//	//	legacyPush = true
+//	//}
+//	base64Data := ""
+//	if legacyPush {
+//		ok := false
+//		// deal with source filename being quoted (e.g. spaces in filename)
+//		base64Data, ok, _, _ = FileToBase64(fileName, false)
+//		if !ok {
+//			logging.WriteMsgColor(Red, "OpCp failed failed get base64 data, symbol: %s\n", symbolName)
+//			return false
+//		}
+//	} else {
+//		command := fmt.Sprintf("%s.presigned_put", symbolName)
+//		results, err :=  ExecuteOpCommand(GlobalOpts, command, timeout)
+//		if err != nil {
+//			logging.WriteMsgColor(Red, "OpCp failed failed call for presigned URL, symbol: %s\n", symbolName)
+//			return false
+//		}
+//		//rpath, err := ExtractPresignedUrl(results_pre)
+//		//if err != nil {
+//		//	logging.WriteMsgColor(Red, "OpCp failed failed to extract remote path, symbol: %s\n", symbolName)
+//		//	return false
+//		//}
+//		url, err := ExtractPresignedUrl(results)
+//		if err != nil {
+//			logging.WriteMsgColor(Red, "OpCp failed failed to extract presigned URL, symbol: %s\n", symbolName)
+//			return false
+//		}
+//		// push to URL
+//		logging.WriteMsgColor(Blue, "OpCp uploading to presigned URL, symbol: %s\n   %s\n", symbolName, url)
+//		err = UploadFileHttps(fileName, url, "")
+//		if err != nil {
+//			logging.WriteMsgColor(Red, "OpCp failed failed to extract presigned URL, symbol: %s\n%s\n", symbolName, err.Error())
+//			return false
+//		}
+//		base64Data = fmt.Sprintf(":%s", rpath)
+//	}
+//	// NOTE: even for S3 files, we need to set file_data to *something*
+//	command := fmt.Sprintf("%s.file_data = \"%s\"", symbolName, base64Data)
+//	if !HandleOpCommand(GlobalOpts, command, false) {
+//		commandTrunc := command
+//		if len(commandTrunc) > 200 {
+//			commandTrunc = commandTrunc[0:200] + " ..."
+//		}
+//		logging.WriteMsgColor(Red, "OpCp failed at step: %s\n", commandTrunc)
+//		return false
+//	}
+//	return true
+//}

@@ -1174,6 +1174,20 @@ func setFieldViaOp(typ string, attrs map[string]interface{}, name string, key st
 	return nil
 }
 
+func getRemoteFileAttr(name string, key string) string {
+	pathAttrCmd := fmt.Sprintf("%s.%s", name, key)
+	pathJson, err := runOpCommandToJson(pathAttrCmd)
+	if err != nil {
+		return ""
+	}
+	uri, isStr := GetNestedValueOrDefault(pathJson, ToKeyPath("get_file_attribute"), nil).(string)
+	// "get file attribute failed: field does not exist"
+	if !isStr || strings.Contains(uri, "failed:") || strings.Contains(uri, "field does not exist") {
+		return ""
+	}
+	return uri
+}
+
 func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, ctx context.Context, d *schema.ResourceData, meta interface{}, doDiff bool, isCreate bool) diag.Diagnostics {
 	var diags diag.Diagnostics
 	name := d.Get("name").(string)
@@ -1196,7 +1210,15 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	if typ == "file" {
 		infile, exists := d.GetOk("input_file")
 		if exists {
-			base64Data, ok, fileSize, md5sum := FileToBase64(infile.(string))
+			uri := getRemoteFileAttr(name, "uri")
+			fileIsRemote := true
+			if uri == "" {
+				fileIsRemote = false
+			}
+			base64Data, ok, fileSize, md5sum := FileToBase64(infile.(string), fileIsRemote)
+			if fileIsRemote {
+				base64Data = fmt.Sprintf(":%s", uri)
+			}
 			if ok {
 				appendActionLog(fmt.Sprintf("file_length is %d (%v)\n", int(fileSize), fileSize))
 				if forcedChangeKeys["file_data"] {
@@ -1207,6 +1229,18 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 				d.Set("file_length", int(fileSize))
 				d.Set("checksum", md5sum)
 				d.Set("file_data", base64Data)
+				if fileIsRemote {
+					presignedUrl := getRemoteFileAttr(name, "presigned_put")
+					if presignedUrl == "" {
+						diags = diag.Errorf("Failed to get presigned url for file object %s", name)
+						return diags
+					}
+					err := UploadFileHttps(infile.(string), presignedUrl, "")
+					if err != nil {
+						diags = diag.Errorf("Failed to upload to presigned url for file object %s -- %s", name, err.Error())
+						return diags
+					}
+				}
 			} else {
 				diags = diag.Errorf("Failed to read file object %s", infile)
 				return diags
