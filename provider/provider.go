@@ -711,7 +711,8 @@ var ObjectConfigJsonStr = `
 			"allowed_entities":       { "type": "string_set", "optional": true },
 			"approvers":              { "type": "string_set", "optional": true },
 			"resource_query":         { "type": "string", "optional": true },
-			"#enabled":                { "type": "intbool",  "optional": true, "default": false }
+			"#enabled":                { "type": "intbool",  "optional": true, "default": false },
+			"is_run_output_persisted":    {"type": "bool", "optional": true, "default": true}
 		}
 	},
 
@@ -810,7 +811,8 @@ var ObjectConfigJsonStr = `
 				"timeout":                 "Maximum time to wait, in milliseconds.",
 				"units":                   "Units of a Metric (e.g., bytes, blocks, packets, percent).",
 				"value":                   "The Op statement that defines a Metric or Resource.",
-				"view_limit":            "The number of simultaneous metrics allowed for a permissions group."
+				"view_limit":            "The number of simultaneous metrics allowed for a permissions group.",
+				"is_run_output_persisted":  "A boolean value denoting whether or not cell outputs should be persisted when running a notebook"
 		}
 	}
 }
