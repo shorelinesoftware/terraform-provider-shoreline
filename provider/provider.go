@@ -578,28 +578,29 @@ var ObjectConfigJsonStr = `
 {
 	"action": {
 		"attributes": {
-			"type":                    { "type": "string",   "computed": true, "value": "ACTION" },
-			"name":                    { "type": "label",    "required": true, "forcenew": true, "skip": true },
-			"command":                 { "type": "command",  "required": true, "primary": true },
-			"description":             { "type": "string",   "optional": true },
-			"enabled":                 { "type": "intbool",  "optional": true, "default": false },
-			"params":                  { "type": "string[]", "optional": true },
+			"type":                    { "type": "string",     "computed": true, "value": "ACTION" },
+			"name":                    { "type": "label",      "required": true, "forcenew": true, "skip": true },
+			"command":                 { "type": "command",    "required": true, "primary": true },
+			"description":             { "type": "string",     "optional": true },
+			"enabled":                 { "type": "intbool",    "optional": true, "default": false },
+			"params":                  { "type": "string[]",   "optional": true },
 			"resource_tags_to_export": { "type": "string_set", "optional": true },
-			"res_env_var":             { "type": "string",   "optional": true },
-			"resource_query":          { "type": "command",  "optional": true },
-			"shell":                   { "type": "string",   "optional": true },
-			"timeout":                 { "type": "int",      "optional": true, "default": 60000 },
+			"res_env_var":             { "type": "string",     "optional": true },
+			"resource_query":          { "type": "command",    "optional": true },
+			"shell":                   { "type": "string",     "optional": true },
+			"timeout":                 { "type": "int",        "optional": true, "default": 60000 },
 			"file_deps":               { "type": "string_set", "optional": true },
-			"start_short_template":    { "type": "string",   "optional": true, "step": "start_step_class.short_template" },
-			"start_long_template":     { "type": "string",   "optional": true, "step": "start_step_class.long_template" },
-			"start_title_template":    { "type": "string",   "optional": true, "step": "start_step_class.title_template", "suppress_null_regex": "^started \\w*$" },
-			"error_short_template":    { "type": "string",   "optional": true, "step": "error_step_class.short_template" },
-			"error_long_template":     { "type": "string",   "optional": true, "step": "error_step_class.long_template" },
-			"error_title_template":    { "type": "string",   "optional": true, "step": "error_step_class.title_template", "suppress_null_regex": "^failed \\w*$" },
-			"complete_short_template": { "type": "string",   "optional": true, "step": "complete_step_class.short_template" },
-			"complete_long_template":  { "type": "string",   "optional": true, "step": "complete_step_class.long_template" },
-			"complete_title_template": { "type": "string",   "optional": true, "step": "complete_step_class.title_template", "suppress_null_regex": "^completed \\w*$" },
-			"allowed_entities":        { "type": "string_set", "optional": true }
+			"start_short_template":    { "type": "string",     "optional": true, "step": "start_step_class.short_template" },
+			"start_long_template":     { "type": "string",     "optional": true, "step": "start_step_class.long_template" },
+			"start_title_template":    { "type": "string",     "optional": true, "step": "start_step_class.title_template", "suppress_null_regex": "^started \\w*$" },
+			"error_short_template":    { "type": "string",     "optional": true, "step": "error_step_class.short_template" },
+			"error_long_template":     { "type": "string",     "optional": true, "step": "error_step_class.long_template" },
+			"error_title_template":    { "type": "string",     "optional": true, "step": "error_step_class.title_template", "suppress_null_regex": "^failed \\w*$" },
+			"complete_short_template": { "type": "string",     "optional": true, "step": "complete_step_class.short_template" },
+			"complete_long_template":  { "type": "string",     "optional": true, "step": "complete_step_class.long_template" },
+			"complete_title_template": { "type": "string",     "optional": true, "step": "complete_step_class.title_template", "suppress_null_regex": "^completed \\w*$" },
+			"allowed_entities":        { "type": "string_set", "optional": true },
+			"allowed_resources_query": { "type": "command",    "optional": true }
 		}
 	},
 
@@ -632,39 +633,39 @@ var ObjectConfigJsonStr = `
 
 	"bot": {
 		"attributes": {
-			"type":             { "type": "string",   "computed": true, "value": "BOT" },
-			"name":             { "type": "label",    "required": true, "forcenew": true, "skip": true },
-			"command":          { "type": "command",  "required": true, "primary": true,
+			"type":                 { "type": "string",  "computed": true, "value": "BOT" },
+			"name":                 { "type": "label",   "required": true, "forcenew": true, "skip": true },
+			"command":              { "type": "command", "required": true, "primary": true,
 				"compound_in": "^\\s*if\\s*(?P<alarm_statement>.*?)\\s*then\\s*(?P<action_statement>.*?)\\s*fi\\s*$",
 				"compound_out": "if ${alarm_statement} then ${action_statement} fi"
 			},
-			"description":         { "type": "string",   "optional": true },
-			"enabled":             { "type": "intbool",  "optional": true, "default": false },
-			"family":              { "type": "command",  "optional": true, "step": "config_data.family", "default": "custom" },
-			"action_statement":    { "type": "command",  "internal": true },
-			"alarm_statement":     { "type": "command",  "internal": true },
-			"event_type":          { "type": "string",   "optional": true, "alias": "trigger_source" },
-			"monitor_id":          { "type": "string",   "optional": true, "alias": "external_trigger_id" },
-			"alarm_resource_query": { "type": "command",  "optional": true },
-			"#trigger_source":      { "type": "string",   "optional": true, "preferred_alias": "event_type" },
-			"#external_trigger_id": { "type": "string",   "optional": true, "preferred_alias": "monitor_id" }
+			"description":          { "type": "string",  "optional": true },
+			"enabled":              { "type": "intbool", "optional": true, "default": false },
+			"family":               { "type": "command", "optional": true, "step": "config_data.family", "default": "custom" },
+			"action_statement":     { "type": "command", "internal": true },
+			"alarm_statement":      { "type": "command", "internal": true },
+			"event_type":           { "type": "string",  "optional": true, "alias": "trigger_source" },
+			"monitor_id":           { "type": "string",  "optional": true, "alias": "external_trigger_id" },
+			"alarm_resource_query": { "type": "command", "optional": true },
+			"#trigger_source":      { "type": "string",  "optional": true, "preferred_alias": "event_type" },
+			"#external_trigger_id": { "type": "string",  "optional": true, "preferred_alias": "monitor_id" }
 		}
 	},
 
 	"circuit_breaker": {
 		"attributes": {
-			"type":           { "type": "string", "computed": true, "value": "CIRCUIT_BREAKER" },
-			"name":           { "type": "label", "required": true, "forcenew": true, "skip": true },
+			"type":           { "type": "string",  "computed": true, "value": "CIRCUIT_BREAKER" },
+			"name":           { "type": "label",   "required": true, "forcenew": true, "skip": true },
 			"command":        { "type": "command", "required": true, "primary": true, "forcenew": true,
 				"compound_in": "^\\s*(?P<resource_query>.+)\\s*\\|\\s*(?P<action_name>[a-zA-Z_][a-zA-Z_]*)\\s*$",
 				"compound_out": "${resource_query} | ${action_name}"
 			},
-			"breaker_type":   { "type": "string", "optional": true },
-			"hard_limit":     { "type": "int", "required": true },
-			"soft_limit":     { "type": "int", "optional": true, "default": -1 },
-			"duration":       { "type": "time_s", "required": true },
-			"fail_over":      { "type": "string", "optional": true },
-			"enabled":        { "type": "bool", "optional": true, "default": false },
+			"breaker_type":   { "type": "string",  "optional": true },
+			"hard_limit":     { "type": "int",     "required": true },
+			"soft_limit":     { "type": "int",     "optional": true, "default": -1 },
+			"duration":       { "type": "time_s",  "required": true },
+			"fail_over":      { "type": "string",  "optional": true },
+			"enabled":        { "type": "bool",    "optional": true, "default": false },
 			"action_name":    { "type": "command", "internal": true },
 			"resource_query": { "type": "command", "internal": true }
 		}
@@ -690,7 +691,7 @@ var ObjectConfigJsonStr = `
 		"attributes": {
 			"type":           { "type": "string",   "computed": true, "value": "METRIC" },
 			"name":           { "type": "label",    "required": true, "forcenew": true, "skip": true },
-			"value":          { "type": "command",   "required": true, "primary": true, "alias_out": "val" },
+			"value":          { "type": "command",  "required": true, "primary": true, "alias_out": "val" },
 			"description":    { "type": "string",   "optional": true },
 			"units":          { "type": "string",   "optional": true },
 			"resource_type":  { "type": "resource", "optional": true }
@@ -699,20 +700,20 @@ var ObjectConfigJsonStr = `
 
 	"notebook": {
 		"attributes": {
-			"type":                   { "type": "string",   "computed": true, "value": "NOTEBOOK" },
-			"name":                   { "type": "label",    "required": true, "forcenew": true, "skip": true },
-			"data":                   { "type": "b64json",  "required": true, "step": ".", "primary": true,
-				                          "omit": {"cells": "dynamic_cell_fields", ".": "dynamic_fields" },
-				                          "omit_items": {"external_params": "dynamic_params"},
-				                          "cast": { "params": "string[]", "params_values": "string[]" }
-			                          },
-			"description":            { "type": "string",   "optional": true },
-			"timeout_ms":             { "type": "unsigned", "optional": true, "default": 60000 },
-			"allowed_entities":       { "type": "string_set", "optional": true },
-			"approvers":              { "type": "string_set", "optional": true },
-			"resource_query":         { "type": "string", "optional": true },
-			"#enabled":                { "type": "intbool",  "optional": true, "default": false },
-			"is_run_output_persisted":    {"type": "bool", "optional": true, "default": true}
+			"type":                    { "type": "string",     "computed": true, "value": "NOTEBOOK" },
+			"name":                    { "type": "label",      "required": true, "forcenew": true, "skip": true },
+			"data":                    { "type": "b64json",    "required": true, "step": ".", "primary": true,
+				                           "omit": { "cells": "dynamic_cell_fields", ".": "dynamic_fields" },
+				                           "omit_items": { "external_params": "dynamic_params" },
+				                           "cast": { "params": "string[]", "params_values": "string[]" }
+			                           },
+			"description":             { "type": "string",     "optional": true },
+			"timeout_ms":              { "type": "unsigned",   "optional": true, "default": 60000 },
+			"allowed_entities":        { "type": "string_set", "optional": true },
+			"approvers":               { "type": "string_set", "optional": true },
+			"resource_query":          { "type": "string",     "optional": true, "deprecated_for": "allowed_resources_query" },
+			"is_run_output_persisted": { "type": "bool",       "optional": true, "step": "is_run_output_persisted", "default": true },
+			"allowed_resources_query": { "type": "command",    "optional": true, "replaces": "resource_query" }
 		}
 	},
 
@@ -722,7 +723,7 @@ var ObjectConfigJsonStr = `
 			"name":            { "type": "label",    "required": true, "forcenew": true, "skip": true },
 			"value":           { "type": "command",  "required": true, "primary": true },
 			"description":     { "type": "string",   "optional": true },
-			"params":          { "type": "string[]",   "optional": true },
+			"params":          { "type": "string[]", "optional": true },
 			"#units":          { "type": "string",   "optional": true },
 			"#resource_type":  { "type": "resource", "optional": true },
 			"#user":           { "type": "string",   "optional": true },
@@ -745,74 +746,75 @@ var ObjectConfigJsonStr = `
 
 	"docs": {
 		"objects": {
-				"action":    "A command that can be run.\n\nSee the Shoreline [Actions Documentation](https://docs.shoreline.io/actions) for more info.",
-				"alarm":     "A condition that triggers Alerts or Actions.\n\nSee the Shoreline [Alarms Documentation](https://docs.shoreline.io/alarms) for more info.",
-				"bot":       "An automation that ties an Action to an Alert.\n\nSee the Shoreline [Bots Documentation](https://docs.shoreline.io/bots) for more info.",
-				"circuit_breaker":      "An automatic rate limit on actions.\n\nSee the Shoreline [CircuitBreakers Documentation](https://docs.shoreline.io/circuit_breakers) for more info.",
-				"file":      "A datafile that is automatically copied/distributed to defined Resources.\n\nSee the Shoreline [OpCp Documentation](https://docs.shoreline.io/op/commands/cp) for more info.",
-				"metric":    "A periodic measurement of a system property.\n\nSee the Shoreline [Metrics Documentation](https://docs.shoreline.io/metrics) for more info.",
-				"notebook":  "An interactive notebook of Op commands and user documentation .\n\nSee the Shoreline [Notebook Documentation](https://docs.shoreline.io/ui/notebooks) for more info.",
-				"principal": "An authorization group (e.g. Okta groups).",
-				"resource":  "A server or compute resource in the system (e.g. host, pod, container).\n\nSee the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info."
+			"action":    "A command that can be run.\n\nSee the Shoreline [Actions Documentation](https://docs.shoreline.io/actions) for more info.",
+			"alarm":     "A condition that triggers Alerts or Actions.\n\nSee the Shoreline [Alarms Documentation](https://docs.shoreline.io/alarms) for more info.",
+			"bot":       "An automation that ties an Action to an Alert.\n\nSee the Shoreline [Bots Documentation](https://docs.shoreline.io/bots) for more info.",
+			"circuit_breaker": "An automatic rate limit on actions.\n\nSee the Shoreline [CircuitBreakers Documentation](https://docs.shoreline.io/circuit_breakers) for more info.",
+			"file":      "A datafile that is automatically copied/distributed to defined Resources.\n\nSee the Shoreline [OpCp Documentation](https://docs.shoreline.io/op/commands/cp) for more info.",
+			"metric":    "A periodic measurement of a system property.\n\nSee the Shoreline [Metrics Documentation](https://docs.shoreline.io/metrics) for more info.",
+			"notebook":  "An interactive notebook of Op commands and user documentation .\n\nSee the Shoreline [Notebook Documentation](https://docs.shoreline.io/ui/notebooks) for more info.",
+			"principal": "An authorization group (e.g. Okta groups).",
+			"resource":  "A server or compute resource in the system (e.g. host, pod, container).\n\nSee the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info."
 		},
 
 		"attributes": {
-				"name":                    "The name of the object (must be unique).",
-				"type":                    "The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).",
-				"action_limit":            "The number of simultaneous actions allowed for a permissions group.",
-				"administer_permission":   "If a permissions group is allowed to perform \"administer\" actions.",
-				"allowed_entities":        "The list of users who can run an action or notebook. Any user can run if left empty.",
-				"cells":                   "The data cells inside a notebook.",
-				"check_interval":          "Interval (in seconds) between Alarm evaluations.",
-				"checksum":                "Cryptographic hash (e.g. md5) of a File Resource.",
-				"clear_query":             "The Alarm's resolution condition.",
-				"command":                 "A specific action to run.",
-				"compile_eligible":        "If the Alarm can be effectively optimized.",
-				"complete_long_template":  "The long description of the Action's completion.",
-				"complete_short_template": "The short description of the Action's completion.",
-				"complete_title_template": "UI title of the Action's completion.",
-				"condition_type":          "Kind of check in an Alarm (e.g. above or below) vs a threshold for a Metric.",
-				"condition_value":         "Switching value (threshold) for a Metric in an Alarm.",
-				"configure_permission":    "If a permissions group is allowed to perform \"configure\" actions.",
-				"data":                    "The downloaded (JSON) representation of a Notebook.",
-				"description":             "A user-friendly explanation of an object.",
-				"destination_path":        "Target location for a copied distributed File object.  See [Op: cp](https://docs.shoreline.io/op/commands/cp).",
-				"enabled":                 "If the object is currently enabled or disabled.",
-				"error_long_template":     "The long description of the Action's error condition.",
-				"error_short_template":    "The short description of the Action's error condition.",
-				"error_title_template":    "UI title of the Action's error condition.",
-				"event_type":              "Used to tag 'datadog' monitor triggers vs 'shoreline' alarms (default).",
-				"execute_limit":           "The number of simultaneous linux (shell) commands allowed for a permissions group.",
-				"family":                  "General class for an Action or Bot (e.g., custom, standard, metric, or system check).",
-				"file_data":               "Internal representation of a distributed File object's data (computed).",
-				"file_deps":               "file object dependencies.",
-				"file_length":             "Length, in bytes, of a distributed File object (computed)",
-				"fire_long_template":      "The long description of the Alarm's triggering condition.",
-				"fire_query":              "The Alarm's trigger condition.",
-				"fire_short_template":     "The short description of the Alarm's triggering condition.",
-				"fire_title_template":     "UI title of the Alarm's triggering condition.",
-				"identity":                "The email address for a permissions group.",
-				"input_file":              "The local source of a distributed File object.",
-				"md5":                     "The md5 checksum of a file, e.g. filemd5(\"${path.module}/data/example-file.txt\")",
-				"metric_name":             "The Alarm's triggering Metric.",
-				"monitor_id":              "For 'datadog' monitor triggered bots, the DD monitor identifier.",
-				"mute_query":              "The Alarm's mute condition.",
-				"params":                  "Named variables to pass to an object (e.g. an Action).",
-				"raise_for":               "Where an Alarm is raised (e.g., local to a resource, or global to the system).",
-				"res_env_var":             "Result environment variable ... an environment variable used to output values through.",
-				"resolve_long_template":   "The long description of the Alarm's resolution.",
-				"resolve_short_template":  "The short description of the Alarm's resolution.",
-				"resolve_title_template":  "UI title of the Alarm's' resolution.",
-				"resource_query":          "A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.",
-				"shell":                   "The commandline shell to use (e.g. /bin/sh).",
-				"start_long_template":     "The long description when starting the Action.",
-				"start_short_template":    "The short description when starting the Action.",
-				"start_title_template":    "UI title of the start of the Action.",
-				"timeout":                 "Maximum time to wait, in milliseconds.",
-				"units":                   "Units of a Metric (e.g., bytes, blocks, packets, percent).",
-				"value":                   "The Op statement that defines a Metric or Resource.",
-				"view_limit":            "The number of simultaneous metrics allowed for a permissions group.",
-				"is_run_output_persisted":  "A boolean value denoting whether or not cell outputs should be persisted when running a notebook"
+			"name":                    "The name of the object (must be unique).",
+			"type":                    "The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).",
+			"action_limit":            "The number of simultaneous actions allowed for a permissions group.",
+			"administer_permission":   "If a permissions group is allowed to perform \"administer\" actions.",
+			"allowed_entities":        "The list of users who can run an action or notebook. Any user can run if left empty.",
+			"allowed_resources_query": "The list of resources on which an action or notebook can run. No restriction, if left empty.",
+			"cells":                   "The data cells inside a notebook.",
+			"check_interval":          "Interval (in seconds) between Alarm evaluations.",
+			"checksum":                "Cryptographic hash (e.g. md5) of a File Resource.",
+			"clear_query":             "The Alarm's resolution condition.",
+			"command":                 "A specific action to run.",
+			"compile_eligible":        "If the Alarm can be effectively optimized.",
+			"complete_long_template":  "The long description of the Action's completion.",
+			"complete_short_template": "The short description of the Action's completion.",
+			"complete_title_template": "UI title of the Action's completion.",
+			"condition_type":          "Kind of check in an Alarm (e.g. above or below) vs a threshold for a Metric.",
+			"condition_value":         "Switching value (threshold) for a Metric in an Alarm.",
+			"configure_permission":    "If a permissions group is allowed to perform \"configure\" actions.",
+			"data":                    "The downloaded (JSON) representation of a Notebook.",
+			"description":             "A user-friendly explanation of an object.",
+			"destination_path":        "Target location for a copied distributed File object.  See [Op: cp](https://docs.shoreline.io/op/commands/cp).",
+			"enabled":                 "If the object is currently enabled or disabled.",
+			"error_long_template":     "The long description of the Action's error condition.",
+			"error_short_template":    "The short description of the Action's error condition.",
+			"error_title_template":    "UI title of the Action's error condition.",
+			"event_type":              "Used to tag 'datadog' monitor triggers vs 'shoreline' alarms (default).",
+			"execute_limit":           "The number of simultaneous linux (shell) commands allowed for a permissions group.",
+			"family":                  "General class for an Action or Bot (e.g., custom, standard, metric, or system check).",
+			"file_data":               "Internal representation of a distributed File object's data (computed).",
+			"file_deps":               "file object dependencies.",
+			"file_length":             "Length, in bytes, of a distributed File object (computed)",
+			"fire_long_template":      "The long description of the Alarm's triggering condition.",
+			"fire_query":              "The Alarm's trigger condition.",
+			"fire_short_template":     "The short description of the Alarm's triggering condition.",
+			"fire_title_template":     "UI title of the Alarm's triggering condition.",
+			"identity":                "The email address for a permissions group.",
+			"input_file":              "The local source of a distributed File object.",
+			"md5":                     "The md5 checksum of a file, e.g. filemd5(\"${path.module}/data/example-file.txt\")",
+			"metric_name":             "The Alarm's triggering Metric.",
+			"monitor_id":              "For 'datadog' monitor triggered bots, the DD monitor identifier.",
+			"mute_query":              "The Alarm's mute condition.",
+			"params":                  "Named variables to pass to an object (e.g. an Action).",
+			"raise_for":               "Where an Alarm is raised (e.g., local to a resource, or global to the system).",
+			"res_env_var":             "Result environment variable ... an environment variable used to output values through.",
+			"resolve_long_template":   "The long description of the Alarm's resolution.",
+			"resolve_short_template":  "The short description of the Alarm's resolution.",
+			"resolve_title_template":  "UI title of the Alarm's' resolution.",
+			"resource_query":          "A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.",
+			"shell":                   "The commandline shell to use (e.g. /bin/sh).",
+			"start_long_template":     "The long description when starting the Action.",
+			"start_short_template":    "The short description when starting the Action.",
+			"start_title_template":    "UI title of the start of the Action.",
+			"timeout":                 "Maximum time to wait, in milliseconds.",
+			"units":                   "Units of a Metric (e.g., bytes, blocks, packets, percent).",
+			"value":                   "The Op statement that defines a Metric or Resource.",
+			"view_limit":            "The number of simultaneous metrics allowed for a permissions group.",
+			"is_run_output_persisted":  "A boolean value denoting whether or not cell outputs should be persisted when running a notebook"
 		}
 	}
 }
@@ -955,7 +957,23 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		sch.Required = GetNestedValueOrDefault(attrMap, ToKeyPath("required"), false).(bool)
 		sch.Computed = GetNestedValueOrDefault(attrMap, ToKeyPath("computed"), false).(bool)
 		sch.ForceNew = GetNestedValueOrDefault(attrMap, ToKeyPath("forcenew"), false).(bool)
-		sch.Deprecated = GetNestedValueOrDefault(attrMap, ToKeyPath("deprecated"), "").(string)
+		deprecated := GetNestedValueOrDefault(attrMap, ToKeyPath("deprecated"), false).(bool)
+		deprField := GetNestedValueOrDefault(attrMap, ToKeyPath("deprecated_for"), "").(string)
+		if deprecated {
+			sch.Deprecated = fmt.Sprintf("Field '%s' is obsolete.", k)
+			sch.Description = "**Deprecated** " + sch.Deprecated + " " + description
+		}
+		if deprField != "" {
+			sch.Deprecated = fmt.Sprintf("Please use '%s' instead.", deprField)
+			sch.ConflictsWith = []string{deprField}
+			sch.Description = "**Deprecated** " + sch.Deprecated + " " + description
+			// XXX does this need diff suppression?
+			//sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool { }
+		}
+		replacesField := GetNestedValueOrDefault(attrMap, ToKeyPath("replaces"), "").(string)
+		if replacesField != "" {
+			sch.ConflictsWith = []string{replacesField}
+		}
 		//WriteMsg("WARNING: JSON config from resourceShorelineObject(%s) %s.Optional = %+v.\n", key, k, sch.Optional)
 		//WriteMsg("WARNING: JSON config from resourceShorelineObject(%s) %s.Required = %+v.\n", key, k, sch.Required)
 		//WriteMsg("WARNING: JSON config from resourceShorelineObject(%s) %s.Computed = %+v.\n", key, k, sch.Computed)
@@ -1351,6 +1369,13 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 			result = setFieldViaOp(typ, attrs, name, key, forcedChangeVals[key])
 		} else {
 			result = setFieldViaOp(typ, attrs, name, key, val)
+
+			// on failure, if field is deprecated and renamed, try the new name
+			deprecatedFor := GetNestedValueOrDefault(attrs, ToKeyPath(key+".deprecated_for"), "").(string)
+			if deprecatedFor != "" && result != nil {
+				appendActionLog(fmt.Sprintf("Set deprecated/renamed field : %s: '%s'.'%s'->'%s'  val:'%v'\n", typ, name, key, deprecatedFor, val))
+				result = setFieldViaOp(typ, attrs, name, deprecatedFor, val)
+			}
 		}
 		if result != nil {
 			return result
@@ -1429,6 +1454,154 @@ func resourceShorelineObjectCreate(typ string, primary string, attrs map[string]
 	}
 }
 
+// returns skip, value, diagnostics
+func resourceShorelineObjectReadSingleAttr(name string, typ string, key string, attrs map[string]interface{}, record map[string]interface{}, stepsJs map[string]interface{}, d *schema.ResourceData) (bool, interface{}, diag.Diagnostics) {
+	var val interface{}
+	attr := GetNestedValueOrDefault(attrs, ToKeyPath(key), map[string]interface{}{})
+
+	if strings.HasPrefix(key, "#") {
+		// skip commented fields
+		return true, nil, nil
+	}
+
+	internal := GetNestedValueOrDefault(attrs, ToKeyPath(key+".internal"), false).(bool)
+	if internal {
+		// skip internal fields
+		return true, nil, nil
+	}
+
+	compoundValue, isStr := GetNestedValueOrDefault(attrs, ToKeyPath(key+".compound_out"), nil).(string)
+	if isStr {
+		fullVal := compoundValue
+		re := regexp.MustCompile(`\$\{\w\w*\}`)
+		for expr := re.FindString(fullVal); expr != ""; expr = re.FindString(fullVal) {
+			l := len(expr)
+			varName := expr[2 : l-1]
+			valStr := CastToString(GetNestedValueOrDefault(record, ToKeyPath("attributes."+varName), ""))
+			fullVal = strings.Replace(fullVal, expr, valStr, -1)
+		}
+		val = fullVal
+	} else {
+		stepPath, isStr := GetNestedValueOrDefault(attr, ToKeyPath("step"), nil).(string)
+		if isStr {
+			if stepPath == "." {
+				val = stepsJs
+			} else {
+				val = GetNestedValueOrDefault(stepsJs, ToKeyPath(stepPath), nil)
+			}
+
+			// special handling (notebooks)... field is base64 outgoing, and json incoming
+			attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
+			if attrTyp == "b64json" {
+				// handle cast-map, as get_notebook_class() returns objects with some string-wrapped sub-fields
+				castMap := GetNestedValueOrDefault(attr, ToKeyPath("cast"), map[string]interface{}{}).(map[string]interface{})
+				for castPath, castType := range castMap {
+					cur := GetNestedValueOrDefault(val, ToKeyPath(castPath), nil)
+					if cur != nil {
+						// TODO add additional types as needed
+						switch castType {
+						case "string[]":
+							SetNestedValue(val, ToKeyPath(castPath), CastToArray(cur))
+						case "string_set":
+							SetNestedValue(val, ToKeyPath(castPath), CastToArray(cur))
+						case "object":
+							SetNestedValue(val, ToKeyPath(castPath), CastToObject(cur))
+						}
+					}
+				}
+
+				// handle omit map, and nested deletions, as get_notebook_class() returns objects with dynamic/temporary fields
+				omitMap := GetNestedValueOrDefault(attr, ToKeyPath("omit"), map[string]interface{}{}).(map[string]interface{})
+				// "." has to be last, or it will wipe out other objects
+				omitPaths := []string{}
+				hasDot := false
+				for omitPath, _ := range omitMap {
+					if omitPath != "." {
+						omitPaths = append(omitPaths, omitPath)
+					} else {
+						hasDot = true
+					}
+				}
+				if hasDot {
+					omitPaths = append(omitPaths, ".")
+				}
+				for _, omitPath := range omitPaths {
+					omitTag := omitMap[omitPath]
+					appendActionLog(fmt.Sprintf("Omit path:'%+v' tag: '%+v'\n", omitPath, omitTag))
+					var cur interface{}
+					if omitPath == "." {
+						cur = val
+					} else {
+						cur = GetNestedValueOrDefault(val, ToKeyPath(omitPath), nil)
+					}
+					omitTagStr, isStr := omitTag.(string)
+					if !isStr {
+						// skip omit fields
+						return true, nil, nil
+					}
+					omitList, isList := GetNestedValueOrDefault(stepsJs, ToKeyPath(omitTagStr), []interface{}{}).([]interface{})
+					//appendActionLog(fmt.Sprintf("Omit-list path:'%+v' tag: '%+v' list:'%+v'\n", omitPath, omitTag, omitList))
+					if cur != nil && isList {
+						if typ == "notebook" && omitPath == "." {
+							// NOTE: The top-level object returned by get_notebook_class contains most/all of the object attributes.
+							// So remove them from the inner object
+							for akey, _ := range attrs {
+								omitList = append(omitList, akey)
+							}
+							omitList = append(omitList, "enabled")
+						}
+						switch cur.(type) {
+						case map[string]interface{}:
+							OmitJsonObjectFields(cur.(map[string]interface{}), omitList)
+						case []interface{}:
+							curArr := cur.([]interface{})
+							OmitJsonArrayFields(&curArr, omitList)
+						}
+						if omitPath == "." {
+							val = cur
+						} else {
+							SetNestedValue(val, ToKeyPath(omitPath), cur)
+						}
+					}
+				}
+
+				// handle dynamic parameters (eg. datadog external params)
+				omitMap = GetNestedValueOrDefault(attr, ToKeyPath("omit_items"), map[string]interface{}{}).(map[string]interface{})
+				for omitPath, omitTag := range omitMap {
+					cur, isList := GetNestedValueOrDefault(val, ToKeyPath(omitPath), nil).([]interface{})
+					if cur == nil || !isList {
+						// skip ...
+						return true, nil, nil
+					}
+					omitTagStr, isStr := omitTag.(string)
+					if !isStr {
+						// skip omit fields
+						return true, nil, nil
+					}
+					omitList, isList := GetNestedValueOrDefault(stepsJs, ToKeyPath(omitTagStr), []interface{}{}).([]interface{})
+					if !isList {
+						// skip omit fields
+						return true, nil, nil
+					}
+					OmitJsonArrayItems(&cur, omitList)
+					SetNestedValue(val, ToKeyPath(omitPath), cur)
+				}
+
+				b, err := json.Marshal(val)
+				if err != nil {
+					diags := diag.Errorf("Failed to marshall JSON %s:%s '%s'", typ, key, name)
+					return false, nil, diags
+				}
+				//val = base64.URLEncoding.EncodeToString(b)
+				val = string(b)
+			}
+		} else {
+			val = GetNestedValueOrDefault(record, ToKeyPath("attributes."+key), nil)
+		}
+	}
+	return false, val, nil
+}
+
 func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 		// use the meta value to retrieve your client from the provider configure method
@@ -1482,146 +1655,36 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 			return diags
 		}
 
-		for key, attr := range attrs {
-			var val interface{}
-
-			if strings.HasPrefix(key, "#") {
-				// skip commented fields
+		for key, _ := range attrs {
+			skip, val, diags := resourceShorelineObjectReadSingleAttr(name, typ, key, attrs, record, stepsJs, d)
+			if diags != nil {
+				return diags
+			}
+			if skip {
 				continue
 			}
 
-			internal := GetNestedValueOrDefault(attrs, ToKeyPath(key+".internal"), false).(bool)
-			if internal {
-				continue
-			}
-
-			compoundValue, isStr := GetNestedValueOrDefault(attrs, ToKeyPath(key+".compound_out"), nil).(string)
-			if isStr {
-				fullVal := compoundValue
-				re := regexp.MustCompile(`\$\{\w\w*\}`)
-				for expr := re.FindString(fullVal); expr != ""; expr = re.FindString(fullVal) {
-					l := len(expr)
-					varName := expr[2 : l-1]
-					valStr := CastToString(GetNestedValueOrDefault(record, ToKeyPath("attributes."+varName), ""))
-					fullVal = strings.Replace(fullVal, expr, valStr, -1)
-				}
-				val = fullVal
-			} else {
-				stepPath, isStr := GetNestedValueOrDefault(attr, ToKeyPath("step"), nil).(string)
-				if isStr {
-					if stepPath == "." {
-						val = stepsJs
-					} else {
-						val = GetNestedValueOrDefault(stepsJs, ToKeyPath(stepPath), nil)
-					}
-
-					// special handling (notebooks)... field is base64 outgoing, and json incoming
-					attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
-					if attrTyp == "b64json" {
-						// handle cast-map, as get_notebook_class() returns objects with some string-wrapped sub-fields
-						castMap := GetNestedValueOrDefault(attr, ToKeyPath("cast"), map[string]interface{}{}).(map[string]interface{})
-						for castPath, castType := range castMap {
-							cur := GetNestedValueOrDefault(val, ToKeyPath(castPath), nil)
-							if cur != nil {
-								// TODO add additional types as needed
-								switch castType {
-								case "string[]":
-									SetNestedValue(val, ToKeyPath(castPath), CastToArray(cur))
-								case "string_set":
-									SetNestedValue(val, ToKeyPath(castPath), CastToArray(cur))
-								case "object":
-									SetNestedValue(val, ToKeyPath(castPath), CastToObject(cur))
-								}
-							}
-						}
-
-						// handle omit map, and nested deletions, as get_notebook_class() returns objects with dynamic/temporary fields
-						omitMap := GetNestedValueOrDefault(attr, ToKeyPath("omit"), map[string]interface{}{}).(map[string]interface{})
-						// "." has to be last, or it will wipe out other objects
-						omitPaths := []string{}
-						hasDot := false
-						for omitPath, _ := range omitMap {
-							if omitPath != "." {
-								omitPaths = append(omitPaths, omitPath)
-							} else {
-								hasDot = true
-							}
-						}
-						if hasDot {
-							omitPaths = append(omitPaths, ".")
-						}
-						for _, omitPath := range omitPaths {
-							omitTag := omitMap[omitPath]
-							appendActionLog(fmt.Sprintf("Omit path:'%+v' tag: '%+v'\n", omitPath, omitTag))
-							var cur interface{}
-							if omitPath == "." {
-								cur = val
-							} else {
-								cur = GetNestedValueOrDefault(val, ToKeyPath(omitPath), nil)
-							}
-							omitTagStr, isStr := omitTag.(string)
-							if !isStr {
-								continue
-							}
-							omitList, isList := GetNestedValueOrDefault(stepsJs, ToKeyPath(omitTagStr), []interface{}{}).([]interface{})
-							//appendActionLog(fmt.Sprintf("Omit-list path:'%+v' tag: '%+v' list:'%+v'\n", omitPath, omitTag, omitList))
-							if cur != nil && isList {
-								if typ == "notebook" && omitPath == "." {
-									// NOTE: The top-level object returned by get_notebook_class contains most/all of the object attributes.
-									// So remove them from the inner object
-									for akey, _ := range attrs {
-										omitList = append(omitList, akey)
-									}
-									omitList = append(omitList, "enabled")
-								}
-								switch cur.(type) {
-								case map[string]interface{}:
-									OmitJsonObjectFields(cur.(map[string]interface{}), omitList)
-								case []interface{}:
-									curArr := cur.([]interface{})
-									OmitJsonArrayFields(&curArr, omitList)
-								}
-								if omitPath == "." {
-									val = cur
-								} else {
-									SetNestedValue(val, ToKeyPath(omitPath), cur)
-								}
-							}
-						}
-
-						// handle dynamic parameters (eg. datadog external params)
-						omitMap = GetNestedValueOrDefault(attr, ToKeyPath("omit_items"), map[string]interface{}{}).(map[string]interface{})
-						for omitPath, omitTag := range omitMap {
-							cur, isList := GetNestedValueOrDefault(val, ToKeyPath(omitPath), nil).([]interface{})
-							if cur == nil || !isList {
-								continue
-							}
-							omitTagStr, isStr := omitTag.(string)
-							if !isStr {
-								continue
-							}
-							omitList, isList := GetNestedValueOrDefault(stepsJs, ToKeyPath(omitTagStr), []interface{}{}).([]interface{})
-							if !isList {
-								continue
-							}
-							OmitJsonArrayItems(&cur, omitList)
-							SetNestedValue(val, ToKeyPath(omitPath), cur)
-						}
-
-						b, err := json.Marshal(val)
-						if err != nil {
-							diags = diag.Errorf("Failed to marshall JSON %s:%s '%s'", typ, key, name)
-							return diags
-						}
-						//val = base64.URLEncoding.EncodeToString(b)
-						val = string(b)
-					}
-				} else {
-					val = GetNestedValueOrDefault(record, ToKeyPath("attributes."+key), nil)
-				}
-				if val == nil {
+			// if there's an obsolete prior name, with a value set, skip
+			replaces := GetNestedValueOrDefault(attrs, ToKeyPath(key+".replaces"), "").(string)
+			if replaces != "" {
+				_, replacesSet := d.GetOk(replaces)
+				if replacesSet {
+					appendActionLog(fmt.Sprintf("Get deprecated/renamed skipping new (for obsolete) field : %s: '%s'.'%s'->'%s'  '%v'\n", typ, name, key, replaces, val))
 					continue
 				}
+			}
+
+			// on failure, if field is deprecated and renamed and set in HCL, try the new name
+			deprecatedFor := GetNestedValueOrDefault(attrs, ToKeyPath(key+".deprecated_for"), "").(string)
+			if deprecatedFor != "" && val == nil {
+				appendActionLog(fmt.Sprintf("Get deprecated/renamed field : %s: '%s'.'%s'->'%s'  '%v'\n", typ, name, key, deprecatedFor, val))
+				_, isSet := d.GetOk(key)
+				if isSet {
+					_, val, diags = resourceShorelineObjectReadSingleAttr(name, typ, key, attrs, record, stepsJs, d)
+				}
+			}
+			if val == nil {
+				continue
 			}
 			appendActionLog(fmt.Sprintf("Setting %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
 			//typ := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)

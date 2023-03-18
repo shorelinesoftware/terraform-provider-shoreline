@@ -60,10 +60,12 @@ resource "shoreline_notebook" "my_notebook" {
 ### Optional
 
 - **allowed_entities** (List of String) The list of users who can run an action or notebook. Any user can run if left empty.
+- **allowed_resources_query** (String) The list of resources on which an action or notebook can run. No restriction, if left empty.
 - **approvers** (List of String)
 - **description** (String) A user-friendly explanation of an object.
 - **id** (String) The ID of this resource.
-- **resource_query** (String) A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
+- **is_run_output_persisted** (Boolean) A boolean value denoting whether or not cell outputs should be persisted when running a notebook Defaults to `true`.
+- **resource_query** (String, Deprecated) **Deprecated** Please use 'allowed_resources_query' instead. A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
 - **timeout_ms** (Number) Defaults to `60000`.
 
 ### Read-Only
