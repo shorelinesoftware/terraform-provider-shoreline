@@ -758,8 +758,8 @@ var ObjectConfigJsonStr = `
 			"resource_query":          { "type": "string",     "optional": true, "deprecated_for": "allowed_resources_query" },
 			"is_run_output_persisted": { "type": "bool",       "optional": true, "step": "is_run_output_persisted", "default": true, "min_ver": "12.3.0" },
 			"allowed_resources_query": { "type": "command",    "optional": true, "replaces": "resource_query", "min_ver": "12.3.0" },
-			"communication_workspace": { "type": "string", "optional": true, "min_ver": "12.5.0"},
-            "communication_channel":   { "type": "string", "optional": true, "min_ver": "12.5.0"}
+			"communication_workspace": { "type": "string", "optional": true, "min_ver": "12.5.0", "step": "communication_workspace"},
+			"communication_channel":   { "type": "string", "optional": true, "min_ver": "12.5.0", "step": "communication_channel"}
 		}
 	},
 
@@ -861,8 +861,8 @@ var ObjectConfigJsonStr = `
 			"value":                   "The Op statement that defines a Metric or Resource.",
 			"view_limit":            "The number of simultaneous metrics allowed for a permissions group.",
 			"is_run_output_persisted":  "A boolean value denoting whether or not cell outputs should be persisted when running a notebook",
-			"communication_workspace":  "A string value denoting the slack workspace which notifications related to the notebook should be sent to.",
-			"communication_channel":    "A string value denoting the slack channel which notifications related to the notebook should be sent to."
+			"communication_workspace":  "A string value denoting the slack workspace where notifications related to the notebook should be sent to.",
+			"communication_channel":    "A string value denoting the slack channel where notifications related to the notebook should be sent to."
 		}
 	}
 }
