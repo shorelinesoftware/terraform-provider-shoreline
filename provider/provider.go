@@ -336,6 +336,35 @@ func init() {
 	}
 }
 
+type VersionRecord struct {
+	Valid   bool
+	Build   string
+	Version string
+	Major   int64
+	Minor   int64
+	Patch   int64
+	Error   *error
+}
+
+// returns 0,false if either version is invalid
+// otherwise, lessThan: -1, equalTo: 0, greaterThan: +1
+func CompareVersionRecords(have VersionRecord, want VersionRecord) (gtlteq int, unknown bool) {
+	if !have.Valid || !want.Valid {
+		return 0, false
+	}
+	haveVer := []int64{have.Major, have.Minor, have.Patch}
+	wantVer := []int64{want.Major, want.Minor, want.Patch}
+	for i, want := range wantVer {
+		if haveVer[i] < want {
+			return -1, true
+		}
+		if haveVer[i] > want {
+			return 1, true
+		}
+	}
+	return 0, true
+}
+
 func ExtractVersionData(verStr string) (major int64, minor int64, patch int64, err *error) {
 	verRe := regexp.MustCompile(`(\d+)\.(\d+)\.(\d+)`)
 	if verRe.MatchString(verStr) {
@@ -374,6 +403,21 @@ func GetBackendVersionInfo() (build string, version string, major int64, minor i
 		major, minor, patch = 9999, 9999, 9999
 	}
 	return
+}
+
+func GetBackendVersionInfoStruct() VersionRecord {
+	var ver VersionRecord
+	ver.Build, ver.Version, ver.Major, ver.Minor, ver.Patch, ver.Error = GetBackendVersionInfo()
+	ver.Valid = (ver.Error == nil)
+	return ver
+}
+
+func ParseVersionString(verStr string) VersionRecord {
+	var ver VersionRecord
+	ver.Version = verStr
+	ver.Major, ver.Minor, ver.Patch, ver.Error = ExtractVersionData(verStr)
+	ver.Valid = (ver.Error == nil)
+	return ver
 }
 
 func dataSourceVersionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -712,10 +756,10 @@ var ObjectConfigJsonStr = `
 			"allowed_entities":        { "type": "string_set", "optional": true },
 			"approvers":               { "type": "string_set", "optional": true },
 			"resource_query":          { "type": "string",     "optional": true, "deprecated_for": "allowed_resources_query" },
-			"is_run_output_persisted": { "type": "bool",       "optional": true, "step": "is_run_output_persisted", "default": true },
-			"allowed_resources_query": { "type": "command",    "optional": true, "replaces": "resource_query" },
-			"communication_workspace": { "type": "string", "optional": true}
-			"communication_channel":   { "type": "string", "optional": true}
+			"is_run_output_persisted": { "type": "bool",       "optional": true, "step": "is_run_output_persisted", "default": true, "min_ver": "12.3.0" },
+			"allowed_resources_query": { "type": "command",    "optional": true, "replaces": "resource_query", "min_ver": "12.3.0" },
+			"communication_workspace": { "type": "string", "optional": true, "min_ver": "12.5.0"},
+            "communication_channel":   { "type": "string", "optional": true, "min_ver": "12.5.0"}
 		}
 	},
 
@@ -1094,6 +1138,38 @@ func SortListByStrVal(val []interface{}) []interface{} {
 	return sortedCopy
 }
 
+func attrValueDefault(attrTyp string) interface{} {
+	switch attrTyp {
+	case "command":
+		return ""
+	case "time_s":
+		return ""
+	case "b64json":
+		return ""
+	case "string":
+		return ""
+	case "string[]":
+		return []string{}
+	case "string_set":
+		return []string{}
+	case "bool":
+		return false
+	case "intbool": // special handling to/from backend ("1"/"0")
+		return false
+	case "float":
+		return float64(0)
+	case "int":
+		return int(0)
+	case "unsigned":
+		return uint(0)
+	case "label":
+		return ""
+	case "resource":
+		return ""
+	}
+	return ""
+}
+
 func attrValueString(typ string, key string, val interface{}, attrs map[string]interface{}) string {
 	strVal := ""
 	attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
@@ -1220,6 +1296,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 
 	forcedChangeKeys := map[string]bool{}
 	forcedChangeVals := map[string]interface{}{}
+	needVersion := false
 
 	for key, _ := range attrs {
 		proxy := GetNestedValueOrDefault(attrs, ToKeyPath(key+".proxy"), "").(string)
@@ -1229,6 +1306,16 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 				forcedChangeKeys[k] = true
 			}
 		}
+		min_ver := GetNestedValueOrDefault(attrs, ToKeyPath(key+".min_ver"), "").(string)
+		if min_ver != "" {
+			needVersion = true
+		}
+	}
+
+	var backendVersion VersionRecord
+	backendVersion.Valid = false
+	if needVersion {
+		backendVersion = GetBackendVersionInfoStruct()
 	}
 
 	if typ == "file" {
@@ -1272,25 +1359,28 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		}
 	}
 
-	// TODO handle intbool type (aside from enable)
 	writeEnable := false
 	enableVal := false
 	anyChange := false
 	for key, _ := range attrs {
-
 		skip := GetNestedValueOrDefault(attrs, ToKeyPath(key+".skip"), false).(bool)
 		if skip {
+			appendActionLog(fmt.Sprintf("Set (skipping explicit): %s: '%s'.'%s'\n", typ, name, key))
 			continue
 		}
 
 		internal := GetNestedValueOrDefault(attrs, ToKeyPath(key+".internal"), false).(bool)
 		if internal {
+			appendActionLog(fmt.Sprintf("Set (skipping internal): %s: '%s'.'%s'\n", typ, name, key))
 			continue
 		}
 		proxy := GetNestedValueOrDefault(attrs, ToKeyPath(key+".proxy"), "").(string)
 		if proxy != "" {
+			appendActionLog(fmt.Sprintf("Set (skipping proxy): %s: '%s'.'%s'\n", typ, name, key))
 			continue
 		}
+
+		min_ver := GetNestedValueOrDefault(attrs, ToKeyPath(key+".min_ver"), "").(string)
 
 		forceSet := false
 		// CS-336 workaround: Force explicit set of action_statement/alarm_statement to patch quoting issue
@@ -1307,14 +1397,42 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 			}
 		}
 
+		if min_ver != "" {
+			minVer := ParseVersionString(min_ver)
+			// XXX check minVer.Error and complain about version string
+			gtlteq, valid := CompareVersionRecords(backendVersion, minVer)
+			if valid && gtlteq < 0 {
+				// NOTE: see below for errata on GetOk().exists
+				val, exists := d.GetOk(key)
+				defowlt := GetNestedValueOrDefault(attrs, ToKeyPath(key+".default"), nil)
+				if defowlt == nil {
+					attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
+					defowlt = attrValueDefault(attrTyp)
+				}
+				appendActionLog(fmt.Sprintf("Set (checking min_ver): %s: '%s'.'%s' exists(%v) val(%v) default(%v) ver(%v) backend_ver(%v)\n", typ, name, key, exists, val, defowlt, min_ver, backendVersion.Version))
+				// NOTE: because of the bug in GetOk(), we can't know for sure if the value is set in the TF HCL
+				//   e.g. value=<unset>, default=true -> exists==true
+				//        value=false,   default=true -> exists==false
+				// So, be conservative, and only complain if it's different than the default:
+				if val != nil && val != defowlt {
+					// XXX error or warning? (Hashi plugin SDK v2 doesn't seem to support warnings)
+					//diags.AddWarning("Below minimum version.", fmt.Sprintf("Field %s.%s requires minimum version %s, skipping...", name, key, min_ver))
+					diags = diag.Errorf("Field '%s.%s' requires minimum version '%s', but backend is '%s'", name, key, min_ver, backendVersion.Version)
+					return diags
+				}
+				appendActionLog(fmt.Sprintf("Set (skipping): %s: '%s'.'%s' exists(%v) val(%v) default(%v) ver(%v) backend_ver(%v)\n", typ, name, key, exists, val, defowlt, min_ver, backendVersion.Version))
+				continue
+			}
+		}
+
 		// NOTE: GetOk() has bugs: it checks vs 0/false/"" instead of presence of an explicit value, or even equality to the default
 		val, exists := d.GetOk(key)
 		// NOTE: Terraform reports !exists when a value is explicitly supplied, but matches the 'default'
 		if !exists && !d.HasChange(key) && !forceSet && !forcedChangeKeys[key] {
-			appendActionLog(fmt.Sprintf("FieldDoesNotExist: %s: '%s'.'%s' val(%v) HasChange(%v), forceSet(%v)\n", typ, name, key, val, d.HasChange(key), forceSet))
+			defowlt := GetNestedValueOrDefault(attrs, ToKeyPath(key+".default"), nil)
+			appendActionLog(fmt.Sprintf("FieldDoesNotExist: %s: '%s'.'%s' val(%v) HasChange(%v), forceSet(%v) isCreate(%v) default(%v)\n", typ, name, key, val, d.HasChange(key), forceSet, isCreate, defowlt))
 			// Handle GetOk() bug...
 			if isCreate {
-				defowlt := GetNestedValueOrDefault(attrs, ToKeyPath(key+".default"), nil)
 				if defowlt == nil || val == defowlt {
 					continue
 				}
@@ -1497,6 +1615,8 @@ func resourceShorelineObjectReadSingleAttr(name string, typ string, key string, 
 			// special handling (notebooks)... field is base64 outgoing, and json incoming
 			attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
 			if attrTyp == "b64json" {
+				// The code below that omits fields/objects will modify 'val', so we make a copy
+				val = DeepCopy(val)
 				// handle cast-map, as get_notebook_class() returns objects with some string-wrapped sub-fields
 				castMap := GetNestedValueOrDefault(attr, ToKeyPath("cast"), map[string]interface{}{}).(map[string]interface{})
 				for castPath, castType := range castMap {
@@ -1665,6 +1785,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 				return diags
 			}
 			if skip {
+				appendActionLog(fmt.Sprintf("Reading (skip) %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
 				continue
 			}
 
@@ -1673,7 +1794,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 			if replaces != "" {
 				_, replacesSet := d.GetOk(replaces)
 				if replacesSet {
-					appendActionLog(fmt.Sprintf("Get deprecated/renamed skipping new (for obsolete) field : %s: '%s'.'%s'->'%s'  '%v'\n", typ, name, key, replaces, val))
+					appendActionLog(fmt.Sprintf("Reading deprecated/renamed skipping new (for obsolete) field : %s: '%s'.'%s'->'%s'  '%v'\n", typ, name, key, replaces, val))
 					continue
 				}
 			}
@@ -1681,19 +1802,27 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 			// on failure, if field is deprecated and renamed and set in HCL, try the new name
 			deprecatedFor := GetNestedValueOrDefault(attrs, ToKeyPath(key+".deprecated_for"), "").(string)
 			if deprecatedFor != "" && val == nil {
-				appendActionLog(fmt.Sprintf("Get deprecated/renamed field : %s: '%s'.'%s'->'%s'  '%v'\n", typ, name, key, deprecatedFor, val))
+				appendActionLog(fmt.Sprintf("Reading deprecated/renamed field : %s: '%s'.'%s'->'%s'  '%v'\n", typ, name, key, deprecatedFor, val))
 				_, isSet := d.GetOk(key)
 				if isSet {
 					_, val, diags = resourceShorelineObjectReadSingleAttr(name, typ, key, attrs, record, stepsJs, d)
 				}
 			}
 			if val == nil {
-				continue
+				// not found, so check for a default value and assume that
+				defowlt := GetNestedValueOrDefault(attrs, ToKeyPath(key+".default"), nil)
+				if defowlt != nil {
+					val = defowlt
+					appendActionLog(fmt.Sprintf("Reading (default) %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
+					//appendActionLog(fmt.Sprintf("Reading (default) %s field: '%s'.'%s' steps js::     %+v\n", typ, name, key, stepsJs))
+				} else {
+					// XXX error?
+					appendActionLog(fmt.Sprintf("Reading (failed/empty) %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
+					continue
+				}
 			}
-			appendActionLog(fmt.Sprintf("Setting %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
-			//typ := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
-			//if typ == "string[]" {
-			//}
+
+			appendActionLog(fmt.Sprintf("Reading (updating local state) %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
 			attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
 			switch attrTyp {
 			case "float":
