@@ -861,8 +861,8 @@ var ObjectConfigJsonStr = `
 			"value":                   "The Op statement that defines a Metric or Resource.",
 			"view_limit":            "The number of simultaneous metrics allowed for a permissions group.",
 			"is_run_output_persisted":  "A boolean value denoting whether or not cell outputs should be persisted when running a notebook",
-			"communication_workspace":  "A string value denoting the slack workspace which notifications related to the notebook should be sent to.",
-			"communication_channel":    "A string value denoting the slack channel which notifications related to the notebook should be sent to."
+			"communication_workspace":  "A string value denoting the slack workspace where notifications related to the notebook should be sent to.",
+			"communication_channel":    "A string value denoting the slack channel where notifications related to the notebook should be sent to."
 		}
 	}
 }
