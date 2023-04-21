@@ -65,7 +65,7 @@ for more info.
 
 ### Required
 
-- **name** (String) The name of the object (must be unique).
+- **name** (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
 - **value** (String) The Op statement that defines a Metric or Resource.
 
 ### Optional

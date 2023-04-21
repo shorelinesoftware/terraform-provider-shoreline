@@ -91,7 +91,7 @@ variable "s3_bucket" {
 
 - **destination_path** (String) Target location for a copied distributed File object.  See [Op: cp](https://docs.shoreline.io/op/commands/cp).
 - **input_file** (String) The local source of a distributed File object.
-- **name** (String) The name of the object (must be unique).
+- **name** (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
 - **resource_query** (String) A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
 
 ### Optional
