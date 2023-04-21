@@ -799,12 +799,12 @@ var ObjectConfigJsonStr = `
 			"file":      "A datafile that is automatically copied/distributed to defined Resources.\n\nSee the Shoreline [OpCp Documentation](https://docs.shoreline.io/op/commands/cp) for more info.",
 			"metric":    "A periodic measurement of a system property.\n\nSee the Shoreline [Metrics Documentation](https://docs.shoreline.io/metrics) for more info.",
 			"notebook":  "An interactive notebook of Op commands and user documentation .\n\nSee the Shoreline [Notebook Documentation](https://docs.shoreline.io/ui/notebooks) for more info.",
-			"principal": "An authorization group (e.g. Okta groups).",
+			"principal": "An authorization group (e.g. Okta groups). Note: Admin privilege (in Shoreline) to create principal objects.",
 			"resource":  "A server or compute resource in the system (e.g. host, pod, container).\n\nSee the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info."
 		},
 
 		"attributes": {
-			"name":                    "The name of the object (must be unique).",
+			"name":                    "The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).",
 			"type":                    "The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).",
 			"action_limit":            "The number of simultaneous actions allowed for a permissions group.",
 			"administer_permission":   "If a permissions group is allowed to perform \"administer\" actions.",
@@ -839,7 +839,7 @@ var ObjectConfigJsonStr = `
 			"fire_query":              "The Alarm's trigger condition.",
 			"fire_short_template":     "The short description of the Alarm's triggering condition.",
 			"fire_title_template":     "UI title of the Alarm's triggering condition.",
-			"identity":                "The email address for a permissions group.",
+			"identity":                "The email address or provider's (e.g. Okta) group-name for a permissions group.",
 			"input_file":              "The local source of a distributed File object.",
 			"md5":                     "The md5 checksum of a file, e.g. filemd5(\"${path.module}/data/example-file.txt\")",
 			"metric_name":             "The Alarm's triggering Metric.",
@@ -996,7 +996,20 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 			}
 		case "label":
 			sch.Type = schema.TypeString
-			// TODO ValidateVariableName()
+			// ValidateVariableName()
+			sch.ValidateFunc = func(val interface{}, key string) (warns []string, errs []error) {
+				re := regexp.MustCompile("^[a-zA-Z0-9_]*$")
+				v, isStr := val.(string)
+				if !isStr || (!re.MatchString(v)) {
+					errs = append(errs, fmt.Errorf("%q must be an alphanumeric/underscore string, got: '%+v'", key, val))
+				} else {
+					res := regexp.MustCompile("^[a-zA-Z_]")
+					if !res.MatchString(v) {
+						errs = append(errs, fmt.Errorf("%q must start with a letter or underscore, got: '%+v'", key, val))
+					}
+				}
+				return
+			}
 		case "resource":
 			sch.Type = schema.TypeString
 			// TODO ValidateResourceType() "^(HOST|POD|CONTAINER)$"

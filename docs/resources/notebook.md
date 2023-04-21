@@ -55,13 +55,15 @@ resource "shoreline_notebook" "my_notebook" {
 ### Required
 
 - **data** (String) The downloaded (JSON) representation of a Notebook.
-- **name** (String) The name of the object (must be unique).
+- **name** (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
 
 ### Optional
 
 - **allowed_entities** (List of String) The list of users who can run an action or notebook. Any user can run if left empty.
 - **allowed_resources_query** (String) The list of resources on which an action or notebook can run. No restriction, if left empty.
 - **approvers** (List of String)
+- **communication_channel** (String) A string value denoting the slack channel where notifications related to the notebook should be sent to.
+- **communication_workspace** (String) A string value denoting the slack workspace where notifications related to the notebook should be sent to.
 - **description** (String) A user-friendly explanation of an object.
 - **id** (String) The ID of this resource.
 - **is_run_output_persisted** (Boolean) A boolean value denoting whether or not cell outputs should be persisted when running a notebook Defaults to `true`.
