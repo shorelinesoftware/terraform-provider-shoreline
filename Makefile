@@ -4,7 +4,7 @@ REPODIR=/tmp/tf-repo/providers
 
 NAME=shoreline
 BINARY=terraform-provider-$(NAME)
-VERSION=1.11.1
+VERSION=1.11.2
 
 // NOTE: this only works for 64 bit linux and MacOs ("darwin")
 OS=$(shell uname | tr 'A-Z' 'a-z')
