@@ -752,7 +752,7 @@ var ObjectConfigJsonStr = `
 				                           "cast":       { "params": "string[]", "params_values": "string[]" },
 																	 "force_set":  [ "allowed_entities", "approvers", "is_run_output_persisted",
 																	                 "communication_workspace", "communication_channel" ],
-																	 "skip_diff":  [ "allowedUsers", "isRunOutputPersisted", "approvers" ]
+																	 "skip_diff":  [ "allowedUsers", "isRunOutputPersisted", "approvers", "communication" ]
 			                           },
 			"description":             { "type": "string",     "optional": true },
 			"timeout_ms":              { "type": "unsigned",   "optional": true, "default": 60000 },
@@ -983,10 +983,12 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 				}
 				oldData, newData := d.GetChange(k)
 				if oldData == nil || newData == nil {
+					//appendActionLog(fmt.Sprintf("string_set DiffSuppressFunc (one nil),   oldData: '%+v'   newData: '%+v'\n", oldData, newData))
 					return false
 				}
 				oldSortedList := SortListByStrVal(CastToArray(oldData)) // from []any to []string
 				newSortedList := SortListByStrVal(CastToArray(newData))
+				//appendActionLog(fmt.Sprintf("string_set DiffSuppressFunc (sorted lists),   oldList: '%+v'   newList: '%+v'\n", oldSortedList, newSortedList))
 				return reflect.DeepEqual(oldSortedList, newSortedList)
 			}
 		case "bool":
@@ -1145,6 +1147,10 @@ func NormalizeNotebookJson(object map[string]interface{}, attributes map[string]
 			theMap, isMap := v.(map[string]interface{})
 			if isMap {
 				NormalizeNotebookJson(theMap, nil)
+			} else {
+				if k == "external_params" && v == nil {
+					delete(object, k)
+				}
 			}
 		}
 	}
@@ -1503,6 +1509,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		}
 	}
 
+	// Have to explicitly set "data" first, as it overrides some other attributes (e.g. "approvers")
 	if typ == "notebook" {
 		key := "data"
 		val, exists := d.GetOk(key)
@@ -1524,14 +1531,36 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		}
 	}
 
+	skipKeys := map[string]bool{}
+	if typ == "notebook" {
+		skipKeys["data"] = true
+		skipKeys["approvers"] = true
+		skipKeys["allowed_entities"] = true
+	}
+	orderedAttrs := []string{}
 	for key, _ := range attrs {
+		if skipKeys[key] != true {
+			orderedAttrs = append(orderedAttrs, key)
+		} else {
+			appendActionLog(fmt.Sprintf("Notebook skipping key: %s\n", key))
+		}
+	}
+	if typ == "notebook" {
+		// XXX Hack: work around backend issue with wacky data-dependent ordering
+		aVal, _ := d.Get("allowed_entities").([]interface{})
+		//appendActionLog(fmt.Sprintf("Notebook allowed_entities has len: %v\n", len(aVal)))
+		if len(aVal) > 0 {
+			orderedAttrs = append(orderedAttrs, "allowed_entities")
+			orderedAttrs = append(orderedAttrs, "approvers")
+		} else {
+			orderedAttrs = append(orderedAttrs, "approvers")
+			orderedAttrs = append(orderedAttrs, "allowed_entities")
+		}
+	}
+
+	for _, key := range orderedAttrs {
 		// NOTE: GetOk() has bugs: it checks vs 0/false/"" instead of presence of an explicit value, or even equality to the default
 		val, exists := d.GetOk(key)
-
-		if typ == "notebook" && key == "data" {
-			// set above, as it overrides some explicit keys
-			continue
-		}
 
 		skip, diags := shouldSkipSetField(key, val, name, typ, attrs, ctx, d, meta, doDiff, isCreate, forcedChangeKeys, forcedChangeVals, backendVersion)
 		if diags != nil {
