@@ -785,11 +785,11 @@ var ObjectConfigJsonStr = `
 			"type":                  { "type": "string",   "computed": true, "value": "PRINCIPAL" },
 			"name":                  { "type": "label",    "required": true, "forcenew": true, "skip": true },
 			"identity":              { "type": "string",   "required": true, "primary": true },
-			"view_limit":            { "type": "int",      "optional": true, "default": 0 },
-			"action_limit":          { "type": "int",      "optional": true, "default": 0 },
-			"execute_limit":         { "type": "int",      "optional": true, "default": 0 },
-			"configure_permission":  { "type": "intbool",  "optional": true, "default": false },
-			"administer_permission": { "type": "intbool",  "optional": true, "default": false }
+			"view_limit":            { "type": "int",      "optional": true },
+			"action_limit":          { "type": "int",      "optional": true },
+			"execute_limit":         { "type": "int",      "optional": true },
+			"configure_permission":  { "type": "intbool",  "optional": true },
+			"administer_permission": { "type": "intbool",  "optional": true }
 		}
 	},
 
