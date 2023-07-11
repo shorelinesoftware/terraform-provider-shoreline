@@ -665,7 +665,7 @@ var ObjectConfigJsonStr = `
 			"fire_long_template":     { "type": "string",   "optional": true, "step": "fire_step_class.long_template" },
 			"fire_title_template":    { "type": "string",   "optional": true, "step": "fire_step_class.title_template", "suppress_null_regex": "^fired \\w*$" },
 			"condition_type":         { "type": "command",  "optional": true, "step": "condition_details.[0].condition_type" },
-			"condition_value":        { "type": "string",   "optional": true, "step": "condition_details.[0].condition_value" },
+			"condition_value":        { "type": "string",   "optional": true, "step": "condition_details.[0].condition_value", "match_null": "0" },
 			"metric_name":            { "type": "string",   "optional": true, "step": "condition_details.[0].metric_name" },
 			"raise_for":              { "type": "command",  "optional": true, "step": "condition_details.[0].raise_for", "default": "local" },
 			"check_interval_sec":     { "type": "command",  "optional": true, "step": "check_interval_sec", "default": 1 },
@@ -688,8 +688,8 @@ var ObjectConfigJsonStr = `
 			"family":               { "type": "command", "optional": true, "step": "config_data.family", "default": "custom" },
 			"action_statement":     { "type": "command", "internal": true },
 			"alarm_statement":      { "type": "command", "internal": true },
-			"event_type":           { "type": "string",  "optional": true, "alias": "trigger_source" },
-			"monitor_id":           { "type": "string",  "optional": true, "alias": "external_trigger_id" },
+			"event_type":           { "type": "string",  "optional": true, "step": "event_type", "alias": "trigger_source", "match_null": "shoreline" },
+			"monitor_id":           { "type": "string",  "optional": true, "step": "monitor_id", "alias": "external_trigger_id" },
 			"alarm_resource_query": { "type": "command", "optional": true },
 			"#trigger_source":      { "type": "string",  "optional": true, "preferred_alias": "event_type" },
 			"#external_trigger_id": { "type": "string",  "optional": true, "preferred_alias": "monitor_id" }
@@ -1063,6 +1063,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		suppressNullDiffRegex, isStr := GetNestedValueOrDefault(attrMap, ToKeyPath("suppress_null_regex"), nil).(string)
 		if isStr {
 			sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
+				appendActionLog(fmt.Sprintf("suppressNullDiff check: '%s': '%s' -- vs -- '%s'\n", suppressNullDiffRegex, old, nu))
 				if old == nu {
 					return true
 				}
@@ -1071,6 +1072,22 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 					if matched {
 						return true
 					}
+				}
+				return false
+			}
+		}
+		matchNull := GetNestedValueOrDefault(attrMap, ToKeyPath("match_null"), nil)
+		if matchNull != nil {
+			sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
+				//appendActionLog(fmt.Sprintf("suppressNullMatch check: '%v': '%s' -- vs -- '%s'\n", matchNull, old, nu))
+				if old == nu {
+					return true
+				}
+				if old == "" && nu == matchNull {
+					return true
+				}
+				if nu == "" && old == matchNull {
+					return true
 				}
 				return false
 			}
@@ -1301,6 +1318,7 @@ func setFieldViaOp(typ string, attrs map[string]interface{}, name string, key st
 	//   or let backend return ObjectConfigJsonStr to use.
 	alias, isStr := GetNestedValueOrDefault(attrs, ToKeyPath(key+".alias_out"), nil).(string)
 	if isStr {
+		//appendActionLog(fmt.Sprintf("Setting %s aliased field: '%s'->'%s'.'%s' :: %+v\n", typ, name, alias, key, val))
 		op = fmt.Sprintf("%s.%s = %s", name, alias, valStr)
 	}
 
