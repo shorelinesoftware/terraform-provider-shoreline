@@ -232,7 +232,7 @@ func TestAccResourceAlarm(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "family", "custom"),
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "metric_name", "cpu_usage"),
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "condition_type", "above"),
-					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "condition_value", "0"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "condition_value", "1"),
 				),
 			},
 			{
@@ -258,7 +258,7 @@ func getAccResourceAlarm(prefix string, full bool) string {
 			family                  = "custom"
 			metric_name             = "cpu_usage"
 			condition_type          = "above"
-			condition_value         = "0"
+			condition_value         = "1"
 `
 	if !full {
 		extra = ""
