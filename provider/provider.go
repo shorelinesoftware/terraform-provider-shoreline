@@ -644,7 +644,9 @@ var ObjectConfigJsonStr = `
 			"complete_long_template":  { "type": "string",     "optional": true, "step": "complete_step_class.long_template" },
 			"complete_title_template": { "type": "string",     "optional": true, "step": "complete_step_class.title_template", "suppress_null_regex": "^completed \\w*$" },
 			"allowed_entities":        { "type": "string_set", "optional": true },
-			"allowed_resources_query": { "type": "command",    "optional": true }
+			"allowed_resources_query": { "type": "command",    "optional": true },
+			"communication_workspace": { "type": "string", 	   "optional": true, "min_ver": "14.1.0", "step": "communication_workspace"},
+			"communication_channel":   { "type": "string", 	   "optional": true, "min_ver": "14.1.0", "step": "communication_channel"}
 		}
 	},
 
@@ -677,41 +679,45 @@ var ObjectConfigJsonStr = `
 
 	"bot": {
 		"attributes": {
-			"type":                 { "type": "string",  "computed": true, "value": "BOT" },
-			"name":                 { "type": "label",   "required": true, "forcenew": true, "skip": true },
-			"command":              { "type": "command", "required": true, "primary": true,
+			"type":                    { "type": "string",  "computed": true, "value": "BOT" },
+			"name":                    { "type": "label",   "required": true, "forcenew": true, "skip": true },
+			"command":                 { "type": "command", "required": true, "primary": true,
 				"compound_in": "^\\s*if\\s*(?P<alarm_statement>.*?)\\s*then\\s*(?P<action_statement>.*?)\\s*fi\\s*$",
 				"compound_out": "if ${alarm_statement} then ${action_statement} fi"
 			},
-			"description":          { "type": "string",  "optional": true },
-			"enabled":              { "type": "intbool", "optional": true, "default": false },
-			"family":               { "type": "command", "optional": true, "step": "config_data.family", "default": "custom" },
-			"action_statement":     { "type": "command", "internal": true },
-			"alarm_statement":      { "type": "command", "internal": true },
-			"event_type":           { "type": "string",  "optional": true, "step": "event_type", "alias": "trigger_source", "match_null": "shoreline" },
-			"monitor_id":           { "type": "string",  "optional": true, "step": "monitor_id", "alias": "external_trigger_id" },
-			"alarm_resource_query": { "type": "command", "optional": true },
-			"#trigger_source":      { "type": "string",  "optional": true, "preferred_alias": "event_type" },
-			"#external_trigger_id": { "type": "string",  "optional": true, "preferred_alias": "monitor_id" }
+			"description":             { "type": "string",  "optional": true },
+			"enabled":                 { "type": "intbool", "optional": true, "default": false },
+			"family":                  { "type": "command", "optional": true, "step": "config_data.family", "default": "custom" },
+			"action_statement":        { "type": "command", "internal": true },
+			"alarm_statement":         { "type": "command", "internal": true },
+			"event_type":              { "type": "string",  "optional": true, "step": "event_type", "alias": "trigger_source", "match_null": "shoreline" },
+			"monitor_id":              { "type": "string",  "optional": true, "step": "monitor_id", "alias": "external_trigger_id" },
+			"alarm_resource_query":    { "type": "command", "optional": true },
+			"#trigger_source":         { "type": "string",  "optional": true, "preferred_alias": "event_type" },
+			"#external_trigger_id":    { "type": "string",  "optional": true, "preferred_alias": "monitor_id" },
+			"communication_workspace": { "type": "string", 	"optional": true, "min_ver": "14.1.0", "step": "communication_workspace"},
+			"communication_channel":   { "type": "string", 	"optional": true, "min_ver": "14.1.0", "step": "communication_channel"}
 		}
 	},
 
 	"circuit_breaker": {
 		"attributes": {
-			"type":           { "type": "string",  "computed": true, "value": "CIRCUIT_BREAKER" },
-			"name":           { "type": "label",   "required": true, "forcenew": true, "skip": true },
-			"command":        { "type": "command", "required": true, "primary": true, "forcenew": true,
+			"type":                    { "type": "string",  "computed": true, "value": "CIRCUIT_BREAKER" },
+			"name":                    { "type": "label",   "required": true, "forcenew": true, "skip": true },
+			"command":                 { "type": "command", "required": true, "primary": true, "forcenew": true,
 				"compound_in": "^\\s*(?P<resource_query>.+)\\s*\\|\\s*(?P<action_name>[a-zA-Z_][a-zA-Z_]*)\\s*$",
 				"compound_out": "${resource_query} | ${action_name}"
 			},
-			"breaker_type":   { "type": "string",  "optional": true },
-			"hard_limit":     { "type": "int",     "required": true },
-			"soft_limit":     { "type": "int",     "optional": true, "default": -1 },
-			"duration":       { "type": "time_s",  "required": true },
-			"fail_over":      { "type": "string",  "optional": true },
-			"enabled":        { "type": "bool",    "optional": true, "default": false },
-			"action_name":    { "type": "command", "internal": true },
-			"resource_query": { "type": "command", "internal": true }
+			"breaker_type":            { "type": "string",  "optional": true },
+			"hard_limit":              { "type": "int",     "required": true },
+			"soft_limit":              { "type": "int",     "optional": true, "default": -1 },
+			"duration":                { "type": "time_s",  "required": true },
+			"fail_over":               { "type": "string",  "optional": true },
+			"enabled":                 { "type": "bool",    "optional": true, "default": false },
+			"action_name":             { "type": "command", "internal": true },
+			"resource_query":          { "type": "command", "internal": true },
+			"communication_workspace": { "type": "string",  "optional": true, "min_ver": "14.1.0", "step": "communication_workspace"},
+			"communication_channel":   { "type": "string",  "optional": true, "min_ver": "14.1.0", "step": "communication_channel"}
 		}
 	},
 
