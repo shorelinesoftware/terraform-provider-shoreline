@@ -28,6 +28,8 @@ See the Shoreline [CircuitBreakers Documentation](https://docs.shoreline.io/circ
 ### Optional
 
 - **breaker_type** (String)
+- **communication_channel** (String) A string value denoting the slack channel where notifications related to the object should be sent to.
+- **communication_workspace** (String) A string value denoting the slack workspace where notifications related to the object should be sent to.
 - **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
 - **fail_over** (String)
 - **id** (String) The ID of this resource.

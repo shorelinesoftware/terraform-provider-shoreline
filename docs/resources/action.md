@@ -144,6 +144,8 @@ resource "shoreline_action" "jvm_trace_check_heap" {
 
 - **allowed_entities** (List of String) The list of users who can run an action or notebook. Any user can run if left empty.
 - **allowed_resources_query** (String) The list of resources on which an action or notebook can run. No restriction, if left empty.
+- **communication_channel** (String) A string value denoting the slack channel where notifications related to the object should be sent to.
+- **communication_workspace** (String) A string value denoting the slack workspace where notifications related to the object should be sent to.
 - **complete_long_template** (String) The long description of the Action's completion.
 - **complete_short_template** (String) The short description of the Action's completion.
 - **complete_title_template** (String) UI title of the Action's completion.
