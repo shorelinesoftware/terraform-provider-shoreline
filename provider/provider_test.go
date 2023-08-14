@@ -500,6 +500,54 @@ func getAccResourceFile(prefix string) string {
 `
 }
 
+func TestAccResourceFileContent(t *testing.T) {
+	pre := RandomAlphaPrefix(5)
+
+	resource.UnitTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: getProviderConfigString() + getAccResourceFileContent(pre),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "name", pre+"_ex_file"),
+					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "destination_path", "/tmp/opcp_example.sh"),
+					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "description", "op_copy example script."),
+					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "resource_query", "host"),
+					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "enabled", "false"),
+					// computed values...
+					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "file_length", "58"),
+					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "checksum", "dbfb2a7d8176bd6e3dde256824421de3"),
+					// just check that it's set
+					resource.TestCheckResourceAttrSet("shoreline_file."+pre+"_ex_file", "file_length"),
+				),
+			},
+			{
+				// Test Importer..
+				ResourceName:      "shoreline_file." + pre + "_ex_file",
+				ImportState:       true,
+				ImportStateVerify: true,
+				//// The filename (input_file) is not stored in the Op DB, and so can't be recreated for "import".
+				ImportStateVerifyIgnore: []string{"input_file"},
+				//ExpectError: regexp.MustCompile("input_file"), // Despite tickets to the contrary, this doesn't seem to work with ImportStateVerify
+			},
+		},
+	})
+}
+
+func getAccResourceFileContent(prefix string) string {
+	return `
+		resource "shoreline_file" "` + prefix + `_ex_file" {
+			name = "` + prefix + `_ex_file"
+			input_content = "file(${path.module}/../data/opcp_example.sh)"
+			destination_path = "/tmp/opcp_example.sh"
+			resource_query = "host"
+			description = "op_copy example script."
+			enabled = false
+		}
+`
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // Notebook
