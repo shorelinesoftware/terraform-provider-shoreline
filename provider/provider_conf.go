@@ -30,8 +30,8 @@ var ObjectConfigJsonStr = `
 			"complete_title_template": { "type": "string",     "optional": true, "step": "complete_step_class.title_template", "suppress_null_regex": "^completed \\w*$" },
 			"allowed_entities":        { "type": "string_set", "optional": true },
 			"allowed_resources_query": { "type": "command",    "optional": true },
-			"communication_workspace": { "type": "string", 	   "optional": true, "min_ver": "14.1.0", "step": "communication_workspace"},
-			"communication_channel":   { "type": "string", 	   "optional": true, "min_ver": "14.1.0", "step": "communication_channel"}
+			"communication_workspace": { "type": "string", 	   "optional": true, "min_ver": "14.1.0", "step": "communication.workspace"},
+			"communication_channel":   { "type": "string", 	   "optional": true, "min_ver": "14.1.0", "step": "communication.channel"}
 		}
 	},
 
@@ -80,8 +80,8 @@ var ObjectConfigJsonStr = `
 			"alarm_resource_query":    { "type": "command", "optional": true },
 			"#trigger_source":         { "type": "string",  "optional": true, "preferred_alias": "event_type", "step": "trigger_source", "default": "shoreline" },
 			"#external_trigger_id":    { "type": "string",  "optional": true, "preferred_alias": "monitor_id", "step": "external_trigger_id", "default": "" },
-			"communication_workspace": { "type": "string", 	"optional": true, "min_ver": "14.1.0", "step": "communication_workspace"},
-			"communication_channel":   { "type": "string", 	"optional": true, "min_ver": "14.1.0", "step": "communication_channel"}
+			"communication_workspace": { "type": "string", 	"optional": true, "min_ver": "14.1.0", "step": "communication.workspace"},
+			"communication_channel":   { "type": "string", 	"optional": true, "min_ver": "14.1.0", "step": "communication.channel"}
 		}
 	},
 
@@ -101,8 +101,8 @@ var ObjectConfigJsonStr = `
 			"enabled":                 { "type": "bool",    "optional": true, "default": false },
 			"action_name":             { "type": "command", "internal": true },
 			"resource_query":          { "type": "command", "internal": true },
-			"communication_workspace": { "type": "string",  "optional": true, "min_ver": "14.1.0", "step": "communication_workspace"},
-			"communication_channel":   { "type": "string",  "optional": true, "min_ver": "14.1.0", "step": "communication_channel"}
+			"communication_workspace": { "type": "string",  "optional": true, "min_ver": "14.1.0", "step": "communication.workspace"},
+			"communication_channel":   { "type": "string",  "optional": true, "min_ver": "14.1.0", "step": "communication.channel"}
 		}
 	},
 
@@ -205,6 +205,32 @@ var ObjectConfigJsonStr = `
 			"administer_permission": { "type": "intbool",  "optional": true }
 		}
 	},
+
+	"system_settings": {
+		"internal": {
+			"singleton": "system_settings",
+			"read_single_attr": true,
+			"no_create": true,
+			"no_delete": true
+		},
+		"attributes": {
+			"type":                                             { "type": "string",   "computed": true, "value": "SYSTEM_SETTINGS" },
+			"name":                                             { "type": "label",    "required": true, "forcenew": true, "skip": true },
+			"administrator_grants_create_user":                 { "type": "bool",     "optional": true, "default": true },
+			"administrator_grants_create_user_token":           { "type": "bool",     "optional": true, "default": true },
+			"administrator_grants_regenerate_user_token":       { "type": "bool",     "optional": true, "default": true },
+			"administrator_grants_read_user_token":             { "type": "bool",     "optional": true, "default": true },
+			"approval_feature_enabled":                         { "type": "bool",     "optional": true, "default": true },
+			"notebook_ad_hoc_approval_request_enabled":         { "type": "bool",     "optional": true, "default": true },
+			"approval_editable_allowed_resource_query_enabled": { "type": "bool",     "optional": true, "default": true },
+			"external_audit_storage_enabled":                   { "type": "bool",     "optional": true, "default": false },
+			"external_audit_storage_url":                       { "type": "string",   "optional": true },
+			"external_audit_storage_type":                      { "type": "command",  "optional": true, "default": "ELASTIC" },
+			"external_audit_storage_api_token":                 { "type": "string",   "optional": true },
+			"external_audit_storage_batch_period_sec":          { "type": "int",      "optional": true, "default": 5 }
+		}
+	},
+
 
 	"docs": {
 		"objects": {

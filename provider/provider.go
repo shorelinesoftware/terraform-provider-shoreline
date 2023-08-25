@@ -240,7 +240,7 @@ func CheckUpdateResult(result string) error {
 	}
 
 	actions := []string{"define", "delete", "update"}
-	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook"}
+	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook", "configuration"}
 	for _, act := range actions {
 		for _, typ := range types {
 			key := act + "_" + typ
@@ -248,7 +248,7 @@ func CheckUpdateResult(result string) error {
 			if def != nil {
 				errKey := key + ".error.message"
 				err := GetNestedValueOrDefault(js, ToKeyPath(errKey), nil)
-				if typ == "notebook" && (err == nil || err == "") {
+				if (typ == "notebook" || typ == "configuration") && (err == nil || err == "") {
 					// have to special-case for notebooks
 					err = ""
 					errArray := []string{}
@@ -464,6 +464,7 @@ func New(version string) func() *schema.Provider {
 				"shoreline_notebook":        resourceShorelineObject(ObjectConfigJsonStr, "notebook"),
 				"shoreline_principal":       resourceShorelineObject(ObjectConfigJsonStr, "principal"),
 				"shoreline_resource":        resourceShorelineObject(ObjectConfigJsonStr, "resource"),
+				"shoreline_system_settings": resourceShorelineObject(ObjectConfigJsonStr, "system_settings"),
 			},
 			DataSourcesMap: map[string]*schema.Resource{
 				"shoreline_version": &schema.Resource{
@@ -866,14 +867,15 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 	}
 
 	objDescription := CastToString(GetNestedValueOrDefault(objects, ToKeyPath("docs.objects."+key), ""))
+	objectDef, _ := object.(map[string]interface{})
 
 	return &schema.Resource{
 		Description: "Shoreline " + key + ". " + objDescription,
 
-		CreateContext: resourceShorelineObjectCreate(key, primary, attributes),
-		ReadContext:   resourceShorelineObjectRead(key, attributes),
-		UpdateContext: resourceShorelineObjectUpdate(key, attributes),
-		DeleteContext: resourceShorelineObjectDelete(key),
+		CreateContext: resourceShorelineObjectCreate(key, primary, attributes, objectDef),
+		ReadContext:   resourceShorelineObjectRead(key, attributes, objectDef),
+		UpdateContext: resourceShorelineObjectUpdate(key, attributes, objectDef),
+		DeleteContext: resourceShorelineObjectDelete(key, objectDef),
 		Importer:      &schema.ResourceImporter{State: schema.ImportStatePassthrough},
 
 		Schema: params,
@@ -1203,7 +1205,7 @@ func shouldSkipSetField(key string, val interface{}, name string, typ string, at
 	return false, nil
 }
 
-func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, ctx context.Context, d *schema.ResourceData, meta interface{}, doDiff bool, isCreate bool) diag.Diagnostics {
+func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, objectDef map[string]interface{}, ctx context.Context, d *schema.ResourceData, meta interface{}, doDiff bool, isCreate bool) diag.Diagnostics {
 	var diags diag.Diagnostics
 	name := d.Get("name").(string)
 	// valid-variable-name check (and non-null)
@@ -1421,7 +1423,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	return nil
 }
 
-func resourceShorelineObjectCreate(typ string, primary string, attrs map[string]interface{}) func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceShorelineObjectCreate(typ string, primary string, attrs map[string]interface{}, objectDef map[string]interface{}) func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 		// use the meta value to retrieve your client from the provider configure method
 		// client := meta.(*apiClient)
@@ -1431,6 +1433,23 @@ func resourceShorelineObjectCreate(typ string, primary string, attrs map[string]
 		primaryVal := d.Get(primary)
 		idFromAPI := name
 		appendActionLog(fmt.Sprintf("Creating %s: '%s' (%v) :: %+v\n", typ, idFromAPI, name, d))
+
+		singletonName, _ := GetNestedValueOrDefault(objectDef, ToKeyPath("internal.singleton"), "").(string)
+		appendActionLog(fmt.Sprintf("Creating %s: '%s' (%v) :: %+v -- singletonName: '%v'\n", typ, idFromAPI, name, d, singletonName))
+		if singletonName != "" {
+			if name != singletonName {
+				diags = diag.Errorf("Invalid name for %s singleton object '%s' vs required name '%s'", typ, name, singletonName)
+				return diags
+			}
+		}
+		// TODO return early if "no_create"
+		isNoCreate, _ := GetNestedValueOrDefault(objectDef, ToKeyPath("internal.no_create"), false).(bool)
+		if isNoCreate {
+			// once the object is ok, set the ID to tell terraform it's valid...
+			d.SetId(name)
+			// update the data in terraform
+			return resourceShorelineObjectRead(typ, attrs, objectDef)(ctx, d, meta)
+		}
 
 		primaryValStr := attrValueString(typ, primary, primaryVal, attrs)
 		//appendActionLog(fmt.Sprintf("primaryValStr is ((( %+v )))\n", primaryValStr))
@@ -1454,17 +1473,17 @@ func resourceShorelineObjectCreate(typ string, primary string, attrs map[string]
 			return diags
 		}
 
-		diags = resourceShorelineObjectSetFields(typ, attrs, ctx, d, meta, false, true)
+		diags = resourceShorelineObjectSetFields(typ, attrs, objectDef, ctx, d, meta, false, true)
 		if diags != nil {
 			// delete incomplete object
-			resourceShorelineObjectDelete(typ)(ctx, d, meta)
+			resourceShorelineObjectDelete(typ, objectDef)(ctx, d, meta)
 			return diags
 		}
 
 		// once the object is ok, set the ID to tell terraform it's valid...
 		d.SetId(name)
 		// update the data in terraform
-		return resourceShorelineObjectRead(typ, attrs)(ctx, d, meta)
+		return resourceShorelineObjectRead(typ, attrs, objectDef)(ctx, d, meta)
 	}
 }
 
@@ -1618,7 +1637,38 @@ func resourceShorelineObjectReadSingleAttr(name string, typ string, key string, 
 	return false, val, nil
 }
 
-func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func SetSingleAttrFromRead(typ string, name string, key string, val interface{}, attrs map[string]interface{}, ctx context.Context, d *schema.ResourceData, meta interface{}) {
+	appendActionLog(fmt.Sprintf("Reading (updating local state) %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
+	attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
+	switch attrTyp {
+	case "float":
+		d.Set(key, float64(CastToNumber(val)))
+	case "int":
+		d.Set(key, CastToInt(val))
+	case "unsigned":
+		d.Set(key, CastToInt(val))
+	case "bool":
+		d.Set(key, CastToBool(val))
+	case "intbool":
+		d.Set(key, CastToBool(val))
+	case "string[]":
+		d.Set(key, CastToArray(val))
+	case "string_set":
+		d.Set(key, CastToArray(val))
+	case "string":
+		d.Set(key, CastToString(val))
+	case "command":
+		d.Set(key, CastToString(val))
+	case "label":
+		d.Set(key, CastToString(val))
+	case "time_s":
+		d.Set(key, CastToString(val)+"s")
+	default:
+		d.Set(key, val)
+	}
+}
+
+func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objectDef map[string]interface{}) func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 		// use the meta value to retrieve your client from the provider configure method
 		// client := meta.(*apiClient)
@@ -1632,6 +1682,28 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 		// valid-variable-name check
 		idFromAPI := name
 		appendActionLog(fmt.Sprintf("Reading %s: '%s' (%v) :: %+v\n", typ, idFromAPI, name, d))
+
+		// return early if "no_delete"
+		readSingleAttr, _ := GetNestedValueOrDefault(objectDef, ToKeyPath("internal.read_single_attr"), false).(bool)
+		if readSingleAttr {
+			for key, _ := range attrs {
+				if key == "type" || key == "name" {
+					continue
+				}
+				op := fmt.Sprintf("%s.%s", name, key)
+				js, err := runOpCommandToJson(op)
+				if err != nil {
+					diags = diag.Errorf("Failed to read %s - %s.%s: %s", typ, name, key, err.Error())
+					return diags
+				}
+
+				val := GetNestedValueOrDefault(js, ToKeyPath("get_configuration_attribute"), nil)
+				if val != nil {
+					SetSingleAttrFromRead(typ, name, key, val, attrs, ctx, d, meta)
+				}
+			}
+			return diags
+		}
 
 		op := fmt.Sprintf("list %ss | name = \"%s\"", typ, name)
 		js, err := runOpCommandToJson(op)
@@ -1733,40 +1805,13 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}) func(
 				}
 			}
 
-			appendActionLog(fmt.Sprintf("Reading (updating local state) %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
-			attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
-			switch attrTyp {
-			case "float":
-				d.Set(key, float64(CastToNumber(val)))
-			case "int":
-				d.Set(key, CastToInt(val))
-			case "unsigned":
-				d.Set(key, CastToInt(val))
-			case "bool":
-				d.Set(key, CastToBool(val))
-			case "intbool":
-				d.Set(key, CastToBool(val))
-			case "string[]":
-				d.Set(key, CastToArray(val))
-			case "string_set":
-				d.Set(key, CastToArray(val))
-			case "string":
-				d.Set(key, CastToString(val))
-			case "command":
-				d.Set(key, CastToString(val))
-			case "label":
-				d.Set(key, CastToString(val))
-			case "time_s":
-				d.Set(key, CastToString(val)+"s")
-			default:
-				d.Set(key, val)
-			}
+			SetSingleAttrFromRead(typ, name, key, val, attrs, ctx, d, meta)
 		}
 		return diags
 	}
 }
 
-func resourceShorelineObjectUpdate(typ string, attrs map[string]interface{}) func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceShorelineObjectUpdate(typ string, attrs map[string]interface{}, objectDef map[string]interface{}) func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 		// use the meta value to retrieve your client from the provider configure method
 		// client := meta.(*apiClient)
@@ -1775,18 +1820,18 @@ func resourceShorelineObjectUpdate(typ string, attrs map[string]interface{}) fun
 		name := d.Get("name").(string)
 		appendActionLog(fmt.Sprintf("Updated object '%s': '%s' :: %+v\n", typ, name, d))
 
-		diags = resourceShorelineObjectSetFields(typ, attrs, ctx, d, meta, true, false)
+		diags = resourceShorelineObjectSetFields(typ, attrs, objectDef, ctx, d, meta, true, false)
 		if diags != nil {
 			// TODO delete incomplete object?
 			return diags
 		}
 
 		// update the data in terraform
-		return resourceShorelineObjectRead(typ, attrs)(ctx, d, meta)
+		return resourceShorelineObjectRead(typ, attrs, objectDef)(ctx, d, meta)
 	}
 }
 
-func resourceShorelineObjectDelete(typ string) func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceShorelineObjectDelete(typ string, objectDef map[string]interface{}) func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 		// use the meta value to retrieve your client from the provider configure method
 		// client := meta.(*apiClient)
@@ -1794,6 +1839,12 @@ func resourceShorelineObjectDelete(typ string) func(ctx context.Context, d *sche
 		var diags diag.Diagnostics
 		name := d.Get("name").(string)
 		appendActionLog(fmt.Sprintf("deleting %s: '%s' :: %+v\n", typ, name, d))
+
+		// return early if "no_delete"
+		isNoCreate, _ := GetNestedValueOrDefault(objectDef, ToKeyPath("internal.no_delete"), false).(bool)
+		if isNoCreate {
+			return diags
+		}
 
 		op := fmt.Sprintf("delete %s", name)
 		result, err := runOpCommand(op, true)
