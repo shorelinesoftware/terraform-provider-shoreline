@@ -732,16 +732,24 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 				// special handling because DiffSuppressFunc doesn't natively work for
 				// list-type attributes: https://github.com/hashicorp/terraform-plugin-sdk/issues/477#issue-640263603
 				lastDotIndex := strings.LastIndex(k, ".")
+				kPrefix := k
 				if lastDotIndex != -1 {
-					k = string(k[:lastDotIndex])
+					kPrefix = string(k[:lastDotIndex])
 				}
-				oldData, newData := d.GetChange(k)
+				oldData, newData := d.GetChange(kPrefix)
 				if oldData == nil || newData == nil {
 					//appendActionLog(fmt.Sprintf("string_set DiffSuppressFunc (one nil),   oldData: '%+v'   newData: '%+v'\n", oldData, newData))
 					return false
 				}
+				if strings.HasSuffix(k, ".#") {
+					appendActionLog(fmt.Sprintf("string_set DiffSuppressFunc (checking size),   oldData: '%+v'   newData: '%+v'\n", old, nu))
+					if old != nu {
+						return false
+					}
+				}
 				oldSortedList := SortListByStrVal(CastToArray(oldData)) // from []any to []string
 				newSortedList := SortListByStrVal(CastToArray(newData))
+				//appendActionLog(fmt.Sprintf("string_set DiffSuppressFunc (lists pre-sort),   oldArray: '%+v'   newArray: '%+v'\n", oldData, newData))
 				//appendActionLog(fmt.Sprintf("string_set DiffSuppressFunc (sorted lists),   oldList: '%+v'   newList: '%+v'\n", oldSortedList, newSortedList))
 				return reflect.DeepEqual(oldSortedList, newSortedList)
 			}
