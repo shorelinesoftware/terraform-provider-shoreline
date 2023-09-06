@@ -1312,22 +1312,28 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		}
 	}
 
+	orderedAttrs := []string{}
 	skipKeys := map[string]bool{}
 	if typ == "notebook" {
 		skipKeys["data"] = true
 		skipKeys["approvers"] = true
 		skipKeys["allowed_entities"] = true
 	}
-	orderedAttrs := []string{}
+	if typ == "system_settings" {
+		skipKeys["external_audit_storage_enabled"] = true
+		skipKeys["approval_feature_enabled"] = true
+		skipKeys["approval_editable_allowed_resource_query_enabled"] = true
+	}
+
 	for key, _ := range attrs {
 		if skipKeys[key] != true {
 			orderedAttrs = append(orderedAttrs, key)
 		} else {
-			appendActionLog(fmt.Sprintf("Notebook skipping key: %s\n", key))
+			appendActionLog(fmt.Sprintf("Notebook/System skipping key: %s\n", key))
 		}
 	}
 	if typ == "notebook" {
-		// XXX Hack: work around backend issue with wacky data-dependent ordering
+		// XXX: work around backend issue with data-dependent ordering
 		aVal, _ := d.Get("allowed_entities").([]interface{})
 		//appendActionLog(fmt.Sprintf("Notebook allowed_entities has len: %v\n", len(aVal)))
 		if len(aVal) > 0 {
@@ -1337,6 +1343,17 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 			orderedAttrs = append(orderedAttrs, "approvers")
 			orderedAttrs = append(orderedAttrs, "allowed_entities")
 		}
+	}
+
+	if typ == "system_settings" {
+		// XXX: work around backend issues with data-dependent ordering
+		// external_audit_storage_enabled depends on several other fields...
+		orderedAttrs = append(orderedAttrs, "external_audit_storage_enabled")
+		// approval_feature_enabled depends on slackConfig and notebook_ad_hoc_approval_request_enabled
+		orderedAttrs = append(orderedAttrs, "approval_feature_enabled")
+		// NOTE: approval_editable_allowed_resource_query_enabled depends on approval_feature_enabled
+		//         ERROR: approval_editable_allowed_resource_query_enabled cannot be true if approval_feature_enabled is false.
+		orderedAttrs = append(orderedAttrs, "approval_editable_allowed_resource_query_enabled")
 	}
 
 	for _, key := range orderedAttrs {
