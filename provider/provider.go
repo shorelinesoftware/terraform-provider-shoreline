@@ -1312,22 +1312,28 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		}
 	}
 
+	orderedAttrs := []string{}
 	skipKeys := map[string]bool{}
 	if typ == "notebook" {
 		skipKeys["data"] = true
 		skipKeys["approvers"] = true
 		skipKeys["allowed_entities"] = true
 	}
-	orderedAttrs := []string{}
+	if typ == "system_settings" {
+		skipKeys["external_audit_storage_enabled"] = true
+		skipKeys["approval_feature_enabled"] = true
+		skipKeys["approval_editable_allowed_resource_query_enabled"] = true
+	}
+
 	for key, _ := range attrs {
 		if skipKeys[key] != true {
 			orderedAttrs = append(orderedAttrs, key)
 		} else {
-			appendActionLog(fmt.Sprintf("Notebook skipping key: %s\n", key))
+			appendActionLog(fmt.Sprintf("Notebook/System skipping key: %s\n", key))
 		}
 	}
 	if typ == "notebook" {
-		// XXX Hack: work around backend issue with wacky data-dependent ordering
+		// XXX: work around backend issue with data-dependent ordering
 		aVal, _ := d.Get("allowed_entities").([]interface{})
 		//appendActionLog(fmt.Sprintf("Notebook allowed_entities has len: %v\n", len(aVal)))
 		if len(aVal) > 0 {
@@ -1337,6 +1343,17 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 			orderedAttrs = append(orderedAttrs, "approvers")
 			orderedAttrs = append(orderedAttrs, "allowed_entities")
 		}
+	}
+
+	if typ == "system_settings" {
+		// XXX: work around backend issues with data-dependent ordering
+		// external_audit_storage_enabled depends on several other fields...
+		orderedAttrs = append(orderedAttrs, "external_audit_storage_enabled")
+		// approval_feature_enabled depends on slackConfig and notebook_ad_hoc_approval_request_enabled
+		orderedAttrs = append(orderedAttrs, "approval_feature_enabled")
+		// NOTE: approval_editable_allowed_resource_query_enabled depends on approval_feature_enabled
+		//         ERROR: approval_editable_allowed_resource_query_enabled cannot be true if approval_feature_enabled is false.
+		orderedAttrs = append(orderedAttrs, "approval_editable_allowed_resource_query_enabled")
 	}
 
 	for _, key := range orderedAttrs {
@@ -1398,7 +1415,17 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 			continue
 		}
 
-		changed, diags := setFieldInner(key, val, name, typ, attrs, ctx, d, meta, doDiff, isCreate, forcedChangeKeys, forcedChangeVals)
+		attrsOrAlias := attrs
+		aliasKey, _ := GetNestedValueOrDefault(objectDef, ToKeyPath("internal.alias.key"), "").(string)
+		aliasKeyVal := ""
+		aliasMap := map[string]interface{}{}
+		if aliasKey != "" {
+			aliasKeyVal = d.Get(aliasKey).(string)
+			aliasMap = GetNestedValueOrDefault(objectDef, ToKeyPath("internal.alias.map."+aliasKeyVal), map[string]interface{}{}).(map[string]interface{})
+			attrsOrAlias = aliasMap
+		}
+
+		changed, diags := setFieldInner(key, val, name, typ, attrsOrAlias, ctx, d, meta, doDiff, isCreate, forcedChangeKeys, forcedChangeVals)
 		if diags != nil {
 			return diags
 		}
@@ -1496,22 +1523,28 @@ func resourceShorelineObjectCreate(typ string, primary string, attrs map[string]
 }
 
 // returns skip, value, diagnostics
-func resourceShorelineObjectReadSingleAttr(name string, typ string, key string, attrs map[string]interface{}, record map[string]interface{}, stepsJs map[string]interface{}, d *schema.ResourceData) (bool, interface{}, diag.Diagnostics) {
+func resourceShorelineObjectReadSingleAttr(name string, typ string, key string, attrs map[string]interface{}, record map[string]interface{}, stepsJs map[string]interface{}, d *schema.ResourceData, alias string, aliasMap map[string]interface{}) (bool, interface{}, diag.Diagnostics) {
 	var val interface{}
 	attr := GetNestedValueOrDefault(attrs, ToKeyPath(key), map[string]interface{}{})
+	if alias != "" {
+		aliasedAttr := GetNestedValueOrDefault(aliasMap, ToKeyPath(key), nil)
+		if aliasedAttr != nil {
+			attr = aliasedAttr
+		}
+	}
 
 	if strings.HasPrefix(key, "#") {
 		// skip commented fields
 		return true, nil, nil
 	}
 
-	internal := GetNestedValueOrDefault(attrs, ToKeyPath(key+".internal"), false).(bool)
+	internal := GetNestedValueOrDefault(attr, ToKeyPath("internal"), false).(bool)
 	if internal {
 		// skip internal fields
 		return true, nil, nil
 	}
 
-	compoundValue, isStr := GetNestedValueOrDefault(attrs, ToKeyPath(key+".compound_out"), nil).(string)
+	compoundValue, isStr := GetNestedValueOrDefault(attr, ToKeyPath("compound_out"), nil).(string)
 	if isStr {
 		fullVal := compoundValue
 		re := regexp.MustCompile(`\$\{\w\w*\}`)
@@ -1532,7 +1565,7 @@ func resourceShorelineObjectReadSingleAttr(name string, typ string, key string, 
 			}
 
 			// special handling (notebooks)... field is base64 outgoing, and json incoming
-			attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
+			attrTyp := GetNestedValueOrDefault(attr, ToKeyPath("type"), "string").(string)
 			if attrTyp == "b64json" {
 				// The code below that omits fields/objects will modify 'val', so we make a copy
 				val = DeepCopy(val)
@@ -1763,8 +1796,22 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 			return diags
 		}
 
+		aliasKey, _ := GetNestedValueOrDefault(objectDef, ToKeyPath("internal.alias.key"), "").(string)
+		aliasKeyVal := ""
+		aliasMap := map[string]interface{}{}
+		if aliasKey != "" {
+			_, aliasKeyValIfc, diags := resourceShorelineObjectReadSingleAttr(name, typ, aliasKey, attrs, record, stepsJs, d, "", nil)
+			if diags != nil {
+				return diags
+			}
+			aliasKeyVal, _ = aliasKeyValIfc.(string)
+			aliasMap = GetNestedValueOrDefault(objectDef, ToKeyPath("internal.alias.map."+aliasKeyVal), map[string]interface{}{}).(map[string]interface{})
+		}
+
 		for key, _ := range attrs {
-			skip, val, diags := resourceShorelineObjectReadSingleAttr(name, typ, key, attrs, record, stepsJs, d)
+			curAlias, _ := GetNestedValueOrDefault(aliasMap, ToKeyPath(key+".alias_out"), "").(string)
+			skip, val, diags := resourceShorelineObjectReadSingleAttr(name, typ, key, attrs, record, stepsJs, d, curAlias, aliasMap)
+
 			if diags != nil {
 				return diags
 			}
@@ -1789,7 +1836,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 				appendActionLog(fmt.Sprintf("Reading deprecated/renamed field : %s: '%s'.'%s'->'%s'  '%v'\n", typ, name, key, deprecatedFor, val))
 				_, isSet := d.GetOk(key)
 				if isSet {
-					_, val, diags = resourceShorelineObjectReadSingleAttr(name, typ, key, attrs, record, stepsJs, d)
+					_, val, diags = resourceShorelineObjectReadSingleAttr(name, typ, key, attrs, record, stepsJs, d, curAlias, aliasMap)
 				}
 			}
 			if val == nil {

@@ -123,22 +123,43 @@ var ObjectConfigJsonStr = `
 	},
 
 	"integration": {
+		"internal": {
+			"alias": {
+				"key": "service_name",
+				"map": {
+					"newrelic": {
+						"api_key": { "type": "string",   "optional": true, "step": "params_unpack.incident_management_api_key", "alias_out": "incident_management_api_key" },
+						"api_url": { "type": "string",   "optional": true, "step": "params_unpack.incident_management_url",     "alias_out": "incident_management_url" }
+					},
+					"elastic": {
+						"api_key": { "type": "string",   "optional": true, "step": "params_unpack.api_token", "alias_out": "api_token" },
+						"api_url": { "type": "string",   "optional": true, "step": "params_unpack.url",       "alias_out": "url" }
+					},
+					"fluentbit_elastic": {
+						"api_key": { "type": "string",   "optional": true, "step": "params_unpack.api_token", "alias_out": "api_token" },
+						"api_url": { "type": "string",   "optional": true, "step": "params_unpack.url",       "alias_out": "url" }
+					}
+				}
+			}
+		},
 		"attributes": {
 			"type":                        { "type": "string",   "computed": true, "value": "INTEGRATION" },
 			"name":                        { "type": "label",    "required": true, "forcenew": true, "skip": true },
 			"service_name":                { "type": "command",  "required": true, "primary": true, "forcenew": true, "skip": true },
 			"serial_number":               { "type": "string",   "required": true },
 			"permissions_user":            { "type": "string",   "optional": true, "match_null": "Shoreline" },
+			"api_url":                     { "type": "string",   "optional": true, "step": "params_unpack.api_url" },
 			"api_key":                     { "type": "string",   "optional": true, "step": "params_unpack.api_key" },
 			"app_key":                     { "type": "string",   "optional": true, "step": "params_unpack.app_key" },
 			"dashboard_name":              { "type": "string",   "optional": true, "step": "params_unpack.dashboard_name" },
 			"webhook_name":                { "type": "string",   "optional": true, "step": "params_unpack.webhook_name" },
 			"##description":               { "type": "string",   "optional": true },
-			"##account_id":                  { "type": "string",   "optional": true },
-			"##insights_collector_url":      { "type": "string",   "required": true },
-			"##insights_collector_api_key":  { "type": "string",   "required": true },
-			"##incident_management_url":     { "type": "string",   "optional": true },
-			"##incident_management_api_key": { "type": "string",   "optional": true },
+
+			"account_id":                  { "type": "string",   "optional": true, "step": "params_unpack.account_id" },
+			"insights_collector_url":      { "type": "string",   "optional": true, "step": "params_unpack.insights_collector_url" },
+			"insights_collector_api_key":  { "type": "string",   "optional": true, "step": "params_unpack.insights_collector_api_key" },
+			"#incident_management_url":     { "type": "string",   "optional": true, "step": "params_unpack.incident_management_url" },
+			"#incident_management_api_key": { "type": "string",   "optional": true, "step": "params_unpack.incident_management_api_key" },
 			"enabled":                     { "type": "intbool",  "optional": true, "default": false }
 		}
 	},
@@ -224,9 +245,9 @@ var ObjectConfigJsonStr = `
 			"notebook_ad_hoc_approval_request_enabled":         { "type": "bool",     "optional": true, "default": true },
 			"approval_editable_allowed_resource_query_enabled": { "type": "bool",     "optional": true, "default": true },
 			"external_audit_storage_enabled":                   { "type": "bool",     "optional": true, "default": false },
-			"external_audit_storage_url":                       { "type": "string",   "optional": true },
 			"external_audit_storage_type":                      { "type": "command",  "optional": true, "default": "ELASTIC" },
-			"external_audit_storage_api_token":                 { "type": "string",   "optional": true },
+			"#external_audit_storage_url":                       { "type": "string",   "optional": true },
+			"#external_audit_storage_api_token":                 { "type": "string",   "optional": true },
 			"external_audit_storage_batch_period_sec":          { "type": "int",      "optional": true, "default": 5 }
 		}
 	},
@@ -243,7 +264,8 @@ var ObjectConfigJsonStr = `
 			"metric":    "A periodic measurement of a system property.\n\nSee the Shoreline [Metrics Documentation](https://docs.shoreline.io/metrics) for more info.",
 			"notebook":  "An interactive notebook of Op commands and user documentation .\n\nSee the Shoreline [Notebook Documentation](https://docs.shoreline.io/ui/notebooks) for more info.",
 			"principal": "An authorization group (e.g. Okta groups). Note: Admin privilege (in Shoreline) to create principal objects.",
-			"resource":  "A server or compute resource in the system (e.g. host, pod, container).\n\nSee the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info."
+			"resource":  "A server or compute resource in the system (e.g. host, pod, container).\n\nSee the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info.",
+			"system_settings":  "System-level settings. Note: there must only be one instance of this terraform resource named 'system_settings'.\n\nSee the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/settings) for more info."
 		},
 
 		"attributes": {
@@ -308,11 +330,27 @@ var ObjectConfigJsonStr = `
 			"communication_workspace": "A string value denoting the slack workspace where notifications related to the object should be sent to.",
 			"communication_channel":   "A string value denoting the slack channel where notifications related to the object should be sent to.",
 			"service_name":            "The name of a 3rd-party service to integrate with (e.g. 'datadog', or 'newrelic').",
+			"account_id":              "Account ID for a 3rd-party service integration.",
 			"api_key":                 "API key for a 3rd-party service integration.",
+			"api_url":                 "API url for a 3rd-party service integration.",
 			"app_key":                 "Application key for a 3rd-party service integration.",
+			"insights_collector_url":  "Insights url for a 3rd-party service integration.",
+			"insights_collector_api_key": "Insights key for a 3rd-party service integration.",
 			"permissions_user":        "The user which 3rd-party service integration remediations run as (default 'Shoreline').",
 			"dashboard_name":          "The name of a dashboard for 3rd-party service integration (datadog).",
-			"webhook_name":            "The name of a webhook for 3rd-party service integration (datadog)."
+			"webhook_name":            "The name of a webhook for 3rd-party service integration (datadog).",
+			"administrator_grants_create_user":                 "System setting controlling if administrators can create users.",
+			"administrator_grants_create_user_token":           "System setting controlling if administrators can create user access tokens.",
+			"administrator_grants_regenerate_user_token":       "System setting controlling if administrators can update user access tokens.",
+			"administrator_grants_read_user_token":             "System setting controlling if administrators can view user access tokens.",
+			"approval_feature_enabled":                         "System setting controlling if notebook approvals are enabled.",
+			"notebook_ad_hoc_approval_request_enabled":         "System setting controlling if approvals are enabled for ad-hoc notebook execution.",
+			"approval_editable_allowed_resource_query_enabled": "System setting controlling if notebook resource queries can be modified on approved executions.",
+			"external_audit_storage_enabled":                   "System setting controlling if audit information is stored in an alternate location.",
+			"external_audit_storage_url":                       "System setting for alternate audit storage URL.",
+			"external_audit_storage_type":                      "System setting for alternate audit storage type (e.g. 'ELASTIC').",
+			"external_audit_storage_api_token":                 "System setting for alternate audit storage API access token.",
+			"external_audit_storage_batch_period_sec":          "System setting for alternate audit storage batching interval (in seconds)."
 		}
 	}
 }
