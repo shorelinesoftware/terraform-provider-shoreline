@@ -123,22 +123,43 @@ var ObjectConfigJsonStr = `
 	},
 
 	"integration": {
+		"internal": {
+			"alias": {
+				"key": "service_name",
+				"map": {
+					"newrelic": {
+						"api_key": { "type": "string",   "optional": true, "step": "params_unpack.incident_management_api_key", "alias_out": "incident_management_api_key" },
+						"api_url": { "type": "string",   "optional": true, "step": "params_unpack.incident_management_url",     "alias_out": "incident_management_url" }
+					},
+					"elastic": {
+						"api_key": { "type": "string",   "optional": true, "step": "params_unpack.api_token", "alias_out": "api_token" },
+						"api_url": { "type": "string",   "optional": true, "step": "params_unpack.url",       "alias_out": "url" }
+					},
+					"fluentbit_elastic": {
+						"api_key": { "type": "string",   "optional": true, "step": "params_unpack.api_token", "alias_out": "api_token" },
+						"api_url": { "type": "string",   "optional": true, "step": "params_unpack.url",       "alias_out": "url" }
+					}
+				}
+			}
+		},
 		"attributes": {
 			"type":                        { "type": "string",   "computed": true, "value": "INTEGRATION" },
 			"name":                        { "type": "label",    "required": true, "forcenew": true, "skip": true },
 			"service_name":                { "type": "command",  "required": true, "primary": true, "forcenew": true, "skip": true },
 			"serial_number":               { "type": "string",   "required": true },
 			"permissions_user":            { "type": "string",   "optional": true, "match_null": "Shoreline" },
+			"api_url":                     { "type": "string",   "optional": true, "step": "params_unpack.api_url" },
 			"api_key":                     { "type": "string",   "optional": true, "step": "params_unpack.api_key" },
 			"app_key":                     { "type": "string",   "optional": true, "step": "params_unpack.app_key" },
 			"dashboard_name":              { "type": "string",   "optional": true, "step": "params_unpack.dashboard_name" },
 			"webhook_name":                { "type": "string",   "optional": true, "step": "params_unpack.webhook_name" },
 			"##description":               { "type": "string",   "optional": true },
-			"##account_id":                  { "type": "string",   "optional": true },
-			"##insights_collector_url":      { "type": "string",   "required": true },
-			"##insights_collector_api_key":  { "type": "string",   "required": true },
-			"##incident_management_url":     { "type": "string",   "optional": true },
-			"##incident_management_api_key": { "type": "string",   "optional": true },
+
+			"account_id":                  { "type": "string",   "optional": true, "step": "params_unpack.account_id" },
+			"insights_collector_url":      { "type": "string",   "optional": true, "step": "params_unpack.insights_collector_url" },
+			"insights_collector_api_key":  { "type": "string",   "optional": true, "step": "params_unpack.insights_collector_api_key" },
+			"#incident_management_url":     { "type": "string",   "optional": true, "step": "params_unpack.incident_management_url" },
+			"#incident_management_api_key": { "type": "string",   "optional": true, "step": "params_unpack.incident_management_api_key" },
 			"enabled":                     { "type": "intbool",  "optional": true, "default": false }
 		}
 	},
@@ -309,8 +330,12 @@ var ObjectConfigJsonStr = `
 			"communication_workspace": "A string value denoting the slack workspace where notifications related to the object should be sent to.",
 			"communication_channel":   "A string value denoting the slack channel where notifications related to the object should be sent to.",
 			"service_name":            "The name of a 3rd-party service to integrate with (e.g. 'datadog', or 'newrelic').",
+			"account_id":              "Account ID for a 3rd-party service integration.",
 			"api_key":                 "API key for a 3rd-party service integration.",
+			"api_url":                 "API url for a 3rd-party service integration.",
 			"app_key":                 "Application key for a 3rd-party service integration.",
+			"insights_collector_url":  "Insights url for a 3rd-party service integration.",
+			"insights_collector_api_key": "Insights key for a 3rd-party service integration.",
 			"permissions_user":        "The user which 3rd-party service integration remediations run as (default 'Shoreline').",
 			"dashboard_name":          "The name of a dashboard for 3rd-party service integration (datadog).",
 			"webhook_name":            "The name of a webhook for 3rd-party service integration (datadog).",
