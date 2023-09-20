@@ -166,6 +166,7 @@ Now, anytime JVM memory exceeds our defined threshold the JVM is automatically r
 - **event_type** (String) Used to tag 'datadog' monitor triggers vs 'shoreline' alarms (default).
 - **family** (String) General class for an Action or Bot (e.g., custom, standard, metric, or system check). Defaults to `custom`.
 - **id** (String) The ID of this resource.
+- **integration_name** (String) The name/symbol of a Shoreline integration involved in triggering the bot.
 - **monitor_id** (String) For 'datadog' monitor triggered bots, the DD monitor identifier.
 
 ### Read-Only

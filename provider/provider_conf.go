@@ -81,7 +81,8 @@ var ObjectConfigJsonStr = `
 			"#trigger_source":         { "type": "string",  "optional": true, "preferred_alias": "event_type", "step": "trigger_source", "default": "shoreline" },
 			"#external_trigger_id":    { "type": "string",  "optional": true, "preferred_alias": "monitor_id", "step": "external_trigger_id", "default": "" },
 			"communication_workspace": { "type": "string", 	"optional": true, "min_ver": "14.1.0", "step": "communication.workspace"},
-			"communication_channel":   { "type": "string", 	"optional": true, "min_ver": "14.1.0", "step": "communication.channel"}
+			"communication_channel":   { "type": "string", 	"optional": true, "min_ver": "14.1.0", "step": "communication.channel"},
+			"integration_name":        { "type": "string", 	"optional": true, "min_ver": "15.0.0", "step": "integration_name"}
 		}
 	},
 
@@ -350,7 +351,8 @@ var ObjectConfigJsonStr = `
 			"external_audit_storage_url":                       "System setting for alternate audit storage URL.",
 			"external_audit_storage_type":                      "System setting for alternate audit storage type (e.g. 'ELASTIC').",
 			"external_audit_storage_api_token":                 "System setting for alternate audit storage API access token.",
-			"external_audit_storage_batch_period_sec":          "System setting for alternate audit storage batching interval (in seconds)."
+			"external_audit_storage_batch_period_sec":          "System setting for alternate audit storage batching interval (in seconds).",
+			"integration_name":                                 "The name/symbol of a Shoreline integration involved in triggering the bot."
 		}
 	}
 }
