@@ -82,7 +82,7 @@ var ObjectConfigJsonStr = `
 			"#external_trigger_id":    { "type": "string",  "optional": true, "preferred_alias": "monitor_id", "step": "external_trigger_id", "default": "" },
 			"communication_workspace": { "type": "string", 	"optional": true, "min_ver": "14.1.0", "step": "communication.workspace"},
 			"communication_channel":   { "type": "string", 	"optional": true, "min_ver": "14.1.0", "step": "communication.channel"},
-			"integration_name":        { "type": "string", 	"optional": true, "min_ver": "14.1.1", "step": "integration_name"}
+			"integration_name":        { "type": "string", 	"optional": true, "min_ver": "15.0.0", "step": "integration_name"}
 		}
 	},
 
