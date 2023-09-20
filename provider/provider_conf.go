@@ -351,7 +351,8 @@ var ObjectConfigJsonStr = `
 			"external_audit_storage_url":                       "System setting for alternate audit storage URL.",
 			"external_audit_storage_type":                      "System setting for alternate audit storage type (e.g. 'ELASTIC').",
 			"external_audit_storage_api_token":                 "System setting for alternate audit storage API access token.",
-			"external_audit_storage_batch_period_sec":          "System setting for alternate audit storage batching interval (in seconds)."
+			"external_audit_storage_batch_period_sec":          "System setting for alternate audit storage batching interval (in seconds).",
+			"integration_name":                                 "The name/symbol of a Shoreline integration."
 		}
 	}
 }
