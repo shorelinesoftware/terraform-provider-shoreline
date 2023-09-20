@@ -81,7 +81,8 @@ var ObjectConfigJsonStr = `
 			"#trigger_source":         { "type": "string",  "optional": true, "preferred_alias": "event_type", "step": "trigger_source", "default": "shoreline" },
 			"#external_trigger_id":    { "type": "string",  "optional": true, "preferred_alias": "monitor_id", "step": "external_trigger_id", "default": "" },
 			"communication_workspace": { "type": "string", 	"optional": true, "min_ver": "14.1.0", "step": "communication.workspace"},
-			"communication_channel":   { "type": "string", 	"optional": true, "min_ver": "14.1.0", "step": "communication.channel"}
+			"communication_channel":   { "type": "string", 	"optional": true, "min_ver": "14.1.0", "step": "communication.channel"},
+			"integration_name":        { "type": "string", 	"optional": true, "min_ver": "14.1.1", "step": "integration_name"}
 		}
 	},
 
