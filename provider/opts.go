@@ -12,7 +12,7 @@ import (
 	zstd "github.com/klauspost/compress/zstd"
 	"github.com/spf13/viper"
 	"io"
-	"io/ioutil"
+	//"io/ioutil"
 	prand "math/rand"
 	"net/http"
 	"os"
@@ -259,44 +259,47 @@ func ExecuteOpCommand(GlobalOpts *CliOpts, expr string) (string, error) {
 	}
 }
 
-// Returns base64 data, success/failure, file size, md5 checksum.
-func FileToBase64(filename string, skipData bool) (string, bool, int64, string) {
-	encoded := ""
+// Returns compressed base64 data, file size, md5 checksum.
+func CompressedBase64(content []byte) string {
+	// Create a writer that caches compressors.
+	// For this operation type we supply a nil Reader.
+	var encoder, _ = zstd.NewWriter(nil)
+
+	// Compress a buffer.
+	// If you have a destination buffer, the allocation in the call can also be eliminated.
+	compressed := encoder.EncodeAll(content, make([]byte, 0, len(content)))
+
+	encoded := base64.StdEncoding.EncodeToString(compressed)
+	return encoded
+}
+
+func ContentMd5AndSize(content []byte) (string, int64) {
+	// streaming md5sum
+	hash := md5.New()
+	hash.Write(content)
+	md5Sum := fmt.Sprintf("%x", hash.Sum(nil))
+	return md5Sum, int64(len(content))
+}
+
+func FileMd5AndSize(filename string) (error, string, int64) {
 	fstat, err := os.Stat(filename)
 	if err != nil || fstat.Size() == 0 { // skip non-existent or empty files
-		return "", false, 0, ""
+		return err, "", 0
 	}
 	fileLen := fstat.Size()
 	file, err := os.Open(filename)
 	if err != nil {
-		return "", false, 0, ""
+		return err, "", 0
 	}
 	defer file.Close()
 	// streaming md5sum
 	hash := md5.New()
 	_, err = io.Copy(hash, file)
 	if err != nil {
-		return "", false, 0, ""
+		return err, "", 0
 	}
 	md5Sum := fmt.Sprintf("%x", hash.Sum(nil))
-
-	if !skipData {
-		raw, err := ioutil.ReadFile(filename)
-		if err != nil {
-			//logging.WriteMsgColor(Red, "ERROR: Couldn't read input file: %s !\n", filename)
-			return "", false, 0, ""
-		}
-		// Create a writer that caches compressors.
-		// For this operation type we supply a nil Reader.
-		var encoder, _ = zstd.NewWriter(nil)
-
-		// Compress a buffer.
-		// If you have a destination buffer, the allocation in the call can also be eliminated.
-		compressed := encoder.EncodeAll(raw, make([]byte, 0, len(raw)))
-
-		encoded = base64.StdEncoding.EncodeToString(compressed)
-	}
-	return encoded, true, fileLen, md5Sum
+	return nil, md5Sum, fileLen
 }
 
 ////////////////////////////////////////////////////////////
@@ -357,6 +360,22 @@ func UploadFileHttps(src string, dst string, token string) error {
 		fmt.Printf("Uploaded file '%s' (%d bytes) status: %v - %v\n", src, fileSize, response.StatusCode, http.StatusText(response.StatusCode))
 	}
 	return nil
+}
+
+func UploadFileHttpsFromString(data string, dst string, token string) error {
+	f, err := os.CreateTemp("", "tmpfile-") // in Go version older than 1.17 you can use ioutil.TempFile
+	if err != nil {
+		return err
+	}
+	// close and remove the temporary file at the end of the program
+	defer f.Close()
+	defer os.Remove(f.Name())
+	// write data to the temporary file
+	if _, err := f.Write([]byte(data)); err != nil {
+		return err
+	}
+	err = UploadFileHttps(f.Name(), dst, token)
+	return err
 }
 
 func DeleteFileHttps(dst string, token string) error {

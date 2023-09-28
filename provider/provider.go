@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"reflect"
 	"regexp"
@@ -798,6 +799,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		sch.ForceNew = GetNestedValueOrDefault(attrMap, ToKeyPath("forcenew"), false).(bool)
 		deprecated := GetNestedValueOrDefault(attrMap, ToKeyPath("deprecated"), false).(bool)
 		deprField := GetNestedValueOrDefault(attrMap, ToKeyPath("deprecated_for"), "").(string)
+		conflicts := GetNestedValueOrDefault(attrMap, ToKeyPath("conflicts"), []interface{}{}).([]interface{})
 		if deprecated {
 			sch.Deprecated = fmt.Sprintf("Field '%s' is obsolete.", k)
 			sch.Description = "**Deprecated** " + sch.Deprecated + " " + description
@@ -808,6 +810,13 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 			sch.Description = "**Deprecated** " + sch.Deprecated + " " + description
 			// XXX does this need diff suppression?
 			//sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool { }
+		}
+		if len(conflicts) > 0 {
+			confArr := []string{}
+			for _, c := range conflicts {
+				confArr = append(confArr, c.(string))
+			}
+			sch.ConflictsWith = confArr
 		}
 		replacesField := GetNestedValueOrDefault(attrMap, ToKeyPath("replaces"), "").(string)
 		if replacesField != "" {
@@ -1250,41 +1259,71 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	}
 
 	if typ == "file" {
-		infile, exists := d.GetOk("input_file")
-		if exists {
-			uri := getRemoteFileAttr(name, "uri")
-			fileIsRemote := true
-			if uri == "" {
-				fileIsRemote = false
-			}
-			base64Data, ok, fileSize, md5sum := FileToBase64(infile.(string), fileIsRemote)
-			if fileIsRemote {
-				base64Data = fmt.Sprintf(":%s", uri)
-			}
-			if ok {
-				appendActionLog(fmt.Sprintf("file_length is %d (%v)\n", int(fileSize), fileSize))
-				if forcedChangeKeys["file_data"] {
-					forcedChangeVals["file_length"] = int(fileSize)
-					forcedChangeVals["checksum"] = md5sum
-					forcedChangeVals["file_data"] = base64Data
+		var err error
+		var base64Data string
+		var md5sum string
+		var fileSize int64
+
+		infileParam, fileParamExists := d.GetOk("input_file")
+		contentParam, contentParamExists := d.GetOk("inline_data")
+
+		infile := infileParam.(string)
+		content := []byte(contentParam.(string))
+
+		uri := getRemoteFileAttr(name, "uri")
+		fileIsRemote := true
+		if uri == "" {
+			fileIsRemote = false
+		}
+
+		if fileParamExists {
+			err, md5sum, fileSize = FileMd5AndSize(infile)
+			if !fileIsRemote {
+				content, err = ioutil.ReadFile(infile)
+				if err != nil {
+					diags = diag.Errorf("Failed to read file object %s: %s", infile, err)
+					return diags
 				}
-				d.Set("file_length", int(fileSize))
-				d.Set("checksum", md5sum)
-				d.Set("file_data", base64Data)
-				if fileIsRemote {
-					presignedUrl := getRemoteFileAttr(name, "presigned_put")
-					if presignedUrl == "" {
-						diags = diag.Errorf("Failed to get presigned url for file object %s", name)
-						return diags
-					}
-					err := UploadFileHttps(infile.(string), presignedUrl, "")
-					if err != nil {
-						diags = diag.Errorf("Failed to upload to presigned url for file object %s -- %s", name, err.Error())
-						return diags
-					}
+			}
+		} else if contentParamExists {
+			md5sum, fileSize = ContentMd5AndSize(content)
+		} else {
+			diags = diag.Errorf("Must specify input_file or inline_data")
+			return diags
+		}
+
+		if fileIsRemote {
+			base64Data = fmt.Sprintf(":%s", uri)
+		} else {
+			base64Data = CompressedBase64(content)
+		}
+
+		appendActionLog(fmt.Sprintf("file_length is %d (%v)\n", int(fileSize), fileSize))
+		if forcedChangeKeys["file_data"] {
+			forcedChangeVals["file_length"] = int(fileSize)
+			forcedChangeVals["checksum"] = md5sum
+			forcedChangeVals["file_data"] = base64Data
+		}
+		d.Set("file_length", int(fileSize))
+		d.Set("checksum", md5sum)
+		d.Set("file_data", base64Data)
+		if fileIsRemote {
+			presignedUrl := getRemoteFileAttr(name, "presigned_put")
+			if presignedUrl == "" {
+				diags = diag.Errorf("Failed to get presigned url for file object %s", name)
+				return diags
+			}
+			var err error
+			if contentParamExists {
+				err = UploadFileHttpsFromString(string(content), presignedUrl, "")
+				if err == nil {
+					d.Set("inline_data", string(content))
 				}
 			} else {
-				diags = diag.Errorf("Failed to read file object %s", infile)
+				err = UploadFileHttps(infile, presignedUrl, "")
+			}
+			if err != nil {
+				diags = diag.Errorf("Failed to upload to presigned url for file object %s -- %s", name, err.Error())
 				return diags
 			}
 		}
@@ -1850,7 +1889,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 					// XXX error?
 					appendActionLog(fmt.Sprintf("Reading (failed/empty) %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
 					if typ == "file" {
-						if key == "input_file" || key == "md5" {
+						if key == "input_file" || key == "md5" || key == "inline_data" {
 							continue
 						}
 					}
