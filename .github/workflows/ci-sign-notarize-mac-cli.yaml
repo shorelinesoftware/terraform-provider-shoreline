@@ -1,5 +1,5 @@
 name: Sign and Notarize Mac terraform
-on: 
+on:
   workflow_dispatch:
     inputs:
       version:
@@ -52,7 +52,7 @@ jobs:
                "output_path":  "./terraform-provider-shoreline_'"${version}"'_darwin_amd64.dmg",
                "volume_name":  "terraform-provider-shoreline_'"${version}"'_darwin_amd64.command"
             }
-          }' | jq '' > gon.json
+          }' | jq '.' > gon.json
           gon -log-level=debug -log-json ./gon.json
       - name: Sign and notarize mac M1 cli
         env:
@@ -76,7 +76,7 @@ jobs:
                "output_path":  "./terraform-provider-shoreline_'"${version}"'_darwin_arm64.dmg",
                "volume_name":  "terraform-provider-shoreline_'"${version}"'_darwin_arm64.command"
             }
-          }' | jq '' > gon.json
+          }' | jq '.' > gon.json
           gon -log-level=debug -log-json ./gon.json
       - name: Upload signed cli to S3
         env:
