@@ -65,6 +65,7 @@ resource "shoreline_notebook" "my_notebook" {
 - **communication_channel** (String) A string value denoting the slack channel where notifications related to the object should be sent to.
 - **communication_workspace** (String) A string value denoting the slack workspace where notifications related to the object should be sent to.
 - **description** (String) A user-friendly explanation of an object.
+- **editors** (List of String) The list of users who can edit a notebook if they have configure permission. Any user with configure permission can edit if left empty.
 - **id** (String) The ID of this resource.
 - **is_run_output_persisted** (Boolean) A boolean value denoting whether or not cell outputs should be persisted when running a notebook Defaults to `true`.
 - **resource_query** (String, Deprecated) **Deprecated** Please use 'allowed_resources_query' instead. A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
