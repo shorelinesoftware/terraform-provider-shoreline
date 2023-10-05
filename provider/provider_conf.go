@@ -197,8 +197,9 @@ var ObjectConfigJsonStr = `
 			"resource_query":          { "type": "string",     "optional": true, "deprecated_for": "allowed_resources_query" },
 			"is_run_output_persisted": { "type": "bool",       "optional": true, "step": "is_run_output_persisted", "default": true, "min_ver": "12.3.0" },
 			"allowed_resources_query": { "type": "command",    "optional": true, "replaces": "resource_query", "min_ver": "12.3.0" },
-			"communication_workspace": { "type": "string",     "optional": true, "min_ver": "12.5.0", "step": "communication_workspace"},
-			"communication_channel":   { "type": "string",     "optional": true, "min_ver": "12.5.0", "step": "communication_channel"}
+			"communication_workspace": { "type": "string",     "optional": true, "min_ver": "12.5.0", "step": "communication_workspace" },
+			"communication_channel":   { "type": "string",     "optional": true, "min_ver": "12.5.0", "step": "communication_channel" },
+			"labels":				   { "type": "string_set", "optional": true, "min_ver": "16.0", "step": "labels" }
 		}
 	},
 
@@ -308,8 +309,9 @@ var ObjectConfigJsonStr = `
 			"fire_title_template":     "UI title of the Alarm's triggering condition.",
 			"identity":                "The email address or provider's (e.g. Okta) group-name for a permissions group.",
 			"input_file":              "The local source of a distributed File object. (conflicts with inline_data)",
-			"inline_data":              "The inline file data of a distributed File object. (conflicts with input_file)",
-			"is_run_output_persisted":  "A boolean value denoting whether or not cell outputs should be persisted when running a notebook",
+			"inline_data":             "The inline file data of a distributed File object. (conflicts with input_file)",
+			"is_run_output_persisted": "A boolean value denoting whether or not cell outputs should be persisted when running a notebook",
+			"labels":				   "A list of strings by which notebooks can be grouped.",
 			"md5":                     "The md5 checksum of a file, e.g. filemd5(\"${path.module}/data/example-file.txt\")",
 			"metric_name":             "The Alarm's triggering Metric.",
 			"monitor_id":              "For 'datadog' monitor triggered bots, the DD monitor identifier.",
