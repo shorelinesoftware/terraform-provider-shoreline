@@ -199,7 +199,8 @@ var ObjectConfigJsonStr = `
 			"allowed_resources_query": { "type": "command",    "optional": true, "replaces": "resource_query", "min_ver": "12.3.0" },
 			"communication_workspace": { "type": "string",     "optional": true, "min_ver": "12.5.0", "step": "communication_workspace" },
 			"communication_channel":   { "type": "string",     "optional": true, "min_ver": "12.5.0", "step": "communication_channel" },
-			"labels":				   { "type": "string_set", "optional": true, "min_ver": "16.0", "step": "labels" }
+			"labels":				   { "type": "string_set", "optional": true, "min_ver": "16.0", "step": "labels" },
+			"editors":                 { "type": "string_set", "optional": true, "min_ver": "15.1.0" }
 		}
 	},
 
@@ -356,7 +357,8 @@ var ObjectConfigJsonStr = `
 			"external_audit_storage_type":                      "System setting for alternate audit storage type (e.g. 'ELASTIC').",
 			"external_audit_storage_api_token":                 "System setting for alternate audit storage API access token.",
 			"external_audit_storage_batch_period_sec":          "System setting for alternate audit storage batching interval (in seconds).",
-			"integration_name":                                 "The name/symbol of a Shoreline integration involved in triggering the bot."
+			"integration_name":                                 "The name/symbol of a Shoreline integration involved in triggering the bot.",
+			"editors":                                 			"The list of users who can edit the object if they have configure permission. Any user with configure permission can edit if left empty."
 		}
 	}
 }
