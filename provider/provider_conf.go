@@ -356,7 +356,7 @@ var ObjectConfigJsonStr = `
 			"external_audit_storage_api_token":                 "System setting for alternate audit storage API access token.",
 			"external_audit_storage_batch_period_sec":          "System setting for alternate audit storage batching interval (in seconds).",
 			"integration_name":                                 "The name/symbol of a Shoreline integration involved in triggering the bot.",
-			"editors":                                 			"The list of users who can edit a notebook if they have configure permission. Any user with configure permission can edit if left empty."
+			"editors":                                 			"The list of users who can edit the object if they have configure permission. Any user with configure permission can edit if left empty."
 		}
 	}
 }
