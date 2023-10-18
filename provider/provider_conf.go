@@ -140,7 +140,11 @@ var ObjectConfigJsonStr = `
 					"fluentbit_elastic": {
 						"api_key": { "type": "string",   "optional": true, "step": "params_unpack.api_token", "alias_out": "api_token" },
 						"api_url": { "type": "string",   "optional": true, "step": "params_unpack.url",       "alias_out": "url" }
-					}
+					},
+					"okta": {
+                        "api_key": { "type": "string",   "optional": true, "step": "params_unpack.api_token", "alias_out": "api_token" },
+                        "api_url": { "type": "string",   "optional": true, "step": "params_unpack.url",       "alias_out": "url" }
+                    }
 				}
 			}
 		},
@@ -162,6 +166,9 @@ var ObjectConfigJsonStr = `
 			"insights_collector_api_key":  { "type": "string",   "optional": true, "step": "params_unpack.insights_collector_api_key" },
 			"#incident_management_url":     { "type": "string",   "optional": true, "step": "params_unpack.incident_management_url" },
 			"#incident_management_api_key": { "type": "string",   "optional": true, "step": "params_unpack.incident_management_api_key" },
+			
+			"cache_ttl":                   { "type": "int", "optional": true, "step": "params_unpack.cache_ttl" },
+            "api_rate_limit":              { "type": "int", "optional": true, "step": "params_unpack.api_rate_limit" },
 			"enabled":                     { "type": "intbool",  "optional": true, "default": false }
 		}
 	},
@@ -345,6 +352,8 @@ var ObjectConfigJsonStr = `
 			"permissions_user":        "The user which 3rd-party service integration remediations run as (default 'Shoreline').",
 			"dashboard_name":          "The name of a dashboard for 3rd-party service integration (datadog).",
 			"webhook_name":            "The name of a webhook for 3rd-party service integration (datadog).",
+			"cache_ttl":               "The amount of time a resource will be cached.",
+            "api_rate_limit":          "The number of API calls a client is able to make in a second.",
 			"administrator_grants_create_user":                 "System setting controlling if administrators can create users.",
 			"administrator_grants_create_user_token":           "System setting controlling if administrators can create user access tokens.",
 			"administrator_grants_regenerate_user_token":       "System setting controlling if administrators can update user access tokens.",
