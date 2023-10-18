@@ -142,9 +142,9 @@ var ObjectConfigJsonStr = `
 						"api_url": { "type": "string",   "optional": true, "step": "params_unpack.url",       "alias_out": "url" }
 					},
 					"okta": {
-                        "api_key": { "type": "string",   "optional": true, "step": "params_unpack.api_token", "alias_out": "api_token" },
-                        "api_url": { "type": "string",   "optional": true, "step": "params_unpack.url",       "alias_out": "url" }
-                    }
+										"api_key": { "type": "string",   "optional": true, "step": "params_unpack.api_token", "alias_out": "api_token" },
+										"api_url": { "type": "string",   "optional": true, "step": "params_unpack.url",       "alias_out": "url" }
+									}
 				}
 			}
 		},
@@ -168,7 +168,7 @@ var ObjectConfigJsonStr = `
 			"#incident_management_api_key": { "type": "string",   "optional": true, "step": "params_unpack.incident_management_api_key" },
 			
 			"cache_ttl":                   { "type": "int", "optional": true, "step": "params_unpack.cache_ttl" },
-            "api_rate_limit":              { "type": "int", "optional": true, "step": "params_unpack.api_rate_limit" },
+			"api_rate_limit":              { "type": "int", "optional": true, "step": "params_unpack.api_rate_limit" },
 			"enabled":                     { "type": "intbool",  "optional": true, "default": false }
 		}
 	},
@@ -189,13 +189,13 @@ var ObjectConfigJsonStr = `
 			"type":                    { "type": "string",     "computed": true, "value": "NOTEBOOK" },
 			"name":                    { "type": "label",      "required": true, "forcenew": true, "skip": true },
 			"data":                    { "type": "b64json",    "required": true, "step": ".", "primary": true,
-				                           "omit":       { "cells": "dynamic_cell_fields", ".": "dynamic_fields" },
-				                           "omit_items": { "external_params": "dynamic_params" },
-				                           "cast":       { "params": "string[]", "params_values": "string[]" },
+																	 "omit":       { "cells": "dynamic_cell_fields", ".": "dynamic_fields" },
+																	 "omit_items": { "external_params": "dynamic_params" },
+																	 "cast":       { "params": "string[]", "params_values": "string[]" },
 																	 "force_set":  [ "allowed_entities", "approvers", "is_run_output_persisted",
 																	                 "communication_workspace", "communication_channel" ],
 																	 "skip_diff":  [ "allowedUsers", "isRunOutputPersisted", "approvers", "communication" ],
-																   "outtype": "json"
+																	 "outtype": "json"
 			                           },
 			"description":             { "type": "string",     "optional": true },
 			"timeout_ms":              { "type": "unsigned",   "optional": true, "default": 60000 },
@@ -206,7 +206,7 @@ var ObjectConfigJsonStr = `
 			"allowed_resources_query": { "type": "command",    "optional": true, "replaces": "resource_query", "min_ver": "12.3.0" },
 			"communication_workspace": { "type": "string",     "optional": true, "min_ver": "12.5.0", "step": "communication_workspace" },
 			"communication_channel":   { "type": "string",     "optional": true, "min_ver": "12.5.0", "step": "communication_channel" },
-			"labels":				   { "type": "string_set", "optional": true, "min_ver": "16.0", "step": "labels" },
+			"labels":                  { "type": "string_set", "optional": true, "min_ver": "16.0", "step": "labels" },
 			"editors":                 { "type": "string_set", "optional": true, "min_ver": "15.1.0" }
 		}
 	},
@@ -319,7 +319,7 @@ var ObjectConfigJsonStr = `
 			"input_file":              "The local source of a distributed File object. (conflicts with inline_data)",
 			"inline_data":             "The inline file data of a distributed File object. (conflicts with input_file)",
 			"is_run_output_persisted": "A boolean value denoting whether or not cell outputs should be persisted when running a notebook",
-			"labels":				   "A list of strings by which notebooks can be grouped.",
+			"labels":                  "A list of strings by which notebooks can be grouped.",
 			"md5":                     "The md5 checksum of a file, e.g. filemd5(\"${path.module}/data/example-file.txt\")",
 			"metric_name":             "The Alarm's triggering Metric.",
 			"monitor_id":              "For 'datadog' monitor triggered bots, the DD monitor identifier.",
@@ -367,7 +367,7 @@ var ObjectConfigJsonStr = `
 			"external_audit_storage_api_token":                 "System setting for alternate audit storage API access token.",
 			"external_audit_storage_batch_period_sec":          "System setting for alternate audit storage batching interval (in seconds).",
 			"integration_name":                                 "The name/symbol of a Shoreline integration involved in triggering the bot.",
-			"editors":                                 			"The list of users who can edit the object if they have configure permission. Any user with configure permission can edit if left empty."
+			"editors":                                          "The list of users who can edit the object if they have configure permission. Any user with configure permission can edit if left empty."
 		}
 	}
 }

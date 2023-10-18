@@ -389,6 +389,19 @@ func DeleteFileHttps(dst string, token string) error {
 	return nil
 }
 
+func DownloadFileHttpsToTemp(src string, token string) (string, error) {
+	f, err := os.CreateTemp("", "tmp_shor_opcp-") // in Go version older than 1.17 you can use ioutil.TempFile
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+	// The caller is responsible for cleaning up the file.
+	// XXX we could delete it and pass the handle to the caller...
+	//defer os.Remove(f.Name())
+	err = DownloadFileHttps(src, f.Name(), token)
+	return f.Name(), err
+}
+
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 

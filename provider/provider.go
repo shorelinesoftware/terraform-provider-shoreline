@@ -1269,7 +1269,20 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 
 		infile := infileParam.(string)
 		content := []byte(contentParam.(string))
+		infileLocal := infile
 
+		// Chek if the source is remote
+		if strings.HasPrefix(infile, "http:") || strings.HasPrefix(infile, "https://") {
+			tmpFileName, err := DownloadFileHttpsToTemp(infile, "")
+			if err != nil {
+				diags = diag.Errorf("Failed to read remote file object %s: %s", infile, err)
+				return diags
+			}
+			infileLocal = tmpFileName
+			defer os.Remove(tmpFileName)
+		}
+
+		// Check if the file destination is inline or to a remote store (e.g. S3 / GCS / etc.)
 		uri := getRemoteFileAttr(name, "uri")
 		fileIsRemote := true
 		if uri == "" {
@@ -1277,11 +1290,11 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		}
 
 		if fileParamExists {
-			err, md5sum, fileSize = FileMd5AndSize(infile)
+			err, md5sum, fileSize = FileMd5AndSize(infileLocal)
 			if !fileIsRemote {
-				content, err = ioutil.ReadFile(infile)
+				content, err = ioutil.ReadFile(infileLocal)
 				if err != nil {
-					diags = diag.Errorf("Failed to read file object %s: %s", infile, err)
+					diags = diag.Errorf("Failed to read file object %s (%s): %s", infile, infileLocal, err)
 					return diags
 				}
 			}
@@ -1320,7 +1333,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 					d.Set("inline_data", string(content))
 				}
 			} else {
-				err = UploadFileHttps(infile, presignedUrl, "")
+				err = UploadFileHttps(infileLocal, presignedUrl, "")
 			}
 			if err != nil {
 				diags = diag.Errorf("Failed to upload to presigned url for file object %s -- %s", name, err.Error())
