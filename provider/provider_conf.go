@@ -207,7 +207,10 @@ var ObjectConfigJsonStr = `
 			"communication_workspace": { "type": "string",     "optional": true, "min_ver": "12.5.0", "step": "communication_workspace" },
 			"communication_channel":   { "type": "string",     "optional": true, "min_ver": "12.5.0", "step": "communication_channel" },
 			"labels":                  { "type": "string_set", "optional": true, "min_ver": "16.0", "step": "labels" },
-			"editors":                 { "type": "string_set", "optional": true, "min_ver": "15.1.0" }
+			"editors":                 { "type": "string_set", "optional": true, "min_ver": "15.1.0" },
+			"communication_cud_notifications": 			{ "type": "bool", "optional": true, "default": true, "min_ver": "16.1.0" },
+			"communication_approvals_notifications": 	{ "type": "bool", "optional": true, "default": true, "min_ver": "16.1.0" },
+			"communication_executions_notifications": 	{ "type": "bool", "optional": true, "default": true, "min_ver": "16.1.0" }
 		}
 	},
 
@@ -367,7 +370,10 @@ var ObjectConfigJsonStr = `
 			"external_audit_storage_api_token":                 "System setting for alternate audit storage API access token.",
 			"external_audit_storage_batch_period_sec":          "System setting for alternate audit storage batching interval (in seconds).",
 			"integration_name":                                 "The name/symbol of a Shoreline integration involved in triggering the bot.",
-			"editors":                                          "The list of users who can edit the object if they have configure permission. Any user with configure permission can edit if left empty."
+			"editors":                                          "The list of users who can edit the object if they have configure permission. Any user with configure permission can edit if left empty.",
+			"communication_cud_notifications": 					"A boolean value denoting if notifications for create/update/delete operations on the object should be sent to slack or not. A workspace and a channel are required in the object for this to take effect.",
+			"communication_approvals_notifications": 			"A boolean value denoting if notifications for approvals operations related to the object should be sent to slack or not. A workspace and a channel are required in the object for this to take effect.",
+			"communication_executions_notifications": 			"A boolean value denoting if notifications for the object executions should be sent to slack or not. A workspace and a channel are required in the object for this to take effect."
 		}
 	}
 }
