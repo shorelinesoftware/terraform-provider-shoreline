@@ -150,6 +150,7 @@ resource "shoreline_action" "jvm_trace_check_heap" {
 - **complete_short_template** (String) The short description of the Action's completion.
 - **complete_title_template** (String) UI title of the Action's completion.
 - **description** (String) A user-friendly explanation of an object.
+- **editors** (List of String) The list of users who can edit the object if they have configure permission. Any user with configure permission can edit if left empty.
 - **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
 - **error_long_template** (String) The long description of the Action's error condition.
 - **error_short_template** (String) The short description of the Action's error condition.
