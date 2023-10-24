@@ -254,6 +254,8 @@ var ObjectConfigJsonStr = `
 			"administrator_grants_read_user_token":             { "type": "bool",     "optional": true, "default": true },
 			"approval_feature_enabled":                         { "type": "bool",     "optional": true, "default": true },
 			"notebook_ad_hoc_approval_request_enabled":         { "type": "bool",     "optional": true, "default": true },
+			"notebook_approval_request_expiry_time":            { "type": "int",      "optional": true, "default": 60 },
+			"notebook_run_approval_expiry_time":                { "type": "int",      "optional": true, "default": 60 },
 			"approval_editable_allowed_resource_query_enabled": { "type": "bool",     "optional": true, "default": true },
 			"external_audit_storage_enabled":                   { "type": "bool",     "optional": true, "default": false },
 			"external_audit_storage_type":                      { "type": "command",  "optional": true, "default": "ELASTIC" },
@@ -366,6 +368,8 @@ var ObjectConfigJsonStr = `
 			"external_audit_storage_type":                      "System setting for alternate audit storage type (e.g. 'ELASTIC').",
 			"external_audit_storage_api_token":                 "System setting for alternate audit storage API access token.",
 			"external_audit_storage_batch_period_sec":          "System setting for alternate audit storage batching interval (in seconds).",
+			"notebook_approval_request_expiry_time":            "System setting for maximum wait for approval after request (in minutes).",
+			"notebook_run_approval_expiry_time":                "System setting for maximum wait for execution after approval (in minutes).",
 			"integration_name":                                 "The name/symbol of a Shoreline integration involved in triggering the bot.",
 			"editors":                                          "The list of users who can edit the object if they have configure permission. Any user with configure permission can edit if left empty."
 		}
