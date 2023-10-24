@@ -144,7 +144,7 @@ var ObjectConfigJsonStr = `
 					"okta": {
 										"api_key": { "type": "string",   "optional": true, "step": "params_unpack.api_token", "alias_out": "api_token" },
 										"api_url": { "type": "string",   "optional": true, "step": "params_unpack.url",       "alias_out": "url" }
-									}
+					}
 				}
 			}
 		},
@@ -169,6 +169,8 @@ var ObjectConfigJsonStr = `
 			
 			"cache_ttl":                   { "type": "int", "optional": true, "step": "params_unpack.cache_ttl" },
 			"api_rate_limit":              { "type": "int", "optional": true, "step": "params_unpack.api_rate_limit" },
+			"subject":                     { "type": "string", "optional": true, "step": "params_unpack.subject" },
+            "credentials":                 { "type": "string", "optional": true, "step": "params_unpack.credentials" },
 			"enabled":                     { "type": "intbool",  "optional": true, "default": false }
 		}
 	},
@@ -352,6 +354,8 @@ var ObjectConfigJsonStr = `
 			"permissions_user":        "The user which 3rd-party service integration remediations run as (default 'Shoreline').",
 			"dashboard_name":          "The name of a dashboard for 3rd-party service integration (datadog).",
 			"webhook_name":            "The name of a webhook for 3rd-party service integration (datadog).",
+			"subject":  			   "The subject whose authentication details is used for a 3rd-party service integration (google cloud identity).",
+			"credentials": 			   "The credentials used for a 3rd-party service integration (google cloud identity).",
 			"cache_ttl":               "The amount of time a resource will be cached.",
             "api_rate_limit":          "The number of API calls a client is able to make in a second.",
 			"administrator_grants_create_user":                 "System setting controlling if administrators can create users.",
