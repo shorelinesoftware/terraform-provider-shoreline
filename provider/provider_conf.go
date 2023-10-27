@@ -261,7 +261,8 @@ var ObjectConfigJsonStr = `
 			"external_audit_storage_type":                      { "type": "command",  "optional": true, "default": "ELASTIC" },
 			"#external_audit_storage_url":                       { "type": "string",   "optional": true },
 			"#external_audit_storage_api_token":                 { "type": "string",   "optional": true },
-			"external_audit_storage_batch_period_sec":          { "type": "int",      "optional": true, "default": 5 }
+			"external_audit_storage_batch_period_sec":          { "type": "int",      "optional": true, "default": 5 },
+			"environment_name":                                 { "type": "string",   "optional": true, "default": "" }
 		}
 	},
 
@@ -370,6 +371,7 @@ var ObjectConfigJsonStr = `
 			"external_audit_storage_batch_period_sec":          "System setting for alternate audit storage batching interval (in seconds).",
 			"notebook_approval_request_expiry_time":            "System setting for maximum wait for approval after request (in minutes).",
 			"notebook_run_approval_expiry_time":                "System setting for maximum wait for execution after approval (in minutes).",
+			"environment_name":                                 "System setting for the name of the environment.",
 			"integration_name":                                 "The name/symbol of a Shoreline integration involved in triggering the bot.",
 			"editors":                                          "The list of users who can edit the object if they have configure permission. Any user with configure permission can edit if left empty."
 		}
