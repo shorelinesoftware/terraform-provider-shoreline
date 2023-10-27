@@ -355,7 +355,7 @@ var ObjectConfigJsonStr = `
 			"dashboard_name":          "The name of a dashboard for 3rd-party service integration (datadog).",
 			"webhook_name":            "The name of a webhook for 3rd-party service integration (datadog).",
 			"subject":  			   "The subject whose authentication details is used for a 3rd-party service integration (google cloud identity).",
-			"credentials": 			   "The credentials used for a 3rd-party service integration (google cloud identity).",
+			"credentials": 			   "The credentials used for a 3rd-party service integration (google cloud identity), encoded in base64.",
 			"cache_ttl":               "The amount of time a resource will be cached.",
             "api_rate_limit":          "The number of API calls a client is able to make in a second.",
 			"administrator_grants_create_user":                 "System setting controlling if administrators can create users.",

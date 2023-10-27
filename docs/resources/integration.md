@@ -32,7 +32,7 @@ See the Shoreline [Metrics Documentation](https://docs.shoreline.io/integrations
 - **api_url** (String) API url for a 3rd-party service integration.
 - **app_key** (String) Application key for a 3rd-party service integration.
 - **cache_ttl** (Number) The amount of time a resource will be cached.
-- **credentials** (String) The credentials used for a 3rd-party service integration (google cloud identity).
+- **credentials** (String) The credentials used for a 3rd-party service integration (google cloud identity), encoded in base64.
 - **dashboard_name** (String) The name of a dashboard for 3rd-party service integration (datadog).
 - **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
 - **id** (String) The ID of this resource.
