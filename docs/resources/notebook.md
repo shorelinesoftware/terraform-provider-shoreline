@@ -62,10 +62,10 @@ resource "shoreline_notebook" "my_notebook" {
 - **allowed_entities** (List of String) The list of users who can run an action or notebook. Any user can run if left empty.
 - **allowed_resources_query** (String) The list of resources on which an action or notebook can run. No restriction, if left empty.
 - **approvers** (List of String)
-- **communication_approvals_notifications** (Boolean) A boolean value denoting if notifications for approvals operations related to the object should be sent to slack or not. A workspace and a channel are required in the object for this to take effect. Defaults to `true`.
+- **communication_approval_notifications** (Boolean) A boolean value denoting if notifications for approvals operations related to the object should be sent to slack or not. A workspace and a channel are required in the object for this to take effect. Defaults to `true`.
 - **communication_channel** (String) A string value denoting the slack channel where notifications related to the object should be sent to.
 - **communication_cud_notifications** (Boolean) A boolean value denoting if notifications for create/update/delete operations on the object should be sent to slack or not. A workspace and a channel are required in the object for this to take effect. Defaults to `true`.
-- **communication_executions_notifications** (Boolean) A boolean value denoting if notifications for the object executions should be sent to slack or not. A workspace and a channel are required in the object for this to take effect. Defaults to `true`.
+- **communication_execution_notifications** (Boolean) A boolean value denoting if notifications for the object executions should be sent to slack or not. A workspace and a channel are required in the object for this to take effect. Defaults to `true`.
 - **communication_workspace** (String) A string value denoting the slack workspace where notifications related to the object should be sent to.
 - **description** (String) A user-friendly explanation of an object.
 - **editors** (List of String) The list of users who can edit the object if they have configure permission. Any user with configure permission can edit if left empty.
