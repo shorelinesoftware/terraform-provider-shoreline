@@ -186,9 +186,9 @@ var ObjectConfigJsonStr = `
 
 	"notebook": {
 		"attributes": {
-			"type":                    { "type": "string",     "computed": true, "value": "NOTEBOOK" },
-			"name":                    { "type": "label",      "required": true, "forcenew": true, "skip": true },
-			"data":                    { "type": "b64json",    "required": true, "step": ".", "primary": true,
+			"type":                    					{ "type": "string",     "computed": true, "value": "NOTEBOOK" },
+			"name":                    					{ "type": "label",      "required": true, "forcenew": true, "skip": true },
+			"data":                    					{ "type": "b64json",    "required": true, "step": ".", "primary": true,
 																	 "omit":       { "cells": "dynamic_cell_fields", ".": "dynamic_fields" },
 																	 "omit_items": { "external_params": "dynamic_params" },
 																	 "cast":       { "params": "string[]", "params_values": "string[]" },
@@ -196,21 +196,21 @@ var ObjectConfigJsonStr = `
 																	                 "communication_workspace", "communication_channel" ],
 																	 "skip_diff":  [ "allowedUsers", "isRunOutputPersisted", "approvers", "communication" ],
 																	 "outtype": "json"
-			                           },
-			"description":             { "type": "string",     "optional": true },
-			"timeout_ms":              { "type": "unsigned",   "optional": true, "default": 60000 },
-			"allowed_entities":        { "type": "string_set", "optional": true },
-			"approvers":               { "type": "string_set", "optional": true },
-			"resource_query":          { "type": "string",     "optional": true, "deprecated_for": "allowed_resources_query" },
-			"is_run_output_persisted": { "type": "bool",       "optional": true, "step": "is_run_output_persisted", "default": true, "min_ver": "12.3.0" },
-			"allowed_resources_query": { "type": "command",    "optional": true, "replaces": "resource_query", "min_ver": "12.3.0" },
-			"communication_workspace": { "type": "string",     "optional": true, "min_ver": "12.5.0", "step": "communication_workspace" },
-			"communication_channel":   { "type": "string",     "optional": true, "min_ver": "12.5.0", "step": "communication_channel" },
-			"labels":                  { "type": "string_set", "optional": true, "min_ver": "16.0", "step": "labels" },
-			"editors":                 { "type": "string_set", "optional": true, "min_ver": "15.1.0" },
-			"communication_cud_notifications": 			{ "type": "bool", "optional": true, "default": true, "min_ver": "16.1.0" },
-			"communication_approval_notifications": 	{ "type": "bool", "optional": true, "default": true, "min_ver": "16.1.0" },
-			"communication_execution_notifications": 	{ "type": "bool", "optional": true, "default": true, "min_ver": "16.1.0" }
+			                           					},
+			"description":             					{ "type": "string",     "optional": true },
+			"timeout_ms":              					{ "type": "unsigned",   "optional": true, "default": 60000 },
+			"allowed_entities":        					{ "type": "string_set", "optional": true },
+			"approvers":               					{ "type": "string_set", "optional": true },
+			"resource_query":          					{ "type": "string",     "optional": true, "deprecated_for": "allowed_resources_query" },
+			"is_run_output_persisted": 					{ "type": "bool",       "optional": true, "step": "is_run_output_persisted", "default": true, "min_ver": "12.3.0" },
+			"allowed_resources_query": 					{ "type": "command",    "optional": true, "replaces": "resource_query", "min_ver": "12.3.0" },
+			"communication_workspace": 					{ "type": "string",     "optional": true, "min_ver": "12.5.0", "step": "communication_workspace" },
+			"communication_channel":   					{ "type": "string",     "optional": true, "min_ver": "12.5.0", "step": "communication_channel" },
+			"labels":                  					{ "type": "string_set", "optional": true, "min_ver": "16.0", "step": "labels" },
+			"editors":                 					{ "type": "string_set", "optional": true, "min_ver": "15.1.0" },
+			"communication_cud_notifications": 			{ "type": "bool", "optional": true, "default": true, "min_ver": "16.1.0", "step": "communication_cud_notifications" },
+			"communication_approval_notifications":  	{ "type": "bool", "optional": true, "default": true, "min_ver": "16.1.0", "step": "communication_approval_notifications" },
+			"communication_execution_notifications": 	{ "type": "bool", "optional": true, "default": true, "min_ver": "16.1.0", "step": "communication_execution_notifications" }
 		}
 	},
 
