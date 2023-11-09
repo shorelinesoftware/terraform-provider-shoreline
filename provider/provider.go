@@ -900,6 +900,19 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 
 }
 
+func AddNotebookParamsFields(params []interface{}) {
+	for _, v := range params {
+		theMap, isMap := v.(map[string]interface{})
+		// XXX complain if it's not a map...
+		if isMap {
+			_, hasRequired := theMap["required"]
+			if !hasRequired {
+				theMap["required"] = true
+			}
+		}
+	}
+}
+
 func NormalizeNotebookJsonArray(arr []interface{}) {
 	for _, v := range arr {
 		theMap, isMap := v.(map[string]interface{})
@@ -925,6 +938,9 @@ func NormalizeNotebookJson(object map[string]interface{}, attributes map[string]
 			appendActionLog(fmt.Sprintf("NormalizeNotebookJson() toRemove: '%+v'\n", k))
 			delete(object, k)
 		} else if isArray {
+			if k == "params" {
+				AddNotebookParamsFields(arr)
+			}
 			// remove empty lists (e.g. external_params)
 			if len(arr) == 0 {
 				delete(object, k)
