@@ -943,6 +943,7 @@ func NormalizeNotebookJson(object map[string]interface{}, attributes map[string]
 			}
 			// remove empty lists (e.g. external_params)
 			if len(arr) == 0 {
+				appendActionLog(fmt.Sprintf("NormalizeNotebookJson() removing empty array: '%+v'\n", k))
 				delete(object, k)
 			} else {
 				// NOTE: In future, may need to sort nested non-ordinal lists (ala top-level allowed_entities).
@@ -959,6 +960,21 @@ func NormalizeNotebookJson(object map[string]interface{}, attributes map[string]
 			}
 		}
 	}
+
+	if attributes != nil {
+		_, hasExtParams := object["external_params"]
+		if !hasExtParams {
+			//appendActionLog(fmt.Sprintf("NormalizeNotebookJson() Adding: 'external_params'\n"))
+			object["external_params"] = []interface{}{}
+		}
+
+		_, hasInterState := object["interactive_state"]
+		if !hasInterState {
+			//appendActionLog(fmt.Sprintf("NormalizeNotebookJson() Adding: 'interactive_state'\n"))
+			object["interactive_state"] = map[string]interface{}{}
+		}
+	}
+
 }
 
 func EscapeString(val interface{}) string {
