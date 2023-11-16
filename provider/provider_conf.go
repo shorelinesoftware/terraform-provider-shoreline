@@ -208,9 +208,9 @@ var ObjectConfigJsonStr = `
 			"communication_channel":   					{ "type": "string",     "optional": true, "min_ver": "12.5.0", "step": "communication_channel" },
 			"labels":                  					{ "type": "string_set", "optional": true, "min_ver": "16.0", "step": "labels" },
 			"editors":                 					{ "type": "string_set", "optional": true, "min_ver": "15.1.0" },
-			"communication_cud_notifications": 			{ "type": "bool", "optional": true, "default": true, "min_ver": "16.1.0", "step": "communication_cud_notifications" },
-			"communication_approval_notifications":  	{ "type": "bool", "optional": true, "default": true, "min_ver": "16.1.0", "step": "communication_approval_notifications" },
-			"communication_execution_notifications": 	{ "type": "bool", "optional": true, "default": true, "min_ver": "16.1.0", "step": "communication_execution_notifications" }
+			"communication_cud_notifications":			{ "type": "bool", "optional": true, "default": true, "min_ver": "17.0.0", "step": "communication_cud_notifications" },
+			"communication_approval_notifications":		{ "type": "bool", "optional": true, "default": true, "min_ver": "17.0.0", "step": "communication_approval_notifications" },
+			"communication_execution_notifications":	{ "type": "bool", "optional": true, "default": true, "min_ver": "17.0.0", "step": "communication_execution_notifications" }
 		}
 	},
 
@@ -358,7 +358,7 @@ var ObjectConfigJsonStr = `
 			"permissions_user":        "The user which 3rd-party service integration remediations run as (default 'Shoreline').",
 			"dashboard_name":          "The name of a dashboard for 3rd-party service integration (datadog).",
 			"webhook_name":            "The name of a webhook for 3rd-party service integration (datadog).",
-			"cache_ttl":               "The amount of time group memerships will be cached.",
+			"cache_ttl":               "The amount of time group memerships will be cached (in milliseconds).",
             "api_rate_limit":          "The number of API calls a client is able to make in a minute.",
 			"administrator_grants_create_user":                 "System setting controlling if administrators can create users.",
 			"administrator_grants_create_user_token":           "System setting controlling if administrators can create user access tokens.",
