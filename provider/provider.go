@@ -968,11 +968,12 @@ func NormalizeNotebookJson(object map[string]interface{}, attributes map[string]
 			object["external_params"] = []interface{}{}
 		}
 
-		_, hasInterState := object["interactive_state"]
-		if !hasInterState {
-			//appendActionLog(fmt.Sprintf("NormalizeNotebookJson() Adding: 'interactive_state'\n"))
-			object["interactive_state"] = map[string]interface{}{}
-		}
+		// NOTE: Currently interactive_state only contains transient data
+		delete(object, "interactive_state")
+		//_, hasInterState := object["interactive_state"]
+		//if !hasInterState {
+		//	object["interactive_state"] = map[string]interface{}{}
+		//}
 	}
 
 }
