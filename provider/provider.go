@@ -974,6 +974,13 @@ func NormalizeNotebookJson(object map[string]interface{}, attributes map[string]
 		//if !hasInterState {
 		//	object["interactive_state"] = map[string]interface{}{}
 		//}
+
+		_, hasFav := object["is_favorite"]
+		if !hasFav {
+			//appendActionLog(fmt.Sprintf("NormalizeNotebookJson() Adding: 'external_params'\n"))
+			object["is_favorite"] = false
+		}
+
 	}
 
 }
