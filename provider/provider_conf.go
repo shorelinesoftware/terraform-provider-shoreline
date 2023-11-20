@@ -32,7 +32,7 @@ var ObjectConfigJsonStr = `
 			"allowed_resources_query": { "type": "command",    "optional": true },
 			"communication_workspace": { "type": "string", 	   "optional": true, "min_ver": "14.1.0", "step": "communication.workspace"},
 			"communication_channel":   { "type": "string", 	   "optional": true, "min_ver": "14.1.0", "step": "communication.channel"},
-			"editors":        		   { "type": "string_set", "optional": true, "min_ver": "16.1.0" }
+			"editors":        		   { "type": "string_set", "optional": true, "min_ver": "18.0.0" }
 		}
 	},
 
