@@ -900,6 +900,19 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 
 }
 
+func AddNotebookParamsFields(params []interface{}) {
+	for _, v := range params {
+		theMap, isMap := v.(map[string]interface{})
+		// XXX complain if it's not a map...
+		if isMap {
+			_, hasRequired := theMap["required"]
+			if !hasRequired {
+				theMap["required"] = true
+			}
+		}
+	}
+}
+
 func NormalizeNotebookJsonArray(arr []interface{}) {
 	for _, v := range arr {
 		theMap, isMap := v.(map[string]interface{})
@@ -925,8 +938,12 @@ func NormalizeNotebookJson(object map[string]interface{}, attributes map[string]
 			appendActionLog(fmt.Sprintf("NormalizeNotebookJson() toRemove: '%+v'\n", k))
 			delete(object, k)
 		} else if isArray {
+			if k == "params" {
+				AddNotebookParamsFields(arr)
+			}
 			// remove empty lists (e.g. external_params)
 			if len(arr) == 0 {
+				appendActionLog(fmt.Sprintf("NormalizeNotebookJson() removing empty array: '%+v'\n", k))
 				delete(object, k)
 			} else {
 				// NOTE: In future, may need to sort nested non-ordinal lists (ala top-level allowed_entities).
@@ -943,6 +960,29 @@ func NormalizeNotebookJson(object map[string]interface{}, attributes map[string]
 			}
 		}
 	}
+
+	if attributes != nil {
+		_, hasExtParams := object["external_params"]
+		if !hasExtParams {
+			//appendActionLog(fmt.Sprintf("NormalizeNotebookJson() Adding: 'external_params'\n"))
+			object["external_params"] = []interface{}{}
+		}
+
+		// NOTE: Currently interactive_state only contains transient data
+		delete(object, "interactive_state")
+		//_, hasInterState := object["interactive_state"]
+		//if !hasInterState {
+		//	object["interactive_state"] = map[string]interface{}{}
+		//}
+
+		_, hasFav := object["is_favorite"]
+		if !hasFav {
+			//appendActionLog(fmt.Sprintf("NormalizeNotebookJson() Adding: 'external_params'\n"))
+			object["is_favorite"] = false
+		}
+
+	}
+
 }
 
 func EscapeString(val interface{}) string {
