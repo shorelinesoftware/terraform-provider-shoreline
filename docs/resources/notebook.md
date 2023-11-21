@@ -62,10 +62,13 @@ resource "shoreline_notebook" "my_notebook" {
 - **allowed_entities** (List of String) The list of users who can run an action or notebook. Any user can run if left empty.
 - **allowed_resources_query** (String) The list of resources on which an action or notebook can run. No restriction, if left empty.
 - **approvers** (List of String)
+- **communication_approval_notifications** (Boolean) Enables slack notifications for approvals operations. (Requires workspace and channel.) Defaults to `true`.
 - **communication_channel** (String) A string value denoting the slack channel where notifications related to the object should be sent to.
+- **communication_cud_notifications** (Boolean) Enables slack notifications for create/update/delete operations. (Requires workspace and channel.) Defaults to `true`.
+- **communication_execution_notifications** (Boolean) Enables slack notifications for the object executions. (Requires workspace and channel.) Defaults to `true`.
 - **communication_workspace** (String) A string value denoting the slack workspace where notifications related to the object should be sent to.
 - **description** (String) A user-friendly explanation of an object.
-- **editors** (List of String) The list of users who can edit the object if they have configure permission. Any user with configure permission can edit if left empty.
+- **editors** (List of String) List of users who can edit the object (with configure permission). Empty maps to all users.
 - **id** (String) The ID of this resource.
 - **is_run_output_persisted** (Boolean) A boolean value denoting whether or not cell outputs should be persisted when running a notebook Defaults to `true`.
 - **labels** (List of String) A list of strings by which notebooks can be grouped.
