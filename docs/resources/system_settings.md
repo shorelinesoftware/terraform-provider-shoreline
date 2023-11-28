@@ -31,6 +31,7 @@ See the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/se
 - **approval_allow_individual_notification** (Boolean) System setting controlling if approvals notifications are sent to individual users, in case no specific notebook communication setting is defined. Defaults to `false`.
 - **approval_editable_allowed_resource_query_enabled** (Boolean) System setting controlling if notebook resource queries can be modified on approved executions. Defaults to `true`.
 - **approval_feature_enabled** (Boolean) System setting controlling if notebook approvals are enabled. Defaults to `true`.
+- **environment_name** (String) System setting for the name of the environment. Defaults to ``.
 - **external_audit_storage_batch_period_sec** (Number) System setting for alternate audit storage batching interval (in seconds). Defaults to `5`.
 - **external_audit_storage_enabled** (Boolean) System setting controlling if audit information is stored in an alternate location. Defaults to `false`.
 - **external_audit_storage_type** (String) System setting for alternate audit storage type (e.g. 'ELASTIC'). Defaults to `ELASTIC`.
