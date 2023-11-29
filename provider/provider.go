@@ -1430,7 +1430,9 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	if typ == "system_settings" {
 		skipKeys["external_audit_storage_enabled"] = true
 		skipKeys["approval_feature_enabled"] = true
+		skipKeys["notebook_ad_hoc_approval_request_enabled"] = true
 		skipKeys["approval_editable_allowed_resource_query_enabled"] = true
+		skipKeys["approval_allow_individual_notification"] = true
 	}
 
 	for key, _ := range attrs {
@@ -1457,11 +1459,23 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		// XXX: work around backend issues with data-dependent ordering
 		// external_audit_storage_enabled depends on several other fields...
 		orderedAttrs = append(orderedAttrs, "external_audit_storage_enabled")
-		// approval_feature_enabled depends on slackConfig and notebook_ad_hoc_approval_request_enabled
-		orderedAttrs = append(orderedAttrs, "approval_feature_enabled")
-		// NOTE: approval_editable_allowed_resource_query_enabled depends on approval_feature_enabled
-		//         ERROR: approval_editable_allowed_resource_query_enabled cannot be true if approval_feature_enabled is false.
-		orderedAttrs = append(orderedAttrs, "approval_editable_allowed_resource_query_enabled")
+		// XXX: work around backend issues with data-dependent ordering
+		// approvalEnabled depends on several other fields, or vice versa depending on it's value
+		approvalEnabled, _ := d.GetOk("approval_feature_enabled")
+		if CastToBool(approvalEnabled) {
+			orderedAttrs = append(orderedAttrs, "approval_feature_enabled")
+			orderedAttrs = append(orderedAttrs, "approval_editable_allowed_resource_query_enabled")
+			orderedAttrs = append(orderedAttrs, "notebook_ad_hoc_approval_request_enabled")
+			orderedAttrs = append(orderedAttrs, "approval_allow_individual_notification")
+		} else {
+			// approval_feature_enabled depends on slackConfig and notebook_ad_hoc_approval_request_enabled
+			orderedAttrs = append(orderedAttrs, "approval_allow_individual_notification")
+			orderedAttrs = append(orderedAttrs, "notebook_ad_hoc_approval_request_enabled")
+			// NOTE: approval_editable_allowed_resource_query_enabled depends on approval_feature_enabled
+			//         ERROR: approval_editable_allowed_resource_query_enabled cannot be true if approval_feature_enabled is false.
+			orderedAttrs = append(orderedAttrs, "approval_editable_allowed_resource_query_enabled")
+			orderedAttrs = append(orderedAttrs, "approval_feature_enabled")
+		}
 	}
 
 	for _, key := range orderedAttrs {
