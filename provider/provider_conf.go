@@ -167,7 +167,7 @@ var ObjectConfigJsonStr = `
 			"insights_collector_api_key":  { "type": "string",   "optional": true, "step": "params_unpack.insights_collector_api_key" },
 			"#incident_management_url":     { "type": "string",   "optional": true, "step": "params_unpack.incident_management_url" },
 			"#incident_management_api_key": { "type": "string",   "optional": true, "step": "params_unpack.incident_management_api_key" },
-			
+
 			"cache_ttl":                   { "type": "int", "optional": true, "step": "params_unpack.cache_ttl" },
 			"api_rate_limit":              { "type": "int", "optional": true, "step": "params_unpack.api_rate_limit" },
 			"enabled":                     { "type": "intbool",  "optional": true, "default": false }
@@ -360,7 +360,7 @@ var ObjectConfigJsonStr = `
 			"permissions_user":        "The user which 3rd-party service integration remediations run as (default 'Shoreline').",
 			"dashboard_name":          "The name of a dashboard for 3rd-party service integration (datadog).",
 			"webhook_name":            "The name of a webhook for 3rd-party service integration (datadog).",
-			"cache_ttl":               "The amount of time group memerships will be cached (in milliseconds).",
+			"cache_ttl":               "The amount of time group memberships will be cached (in milliseconds).",
 			"api_rate_limit":          "The number of API calls a client is able to make in a minute.",
 			"administrator_grants_create_user":                 "System setting controlling if administrators can create users.",
 			"administrator_grants_create_user_token":           "System setting controlling if administrators can create user access tokens.",
