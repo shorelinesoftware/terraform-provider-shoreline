@@ -170,7 +170,9 @@ var ObjectConfigJsonStr = `
 
 			"cache_ttl":                   { "type": "int", "optional": true, "step": "params_unpack.cache_ttl" },
 			"api_rate_limit":              { "type": "int", "optional": true, "step": "params_unpack.api_rate_limit" },
-			"enabled":                     { "type": "intbool",  "optional": true, "default": false }
+			"enabled":                     { "type": "intbool",  "optional": true, "default": false },
+
+			"external_url":                { "type": "string",   "optional": true, "step": "params_unpack.external_url" }
 		}
 	},
 
@@ -382,7 +384,8 @@ var ObjectConfigJsonStr = `
 			"editors":                                          "List of users who can edit the object (with configure permission). Empty maps to all users.",
 			"communication_cud_notifications":                  "Enables slack notifications for create/update/delete operations. (Requires workspace and channel.)",
 			"communication_approval_notifications":             "Enables slack notifications for approvals operations. (Requires workspace and channel.)",
-			"communication_execution_notifications":            "Enables slack notifications for the object executions. (Requires workspace and channel.)"
+			"communication_execution_notifications":            "Enables slack notifications for the object executions. (Requires workspace and channel.)",
+			"external_url": 									"External url for a 3rd-party service integration."
 		}
 	}
 }
