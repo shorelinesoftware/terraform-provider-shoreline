@@ -267,7 +267,8 @@ var ObjectConfigJsonStr = `
 			"#external_audit_storage_url":                      { "type": "string",   "optional": true },
 			"#external_audit_storage_api_token":                { "type": "string",   "optional": true },
 			"external_audit_storage_batch_period_sec":          { "type": "int",      "optional": true, "default": 5 },
-			"environment_name":                                 { "type": "string",   "optional": true, "default": "" }
+			"environment_name":                                 { "type": "string",   "optional": true, "default": "" },
+			"environment_name_background":                      { "type": "string",   "optional": true, "default": "#ADDAE5" }
 		}
 	},
 
@@ -378,6 +379,7 @@ var ObjectConfigJsonStr = `
 			"notebook_approval_request_expiry_time":            "System setting for maximum wait for approval after request (in minutes).",
 			"notebook_run_approval_expiry_time":                "System setting for maximum wait for execution after approval (in minutes).",
 			"environment_name":                                 "System setting for the name of the environment.",
+			"environment_name_background":                      "System setting for the background colour of the environment name.",
 			"integration_name":                                 "The name/symbol of a Shoreline integration involved in triggering the bot.",
 			"editors":                                          "List of users who can edit the object (with configure permission). Empty maps to all users.",
 			"communication_cud_notifications":                  "Enables slack notifications for create/update/delete operations. (Requires workspace and channel.)",

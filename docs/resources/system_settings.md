@@ -32,6 +32,7 @@ See the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/se
 - **approval_editable_allowed_resource_query_enabled** (Boolean) System setting controlling if notebook resource queries can be modified on approved executions. Defaults to `true`.
 - **approval_feature_enabled** (Boolean) System setting controlling if notebook approvals are enabled. Defaults to `true`.
 - **environment_name** (String) System setting for the name of the environment. Defaults to ``.
+- **environment_name_background** (String) System setting for the background colour of the environment name. Defaults to `#ADDAE5`.
 - **external_audit_storage_batch_period_sec** (Number) System setting for alternate audit storage batching interval (in seconds). Defaults to `5`.
 - **external_audit_storage_enabled** (Boolean) System setting controlling if audit information is stored in an alternate location. Defaults to `false`.
 - **external_audit_storage_type** (String) System setting for alternate audit storage type (e.g. 'ELASTIC'). Defaults to `ELASTIC`.
