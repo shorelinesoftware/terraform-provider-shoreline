@@ -172,7 +172,7 @@ var ObjectConfigJsonStr = `
 			"api_rate_limit":              { "type": "int", "optional": true, "step": "params_unpack.api_rate_limit" },
 			"enabled":                     { "type": "intbool",  "optional": true, "default": false },
 
-			"external_url":                { "type": "string",   "optional": true, "step": "params_unpack.external_url" }
+			"external_url":                { "type": "string",   "optional": true, "min_ver": "18.0.0", "step": "params_unpack.external_url" }
 		}
 	},
 
