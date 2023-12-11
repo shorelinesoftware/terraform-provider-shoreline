@@ -172,7 +172,7 @@ var ObjectConfigJsonStr = `
 			"api_rate_limit":              { "type": "int", "optional": true, "step": "params_unpack.api_rate_limit" },
 			"enabled":                     { "type": "intbool",  "optional": true, "default": false },
 
-			"external_url":                { "type": "string",   "optional": true, "min_ver": "18.0.0", "step": "params_unpack.external_url" }
+			"external_url":                { "type": "string",   "optional": true, "min_ver": "17.0.0", "step": "params_unpack.external_url" }
 		}
 	},
 
@@ -264,6 +264,7 @@ var ObjectConfigJsonStr = `
 			"notebook_run_approval_expiry_time":                { "type": "int",      "optional": true, "default": 60 },
 			"approval_editable_allowed_resource_query_enabled": { "type": "bool",     "optional": true, "default": true },
 			"approval_allow_individual_notification":           { "type": "bool",     "optional": true, "default": false },
+			"approval_optional_request_ticket_url":             { "type": "bool",     "optional": true, "default": false, "min_ver": "17.0.0" },
 			"external_audit_storage_enabled":                   { "type": "bool",     "optional": true, "default": false },
 			"external_audit_storage_type":                      { "type": "command",  "optional": true, "default": "ELASTIC" },
 			"#external_audit_storage_url":                      { "type": "string",   "optional": true },
@@ -372,6 +373,7 @@ var ObjectConfigJsonStr = `
 			"notebook_ad_hoc_approval_request_enabled":         "System setting controlling if approvals are enabled for ad-hoc notebook execution.",
 			"approval_editable_allowed_resource_query_enabled": "System setting controlling if notebook resource queries can be modified on approved executions.",
 			"approval_allow_individual_notification":           "System setting controlling if approvals notifications are sent to individual users, in case no specific notebook communication setting is defined.",
+			"approval_optional_request_ticket_url":	           	"System setting controlling if the ticket url is optional when creating an approval request.",
 			"external_audit_storage_enabled":                   "System setting controlling if audit information is stored in an alternate location.",
 			"external_audit_storage_url":                       "System setting for alternate audit storage URL.",
 			"external_audit_storage_type":                      "System setting for alternate audit storage type (e.g. 'ELASTIC').",
