@@ -50,6 +50,10 @@ release:
 	GOOS=openbsd GOARCH=amd64 go build -o ./bin/$(BINARY)_$(VERSION)_openbsd_amd64
 	GOOS=windows GOARCH=amd64 go build -o ./bin/$(BINARY)_$(VERSION)_windows_amd64
 
+version:
+	@echo "version: ${VERSION}\nTo create a release run: \n  git tag v${VERSION}\n  git push origin v${VERSION}"
+	@git tag -l | grep '^v${VERSION}$$' >/dev/null && echo "WARNING: Release already exists" || true
+
 # Run acceptance tests
 #############
 # NOTE: SHORELINE_URL and SHORELINE_TOKEN should be set externally, e.g.
