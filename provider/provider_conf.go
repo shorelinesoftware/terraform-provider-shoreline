@@ -263,7 +263,7 @@ var ObjectConfigJsonStr = `
 			"notebook_approval_request_expiry_time":            { "type": "int",      "optional": true, "default": 60 },
 			"notebook_run_approval_expiry_time":                { "type": "int",      "optional": true, "default": 60 },
 			"approval_editable_allowed_resource_query_enabled": { "type": "bool",     "optional": true, "default": true },
-			"approval_allow_individual_notification":           { "type": "bool",     "optional": true, "default": false },
+			"approval_allow_individual_notification":           { "type": "bool",     "optional": true, "default": true },
 			"approval_optional_request_ticket_url":             { "type": "bool",     "optional": true, "default": false, "min_ver": "17.0.0" },
 			"external_audit_storage_enabled":                   { "type": "bool",     "optional": true, "default": false },
 			"external_audit_storage_type":                      { "type": "command",  "optional": true, "default": "ELASTIC" },

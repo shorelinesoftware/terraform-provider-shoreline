@@ -28,7 +28,7 @@ See the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/se
 - **administrator_grants_create_user_token** (Boolean) System setting controlling if administrators can create user access tokens. Defaults to `true`.
 - **administrator_grants_read_user_token** (Boolean) System setting controlling if administrators can view user access tokens. Defaults to `true`.
 - **administrator_grants_regenerate_user_token** (Boolean) System setting controlling if administrators can update user access tokens. Defaults to `true`.
-- **approval_allow_individual_notification** (Boolean) System setting controlling if approvals notifications are sent to individual users, in case no specific notebook communication setting is defined. Defaults to `false`.
+- **approval_allow_individual_notification** (Boolean) System setting controlling if approvals notifications are sent to individual users, in case no specific notebook communication setting is defined. Defaults to `true`.
 - **approval_editable_allowed_resource_query_enabled** (Boolean) System setting controlling if notebook resource queries can be modified on approved executions. Defaults to `true`.
 - **approval_feature_enabled** (Boolean) System setting controlling if notebook approvals are enabled. Defaults to `true`.
 - **approval_optional_request_ticket_url** (Boolean) System setting controlling if the ticket url is optional when creating an approval request. Defaults to `false`.
