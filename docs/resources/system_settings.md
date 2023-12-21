@@ -33,7 +33,7 @@ See the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/se
 - **approval_feature_enabled** (Boolean) System setting controlling if notebook approvals are enabled. Defaults to `true`.
 - **approval_optional_request_ticket_url** (Boolean) System setting controlling if the ticket url is optional when creating an approval request. Defaults to `false`.
 - **environment_name** (String) System setting for the name of the environment. Defaults to ``.
-- **environment_name_background** (String) System setting for the background colour of the environment name. The format is #<6-digit hex> Defaults to `#ADDAE5`.
+- **environment_name_background** (String) System setting for the background colour of the environment name. The format is #<6-digit hex> Defaults to `#EF5350`.
 - **external_audit_storage_batch_period_sec** (Number) System setting for alternate audit storage batching interval (in seconds). Defaults to `5`.
 - **external_audit_storage_enabled** (Boolean) System setting controlling if audit information is stored in an alternate location. Defaults to `false`.
 - **external_audit_storage_type** (String) System setting for alternate audit storage type (e.g. 'ELASTIC'). Defaults to `ELASTIC`.

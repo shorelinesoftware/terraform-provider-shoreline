@@ -271,7 +271,7 @@ var ObjectConfigJsonStr = `
 			"#external_audit_storage_api_token":                { "type": "string",   "optional": true },
 			"external_audit_storage_batch_period_sec":          { "type": "int",      "optional": true, "default": 5 },
 			"environment_name":                                 { "type": "string",   "optional": true, "default": "" },
-			"environment_name_background":                      { "type": "string",   "optional": true, "min_ver": "18.0.0", "default": "#ADDAE5" }
+			"environment_name_background":                      { "type": "string",   "optional": true, "min_ver": "18.0.0", "default": "#EF5350" }
 		}
 	},
 
