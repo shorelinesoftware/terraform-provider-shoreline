@@ -4,7 +4,7 @@ REPODIR=/tmp/tf-repo/providers
 
 NAME=shoreline
 BINARY=terraform-provider-$(NAME)
-VERSION=1.14.8
+VERSION=1.14.19
 
 // NOTE: this only works for 64 bit linux and MacOs ("darwin")
 OS=$(shell uname | tr 'A-Z' 'a-z')
@@ -49,6 +49,10 @@ release:
 	GOOS=linux   GOARCH=arm   go build -o ./bin/$(BINARY)_$(VERSION)_linux_arm
 	GOOS=openbsd GOARCH=amd64 go build -o ./bin/$(BINARY)_$(VERSION)_openbsd_amd64
 	GOOS=windows GOARCH=amd64 go build -o ./bin/$(BINARY)_$(VERSION)_windows_amd64
+
+version:
+	@echo "version: ${VERSION}\nTo create a release run: \n  git tag v${VERSION}\n  git push origin v${VERSION}"
+	@git tag -l | grep '^v${VERSION}$$' >/dev/null && echo "WARNING: Release already exists" || true
 
 # Run acceptance tests
 #############

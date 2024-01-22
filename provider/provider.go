@@ -900,6 +900,19 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 
 }
 
+func AddNotebookParamsFields(params []interface{}) {
+	for _, v := range params {
+		theMap, isMap := v.(map[string]interface{})
+		// XXX complain if it's not a map...
+		if isMap {
+			_, hasRequired := theMap["required"]
+			if !hasRequired {
+				theMap["required"] = true
+			}
+		}
+	}
+}
+
 func NormalizeNotebookJsonArray(arr []interface{}) {
 	for _, v := range arr {
 		theMap, isMap := v.(map[string]interface{})
@@ -925,8 +938,12 @@ func NormalizeNotebookJson(object map[string]interface{}, attributes map[string]
 			appendActionLog(fmt.Sprintf("NormalizeNotebookJson() toRemove: '%+v'\n", k))
 			delete(object, k)
 		} else if isArray {
+			if k == "params" {
+				AddNotebookParamsFields(arr)
+			}
 			// remove empty lists (e.g. external_params)
 			if len(arr) == 0 {
+				appendActionLog(fmt.Sprintf("NormalizeNotebookJson() removing empty array: '%+v'\n", k))
 				delete(object, k)
 			} else {
 				// NOTE: In future, may need to sort nested non-ordinal lists (ala top-level allowed_entities).
@@ -943,6 +960,29 @@ func NormalizeNotebookJson(object map[string]interface{}, attributes map[string]
 			}
 		}
 	}
+
+	if attributes != nil {
+		_, hasExtParams := object["external_params"]
+		if !hasExtParams {
+			//appendActionLog(fmt.Sprintf("NormalizeNotebookJson() Adding: 'external_params'\n"))
+			object["external_params"] = []interface{}{}
+		}
+
+		// NOTE: Currently interactive_state only contains transient data
+		delete(object, "interactive_state")
+		//_, hasInterState := object["interactive_state"]
+		//if !hasInterState {
+		//	object["interactive_state"] = map[string]interface{}{}
+		//}
+
+		_, hasFav := object["is_favorite"]
+		if !hasFav {
+			//appendActionLog(fmt.Sprintf("NormalizeNotebookJson() Adding: 'external_params'\n"))
+			object["is_favorite"] = false
+		}
+
+	}
+
 }
 
 func EscapeString(val interface{}) string {
@@ -1173,6 +1213,14 @@ func setFieldInner(key string, val interface{}, name string, typ string, attrs m
 	return true, nil
 }
 
+func maybeArrayLen(val interface{}) int {
+	if val == nil {
+		return 0
+	}
+	arr := reflect.ValueOf(val)
+	return arr.Len()
+}
+
 func shouldSkipSetField(key string, val interface{}, name string, typ string, attrs map[string]interface{}, ctx context.Context, d *schema.ResourceData, meta interface{}, doDiff bool, isCreate bool, forcedChangeKeys map[string]bool, forcedChangeVals map[string]interface{}, backendVersion VersionRecord) (bool, diag.Diagnostics) {
 	skip := GetNestedValueOrDefault(attrs, ToKeyPath(key+".skip"), false).(bool)
 	if skip {
@@ -1191,6 +1239,7 @@ func shouldSkipSetField(key string, val interface{}, name string, typ string, at
 		return true, nil
 	}
 
+	attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
 	min_ver := GetNestedValueOrDefault(attrs, ToKeyPath(key+".min_ver"), "").(string)
 	if min_ver != "" {
 		minVer := ParseVersionString(min_ver)
@@ -1201,15 +1250,22 @@ func shouldSkipSetField(key string, val interface{}, name string, typ string, at
 			val, exists := d.GetOk(key)
 			defowlt := GetNestedValueOrDefault(attrs, ToKeyPath(key+".default"), nil)
 			if defowlt == nil {
-				attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
 				defowlt = attrValueDefault(attrTyp)
 			}
-			appendActionLog(fmt.Sprintf("Set (checking min_ver): %s: '%s'.'%s' exists(%v) val(%v) default(%v) ver(%v) backend_ver(%v)\n", typ, name, key, exists, val, defowlt, min_ver, backendVersion.Version))
+			appendActionLog(fmt.Sprintf("Set (checking min_ver): %s: '%s'.'%s' exists(%v) val(%v : %T) default(%v : %T) ver(%v) backend_ver(%v)\n", typ, name, key, exists, val, val, defowlt, defowlt, min_ver, backendVersion.Version))
 			// NOTE: because of the bug in GetOk(), we can't know for sure if the value is set in the TF HCL
 			//   e.g. value=<unset>, default=true -> exists==true
 			//        value=false,   default=true -> exists==false
 			// So, be conservative, and only complain if it's different than the default:
-			if val != nil && val != defowlt {
+			//
+			// special handling for string-array types, since in golang, two empty arrays are not equal
+			// (also an emtpy terraform-created 'val' may be []interface{} instead of []string)
+			isEmptyArray := false
+			if (attrTyp == "string_set" || attrTyp == "string[]") && maybeArrayLen(val) == 0 && maybeArrayLen(defowlt) == 0 {
+				isEmptyArray = true
+			}
+			appendActionLog(fmt.Sprintf("Set (checking min_ver, isEmptyArray: %v): %s: '%s'.'%s' exists(%v) val(%+v -- %T) default(%+v -- %T) ver(%v) backend_ver(%v)\n", isEmptyArray, typ, name, key, exists, val, val, defowlt, defowlt, min_ver, backendVersion.Version))
+			if val != nil && val != defowlt && !isEmptyArray {
 				// XXX error or warning? (Hashi plugin SDK v2 doesn't seem to support warnings)
 				//diags.AddWarning("Below minimum version.", fmt.Sprintf("Field %s.%s requires minimum version %s, skipping...", name, key, min_ver))
 				diags := diag.Errorf("Field '%s.%s' requires minimum version '%s', but backend is '%s'", name, key, min_ver, backendVersion.Version)
@@ -1374,7 +1430,9 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	if typ == "system_settings" {
 		skipKeys["external_audit_storage_enabled"] = true
 		skipKeys["approval_feature_enabled"] = true
+		skipKeys["notebook_ad_hoc_approval_request_enabled"] = true
 		skipKeys["approval_editable_allowed_resource_query_enabled"] = true
+		skipKeys["approval_allow_individual_notification"] = true
 	}
 
 	for key, _ := range attrs {
@@ -1401,11 +1459,23 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		// XXX: work around backend issues with data-dependent ordering
 		// external_audit_storage_enabled depends on several other fields...
 		orderedAttrs = append(orderedAttrs, "external_audit_storage_enabled")
-		// approval_feature_enabled depends on slackConfig and notebook_ad_hoc_approval_request_enabled
-		orderedAttrs = append(orderedAttrs, "approval_feature_enabled")
-		// NOTE: approval_editable_allowed_resource_query_enabled depends on approval_feature_enabled
-		//         ERROR: approval_editable_allowed_resource_query_enabled cannot be true if approval_feature_enabled is false.
-		orderedAttrs = append(orderedAttrs, "approval_editable_allowed_resource_query_enabled")
+		// XXX: work around backend issues with data-dependent ordering
+		// approvalEnabled depends on several other fields, or vice versa depending on it's value
+		approvalEnabled, _ := d.GetOk("approval_feature_enabled")
+		if CastToBool(approvalEnabled) {
+			orderedAttrs = append(orderedAttrs, "approval_feature_enabled")
+			orderedAttrs = append(orderedAttrs, "approval_editable_allowed_resource_query_enabled")
+			orderedAttrs = append(orderedAttrs, "notebook_ad_hoc_approval_request_enabled")
+			orderedAttrs = append(orderedAttrs, "approval_allow_individual_notification")
+		} else {
+			// approval_feature_enabled depends on slackConfig and notebook_ad_hoc_approval_request_enabled
+			orderedAttrs = append(orderedAttrs, "approval_allow_individual_notification")
+			orderedAttrs = append(orderedAttrs, "notebook_ad_hoc_approval_request_enabled")
+			// NOTE: approval_editable_allowed_resource_query_enabled depends on approval_feature_enabled
+			//         ERROR: approval_editable_allowed_resource_query_enabled cannot be true if approval_feature_enabled is false.
+			orderedAttrs = append(orderedAttrs, "approval_editable_allowed_resource_query_enabled")
+			orderedAttrs = append(orderedAttrs, "approval_feature_enabled")
+		}
 	}
 
 	for _, key := range orderedAttrs {

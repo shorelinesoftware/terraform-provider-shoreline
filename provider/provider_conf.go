@@ -30,8 +30,9 @@ var ObjectConfigJsonStr = `
 			"complete_title_template": { "type": "string",     "optional": true, "step": "complete_step_class.title_template", "suppress_null_regex": "^completed \\w*$" },
 			"allowed_entities":        { "type": "string_set", "optional": true },
 			"allowed_resources_query": { "type": "command",    "optional": true },
-			"communication_workspace": { "type": "string", 	   "optional": true, "min_ver": "14.1.0", "step": "communication.workspace"},
-			"communication_channel":   { "type": "string", 	   "optional": true, "min_ver": "14.1.0", "step": "communication.channel"}
+			"communication_workspace": { "type": "string",     "optional": true, "min_ver": "14.1.0", "step": "communication.workspace"},
+			"communication_channel":   { "type": "string",     "optional": true, "min_ver": "14.1.0", "step": "communication.channel"},
+			"editors":                 { "type": "string_set", "optional": true, "min_ver": "18.0.0" }
 		}
 	},
 
@@ -80,9 +81,9 @@ var ObjectConfigJsonStr = `
 			"alarm_resource_query":    { "type": "command", "optional": true },
 			"#trigger_source":         { "type": "string",  "optional": true, "preferred_alias": "event_type", "step": "trigger_source", "default": "shoreline" },
 			"#external_trigger_id":    { "type": "string",  "optional": true, "preferred_alias": "monitor_id", "step": "external_trigger_id", "default": "" },
-			"communication_workspace": { "type": "string", 	"optional": true, "min_ver": "14.1.0", "step": "communication.workspace"},
-			"communication_channel":   { "type": "string", 	"optional": true, "min_ver": "14.1.0", "step": "communication.channel"},
-			"integration_name":        { "type": "string", 	"optional": true, "min_ver": "15.0.0", "step": "integration_name"}
+			"communication_workspace": { "type": "string",  "optional": true, "min_ver": "14.1.0", "step": "communication.workspace"},
+			"communication_channel":   { "type": "string",  "optional": true, "min_ver": "14.1.0", "step": "communication.channel"},
+			"integration_name":        { "type": "string",  "optional": true, "min_ver": "15.0.0", "step": "integration_name"}
 		}
 	},
 
@@ -142,8 +143,8 @@ var ObjectConfigJsonStr = `
 						"api_url": { "type": "string",   "optional": true, "step": "params_unpack.url",       "alias_out": "url" }
 					},
 					"okta": {
-										"api_key": { "type": "string",   "optional": true, "step": "params_unpack.api_token", "alias_out": "api_token" },
-										"api_url": { "type": "string",   "optional": true, "step": "params_unpack.url",       "alias_out": "url" }
+						"api_key": { "type": "string",   "optional": true, "step": "params_unpack.api_token", "alias_out": "api_token" },
+						"api_url": { "type": "string",   "optional": true, "step": "params_unpack.url",       "alias_out": "url" }
 					}
 				}
 			}
@@ -166,12 +167,14 @@ var ObjectConfigJsonStr = `
 			"insights_collector_api_key":  { "type": "string",   "optional": true, "step": "params_unpack.insights_collector_api_key" },
 			"#incident_management_url":     { "type": "string",   "optional": true, "step": "params_unpack.incident_management_url" },
 			"#incident_management_api_key": { "type": "string",   "optional": true, "step": "params_unpack.incident_management_api_key" },
-			
+
 			"cache_ttl":                   { "type": "int", "optional": true, "step": "params_unpack.cache_ttl" },
+			"cache_ttl_ms":                { "type": "int", "optional": true, "step": "params_unpack.cache_ttl_ms" },
 			"api_rate_limit":              { "type": "int", "optional": true, "step": "params_unpack.api_rate_limit" },
 			"subject":                     { "type": "string", "optional": true, "step": "params_unpack.subject" },
             "credentials":                 { "type": "string", "optional": true, "step": "params_unpack.credentials" },
-			"enabled":                     { "type": "intbool",  "optional": true, "default": false }
+			"enabled":                     { "type": "intbool",  "optional": true, "default": false },
+			"external_url":                { "type": "string",   "optional": true, "min_ver": "17.0.0", "step": "params_unpack.external_url" }
 		}
 	},
 
@@ -209,7 +212,10 @@ var ObjectConfigJsonStr = `
 			"communication_workspace": { "type": "string",     "optional": true, "min_ver": "12.5.0", "step": "communication_workspace" },
 			"communication_channel":   { "type": "string",     "optional": true, "min_ver": "12.5.0", "step": "communication_channel" },
 			"labels":                  { "type": "string_set", "optional": true, "min_ver": "16.0", "step": "labels" },
-			"editors":                 { "type": "string_set", "optional": true, "min_ver": "15.1.0" }
+			"editors":                 { "type": "string_set", "optional": true, "min_ver": "15.1.0" },
+			"communication_cud_notifications":       { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_cud_notifications" },
+			"communication_approval_notifications":  { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_approval_notifications" },
+			"communication_execution_notifications": { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_execution_notifications" }
 		}
 	},
 
@@ -256,12 +262,18 @@ var ObjectConfigJsonStr = `
 			"administrator_grants_read_user_token":             { "type": "bool",     "optional": true, "default": true },
 			"approval_feature_enabled":                         { "type": "bool",     "optional": true, "default": true },
 			"notebook_ad_hoc_approval_request_enabled":         { "type": "bool",     "optional": true, "default": true },
+			"notebook_approval_request_expiry_time":            { "type": "int",      "optional": true, "default": 60 },
+			"notebook_run_approval_expiry_time":                { "type": "int",      "optional": true, "default": 60 },
 			"approval_editable_allowed_resource_query_enabled": { "type": "bool",     "optional": true, "default": true },
+			"approval_allow_individual_notification":           { "type": "bool",     "optional": true, "default": true, "min_ver": "17.0.0" },
+			"approval_optional_request_ticket_url":             { "type": "bool",     "optional": true, "default": false, "min_ver": "17.0.0" },
 			"external_audit_storage_enabled":                   { "type": "bool",     "optional": true, "default": false },
 			"external_audit_storage_type":                      { "type": "command",  "optional": true, "default": "ELASTIC" },
-			"#external_audit_storage_url":                       { "type": "string",   "optional": true },
-			"#external_audit_storage_api_token":                 { "type": "string",   "optional": true },
-			"external_audit_storage_batch_period_sec":          { "type": "int",      "optional": true, "default": 5 }
+			"#external_audit_storage_url":                      { "type": "string",   "optional": true },
+			"#external_audit_storage_api_token":                { "type": "string",   "optional": true },
+			"external_audit_storage_batch_period_sec":          { "type": "int",      "optional": true, "default": 5 },
+			"environment_name":                                 { "type": "string",   "optional": true, "default": "" },
+			"environment_name_background":                      { "type": "string",   "optional": true, "min_ver": "18.0.0", "default": "#EF5350" }
 		}
 	},
 
@@ -356,8 +368,9 @@ var ObjectConfigJsonStr = `
 			"webhook_name":            "The name of a webhook for 3rd-party service integration (datadog).",
 			"subject":  			   "The subject whose authentication details is used for a 3rd-party service integration (google cloud identity).",
 			"credentials": 			   "The credentials used for a 3rd-party service integration (google cloud identity), encoded in base64.",
-			"cache_ttl":               "The amount of time a resource will be cached.",
-            "api_rate_limit":          "The number of API calls a client is able to make in a second.",
+			"cache_ttl_ms":               "The amount of time a resource will be cached.",
+			"cache_ttl":               "The amount of time group memberships will be cached (in milliseconds).",
+			"api_rate_limit":          "The number of API calls a client is able to make in a minute.",
 			"administrator_grants_create_user":                 "System setting controlling if administrators can create users.",
 			"administrator_grants_create_user_token":           "System setting controlling if administrators can create user access tokens.",
 			"administrator_grants_regenerate_user_token":       "System setting controlling if administrators can update user access tokens.",
@@ -365,13 +378,23 @@ var ObjectConfigJsonStr = `
 			"approval_feature_enabled":                         "System setting controlling if notebook approvals are enabled.",
 			"notebook_ad_hoc_approval_request_enabled":         "System setting controlling if approvals are enabled for ad-hoc notebook execution.",
 			"approval_editable_allowed_resource_query_enabled": "System setting controlling if notebook resource queries can be modified on approved executions.",
+			"approval_allow_individual_notification":           "System setting controlling if approvals notifications are sent to individual users, in case no specific notebook communication setting is defined.",
+			"approval_optional_request_ticket_url":	           	"System setting controlling if the ticket url is optional when creating an approval request.",
 			"external_audit_storage_enabled":                   "System setting controlling if audit information is stored in an alternate location.",
 			"external_audit_storage_url":                       "System setting for alternate audit storage URL.",
 			"external_audit_storage_type":                      "System setting for alternate audit storage type (e.g. 'ELASTIC').",
 			"external_audit_storage_api_token":                 "System setting for alternate audit storage API access token.",
 			"external_audit_storage_batch_period_sec":          "System setting for alternate audit storage batching interval (in seconds).",
+			"notebook_approval_request_expiry_time":            "System setting for maximum wait for approval after request (in minutes).",
+			"notebook_run_approval_expiry_time":                "System setting for maximum wait for execution after approval (in minutes).",
+			"environment_name":                                 "System setting for the name of the environment.",
+			"environment_name_background":                      "System setting for the background colour of the environment name. The format is #<6-digit hex>",
 			"integration_name":                                 "The name/symbol of a Shoreline integration involved in triggering the bot.",
-			"editors":                                          "The list of users who can edit the object if they have configure permission. Any user with configure permission can edit if left empty."
+			"editors":                                          "List of users who can edit the object (with configure permission). Empty maps to all users.",
+			"communication_cud_notifications":                  "Enables slack notifications for create/update/delete operations. (Requires workspace and channel.)",
+			"communication_approval_notifications":             "Enables slack notifications for approvals operations. (Requires workspace and channel.)",
+			"communication_execution_notifications":            "Enables slack notifications for the object executions. (Requires workspace and channel.)",
+			"external_url": 									"External url for a 3rd-party service integration."
 		}
 	}
 }

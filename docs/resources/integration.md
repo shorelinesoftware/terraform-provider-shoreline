@@ -28,13 +28,15 @@ See the Shoreline [Metrics Documentation](https://docs.shoreline.io/integrations
 
 - **account_id** (String) Account ID for a 3rd-party service integration.
 - **api_key** (String) API key for a 3rd-party service integration.
-- **api_rate_limit** (Number) The number of API calls a client is able to make in a second.
+- **api_rate_limit** (Number) The number of API calls a client is able to make in a minute.
 - **api_url** (String) API url for a 3rd-party service integration.
 - **app_key** (String) Application key for a 3rd-party service integration.
-- **cache_ttl** (Number) The amount of time a resource will be cached.
+- **cache_ttl** (Number) The amount of time group memberships will be cached (in milliseconds).
+- **cache_ttl_ms** (Number) The amount of time a resource will be cached.
 - **credentials** (String) The credentials used for a 3rd-party service integration (google cloud identity), encoded in base64.
 - **dashboard_name** (String) The name of a dashboard for 3rd-party service integration (datadog).
 - **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
+- **external_url** (String) External url for a 3rd-party service integration.
 - **id** (String) The ID of this resource.
 - **insights_collector_api_key** (String) Insights key for a 3rd-party service integration.
 - **insights_collector_url** (String) Insights url for a 3rd-party service integration.
