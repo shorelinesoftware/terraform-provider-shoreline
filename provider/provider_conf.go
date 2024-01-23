@@ -176,7 +176,7 @@ var ObjectConfigJsonStr = `
 
 			"cache_ttl_ms":                { "type": "int", "optional": true, "step": "params_unpack.cache_ttl_ms" },
 			"subject":                     { "type": "string", "optional": true, "step": "params_unpack.subject" },
-            "credentials":                 { "type": "string", "optional": true, "step": "params_unpack.credentials" }
+			"credentials":                 { "type": "string", "optional": true, "step": "params_unpack.credentials" }
 		}
 	},
 
