@@ -174,9 +174,9 @@ var ObjectConfigJsonStr = `
 
 			"external_url":                { "type": "string",   "optional": true, "min_ver": "17.0.0", "step": "params_unpack.external_url" },
 
-			"cache_ttl_ms":                { "type": "int", "optional": true, "step": "params_unpack.cache_ttl_ms" },
-			"subject":                     { "type": "string", "optional": true, "step": "params_unpack.subject" },
-			"credentials":                 { "type": "string", "optional": true, "step": "params_unpack.credentials" }
+			"cache_ttl_ms":                { "type": "int",    "optional": true, "min_ver": "18.0.0", "step": "params_unpack.cache_ttl_ms" },
+			"subject":                     { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.subject" },
+			"credentials":                 { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.credentials" }
 		}
 	},
 
