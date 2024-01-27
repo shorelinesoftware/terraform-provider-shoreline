@@ -172,7 +172,11 @@ var ObjectConfigJsonStr = `
 			"api_rate_limit":              { "type": "int", "optional": true, "step": "params_unpack.api_rate_limit" },
 			"enabled":                     { "type": "intbool",  "optional": true, "default": false },
 
-			"external_url":                { "type": "string",   "optional": true, "min_ver": "17.0.0", "step": "params_unpack.external_url" }
+			"external_url":                { "type": "string",   "optional": true, "min_ver": "17.0.0", "step": "params_unpack.external_url" },
+
+			"cache_ttl_ms":                { "type": "int",    "optional": true, "min_ver": "18.0.0", "step": "params_unpack.cache_ttl_ms" },
+			"subject":                     { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.subject" },
+			"credentials":                 { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.credentials" }
 		}
 	},
 
@@ -389,7 +393,10 @@ var ObjectConfigJsonStr = `
 			"communication_cud_notifications":                  "Enables slack notifications for create/update/delete operations. (Requires workspace and channel.)",
 			"communication_approval_notifications":             "Enables slack notifications for approvals operations. (Requires workspace and channel.)",
 			"communication_execution_notifications":            "Enables slack notifications for the object executions. (Requires workspace and channel.)",
-			"external_url": 									"External url for a 3rd-party service integration."
+			"external_url": 									"External url for a 3rd-party service integration.",
+			"cache_ttl_ms":            "The amount of time group memberships will be cached (in milliseconds).",
+			"subject":                 "The subject whose authentication details is used for a 3rd-party service integration (google cloud identity).",
+			"credentials":             "The credentials used for a 3rd-party service integration (google cloud identity), encoded in base64."
 		}
 	}
 }
