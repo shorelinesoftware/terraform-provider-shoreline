@@ -41,6 +41,7 @@ See the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/se
 - **notebook_ad_hoc_approval_request_enabled** (Boolean) System setting controlling if approvals are enabled for ad-hoc notebook execution. Defaults to `true`.
 - **notebook_approval_request_expiry_time** (Number) System setting for maximum wait for approval after request (in minutes). Defaults to `60`.
 - **notebook_run_approval_expiry_time** (Number) System setting for maximum wait for execution after approval (in minutes). Defaults to `60`.
+- **time_trigger_permissions_user** (String) System setting indicating the user who will consistently execute triggered notebooks. Defaults to `Shoreline`.
 
 ### Read-Only
 
