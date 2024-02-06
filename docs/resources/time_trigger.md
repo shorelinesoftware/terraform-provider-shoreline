@@ -23,9 +23,9 @@ Shoreline time_trigger. A condition that triggers Notebooks.
 ### Optional
 
 - **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
-- **end_date** (String) Date time when the trigger condition stops being evaluted. If not provided, the condition is evaluated with no time limit.
+- **end_date** (String) Date time when the trigger condition stops being evaluted. If not provided, the condition is evaluated with no time limit. The accepted format is ISO8601.
 - **id** (String) The ID of this resource.
-- **start_date** (String) Date time when the trigger condition starts being evaluated (default value is considered to be when the trigger configuration was saved).
+- **start_date** (String) Date time when the trigger condition starts being evaluated (default value is considered to be when the trigger configuration was saved). The accepted format is ISO8601.
 
 ### Read-Only
 
