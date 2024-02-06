@@ -109,7 +109,7 @@ resource "shoreline_alarm" "jvm_trace_heap_alarm" {
 
 ### Required
 
-- **fire_query** (String) The Alarm's trigger condition.
+- **fire_query** (String) The Alarm's or the TimeTrigger's trigger condition.
 - **name** (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
 
 ### Optional
