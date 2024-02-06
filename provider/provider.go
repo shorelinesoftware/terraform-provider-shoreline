@@ -241,7 +241,7 @@ func CheckUpdateResult(result string) error {
 	}
 
 	actions := []string{"define", "delete", "update"}
-	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook", "configuration"}
+	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook", "configuration", "time_trigger"}
 	for _, act := range actions {
 		for _, typ := range types {
 			key := act + "_" + typ
@@ -457,6 +457,7 @@ func New(version string) func() *schema.Provider {
 			ResourcesMap: map[string]*schema.Resource{
 				"shoreline_action":          resourceShorelineObject(ObjectConfigJsonStr, "action"),
 				"shoreline_alarm":           resourceShorelineObject(ObjectConfigJsonStr, "alarm"),
+				"shoreline_time_trigger":    resourceShorelineObject(ObjectConfigJsonStr, "time_trigger"),
 				"shoreline_bot":             resourceShorelineObject(ObjectConfigJsonStr, "bot"),
 				"shoreline_circuit_breaker": resourceShorelineObject(ObjectConfigJsonStr, "circuit_breaker"),
 				"shoreline_file":            resourceShorelineObject(ObjectConfigJsonStr, "file"),
@@ -1877,7 +1878,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 
 		stepsJs := map[string]interface{}{}
 
-		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" {
+		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" || typ == "time_trigger" {
 			// extract fields from step objects
 			op := fmt.Sprintf("get_%s_class( %s_name = \"%s\" )", typ, typ, name)
 			extraJs, err := runOpCommandToJson(op)
