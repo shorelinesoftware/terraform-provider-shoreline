@@ -280,7 +280,7 @@ var ObjectConfigJsonStr = `
 			"approval_editable_allowed_resource_query_enabled": { "type": "bool",     "optional": true, "default": true },
 			"approval_allow_individual_notification":           { "type": "bool",     "optional": true, "min_ver": "17.0.0", "default": true },
 			"approval_optional_request_ticket_url":             { "type": "bool",     "optional": true, "min_ver": "17.0.0", "default": false },
-			"time_trigger_permissions_user":                    { "type": "string",   "optional": true, "min_ver": "18.0.0", "default": "Shoreline"},
+			"time_trigger_permissions_user":                    { "type": "string",   "optional": true, "min_ver": "19.0.0", "default": "Shoreline"},
 			"external_audit_storage_enabled":                   { "type": "bool",     "optional": true, "default": false },
 			"external_audit_storage_type":                      { "type": "command",  "optional": true, "default": "ELASTIC" },
 			"#external_audit_storage_url":                      { "type": "string",   "optional": true },
