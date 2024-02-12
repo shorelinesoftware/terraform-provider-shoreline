@@ -403,9 +403,9 @@ var ObjectConfigJsonStr = `
 			"cache_ttl_ms":            "The amount of time group memberships will be cached (in milliseconds).",
 			"subject":                 "The subject whose authentication details is used for a 3rd-party service integration (google cloud identity).",
 			"credentials":             "The credentials used for a 3rd-party service integration (google cloud identity), encoded in base64.",
-            "tenant_id":               "Tenant id for a 3rd-party service integration (Microsoft Entra ID).",
-            "client_id":               "Application id for a 3rd-party service integration (Microsoft Entra ID).",
-            "client_secret":           "Client secret for a 3rd-party service integration (Microsoft Entra ID)."
+			"tenant_id":               "Tenant id for a 3rd-party service integration (Microsoft Entra ID).",
+			"client_id":               "Application id for a 3rd-party service integration (Microsoft Entra ID).",
+			"client_secret":           "Client secret for a 3rd-party service integration (Microsoft Entra ID)."
 		}
 	}
 }
