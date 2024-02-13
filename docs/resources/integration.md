@@ -41,6 +41,7 @@ See the Shoreline [Metrics Documentation](https://docs.shoreline.io/integrations
 - **insights_collector_api_key** (String) Insights key for a 3rd-party service integration.
 - **insights_collector_url** (String) Insights url for a 3rd-party service integration.
 - **permissions_user** (String) The user which 3rd-party service integration remediations run as (default 'Shoreline').
+- **site_url** (String) Site/Application url for a 3rd-party service integration.
 - **subject** (String) The subject whose authentication details is used for a 3rd-party service integration (google cloud identity).
 - **webhook_name** (String) The name of a webhook for 3rd-party service integration (datadog).
 
