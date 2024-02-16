@@ -63,6 +63,17 @@ var ObjectConfigJsonStr = `
 		}
 	},
 
+	"time_trigger": {
+		"attributes": {
+			"type":                   { "type": "string",   "computed": true, "value": "TIME_TRIGGER" },
+			"name":                   { "type": "label",    "required": true, "forcenew": true, "skip": true },
+			"fire_query":             { "type": "command",  "required": true, "primary": true },
+			"start_date":             { "type": "string", 	"optional": true },
+			"end_date":               { "type": "string", 	"optional": true },
+			"enabled":                { "type": "intbool",  "optional": true, "default": false }
+		}
+	},
+
 	"bot": {
 		"attributes": {
 			"type":                    { "type": "string",  "computed": true, "value": "BOT" },
@@ -274,7 +285,7 @@ var ObjectConfigJsonStr = `
 			"approval_editable_allowed_resource_query_enabled": { "type": "bool",     "optional": true, "default": true },
 			"approval_allow_individual_notification":           { "type": "bool",     "optional": true, "min_ver": "17.0.0", "default": true },
 			"approval_optional_request_ticket_url":             { "type": "bool",     "optional": true, "min_ver": "17.0.0", "default": false },
-			"time_trigger_permissions_user":                    { "type": "string",   "optional": true, "min_ver": "18.0.0", "default": "Shoreline"},
+			"time_trigger_permissions_user":                    { "type": "string",   "optional": true, "min_ver": "19.0.0", "default": "Shoreline"},
 			"external_audit_storage_enabled":                   { "type": "bool",     "optional": true, "default": false },
 			"external_audit_storage_type":                      { "type": "command",  "optional": true, "default": "ELASTIC" },
 			"#external_audit_storage_url":                      { "type": "string",   "optional": true },
@@ -290,6 +301,7 @@ var ObjectConfigJsonStr = `
 		"objects": {
 			"action":    "A command that can be run.\n\nSee the Shoreline [Actions Documentation](https://docs.shoreline.io/actions) for more info.",
 			"alarm":     "A condition that triggers Alerts or Actions.\n\nSee the Shoreline [Alarms Documentation](https://docs.shoreline.io/alarms) for more info.",
+			"time_trigger": "A condition that triggers Notebooks.",
 			"bot":       "An automation that ties an Action to an Alert.\n\nSee the Shoreline [Bots Documentation](https://docs.shoreline.io/bots) for more info.",
 			"circuit_breaker": "An automatic rate limit on actions.\n\nSee the Shoreline [CircuitBreakers Documentation](https://docs.shoreline.io/circuit_breakers) for more info.",
 			"file":      "A datafile that is automatically copied/distributed to defined Resources.\n\nSee the Shoreline [OpCp Documentation](https://docs.shoreline.io/op/commands/cp) for more info.",
@@ -324,6 +336,7 @@ var ObjectConfigJsonStr = `
 			"description":             "A user-friendly explanation of an object.",
 			"destination_path":        "Target location for a copied distributed File object.  See [Op: cp](https://docs.shoreline.io/op/commands/cp).",
 			"enabled":                 "If the object is currently enabled or disabled.",
+			"end_date":                "When the trigger condition stops firing. (defaults to unset, e.g. no stop date). The accepted format is ISO8601, e.g. '2029-02-17T08:08:01'.",
 			"error_long_template":     "The long description of the Action's error condition.",
 			"error_short_template":    "The short description of the Action's error condition.",
 			"error_title_template":    "UI title of the Action's error condition.",
@@ -334,7 +347,7 @@ var ObjectConfigJsonStr = `
 			"file_deps":               "file object dependencies.",
 			"file_length":             "Length, in bytes, of a distributed File object (computed)",
 			"fire_long_template":      "The long description of the Alarm's triggering condition.",
-			"fire_query":              "The Alarm's trigger condition.",
+			"fire_query":              "The trigger condition for an Alarm (general expression) or the TimeTrigger (e.g. 'every 5m').",
 			"fire_short_template":     "The short description of the Alarm's triggering condition.",
 			"fire_title_template":     "UI title of the Alarm's triggering condition.",
 			"identity":                "The email address or provider's (e.g. Okta) group-name for a permissions group.",
@@ -354,6 +367,7 @@ var ObjectConfigJsonStr = `
 			"resolve_title_template":  "UI title of the Alarm's' resolution.",
 			"resource_query":          "A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.",
 			"shell":                   "The commandline shell to use (e.g. /bin/sh).",
+			"start_date":              "When the trigger condition starts firing (defaults to creation/update time of the trigger). The accepted format is ISO8601, e.g. '2024-02-17T08:08:01'.",
 			"start_long_template":     "The long description when starting the Action.",
 			"start_short_template":    "The short description when starting the Action.",
 			"start_title_template":    "UI title of the start of the Action.",
