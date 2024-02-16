@@ -176,7 +176,11 @@ var ObjectConfigJsonStr = `
 
 			"cache_ttl_ms":                { "type": "int",    "optional": true, "min_ver": "18.0.0", "step": "params_unpack.cache_ttl_ms" },
 			"subject":                     { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.subject" },
-			"credentials":                 { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.credentials" }
+			"credentials":                 { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.credentials" },
+
+			"tenant_id":                   { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.tenant_id" },
+			"client_id":                   { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.client_id" },
+			"client_secret":               { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.client_secret" }
 		}
 	},
 
@@ -398,7 +402,10 @@ var ObjectConfigJsonStr = `
 			"external_url": 									"External url for a 3rd-party service integration.",
 			"cache_ttl_ms":            "The amount of time group memberships will be cached (in milliseconds).",
 			"subject":                 "The subject whose authentication details is used for a 3rd-party service integration (google cloud identity).",
-			"credentials":             "The credentials used for a 3rd-party service integration (google cloud identity), encoded in base64."
+			"credentials":             "The credentials used for a 3rd-party service integration (google cloud identity), encoded in base64.",
+			"tenant_id":               "Tenant id for a 3rd-party service integration (Microsoft Entra ID).",
+			"client_id":               "Application id for a 3rd-party service integration (Microsoft Entra ID).",
+			"client_secret":           "Client secret for a 3rd-party service integration (Microsoft Entra ID)."
 		}
 	}
 }
