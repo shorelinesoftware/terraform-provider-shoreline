@@ -26,10 +26,10 @@ jobs:
         with:
           p12-file-base64: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_P12_BASE64 }}
           p12-password: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_PASSWORD }}
-      - name: Install gon via HomeBrew for code signing and app notarization
+      - name: Install create-dmg via HomeBrew for code signing and app notarization
         run: |
-          brew tap mitchellh/gon
-          brew install mitchellh/gon/gon
+          brew tap create-dmg/create-dmg
+          brew install create-dmg
       - name: Sign and notarize mac x86 cli
         env:
           AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
@@ -38,22 +38,9 @@ jobs:
           chmod 755 ./terraform-provider-shoreline_${version}_darwin_amd64
           mv ./terraform-provider-shoreline_${version}_darwin_amd64 ./terraform-provider-shoreline_${version}_darwin_amd64.command
           chmod 755 ./terraform-provider-shoreline_${version}_darwin_amd64.command
-          echo '{
-            "source" : ["./terraform-provider-shoreline_'"${version}"'_darwin_amd64.command"],
-            "bundle_id" : "io.shoreline.terraform",
-            "apple_id": {
-               "username" : "build@shorelinesoftware.com",
-               "password":  "@env:AC_PASSWORD"
-            },
-            "sign" :{
-               "application_identity" : "E4C09D7E61638C54FFD01886C778C5474B9F958D"
-            },
-            "dmg" :{
-               "output_path":  "./terraform-provider-shoreline_'"${version}"'_darwin_amd64.dmg",
-               "volume_name":  "terraform-provider-shoreline_'"${version}"'_darwin_amd64.command"
-            }
-          }' | jq '.' > gon.json
-          gon -log-level=debug -log-json ./gon.json
+          codesign -s "E4C09D7E61638C54FFD01886C778C5474B9F958D" -f -v --timestamp --options runtime ./terraform-provider-shoreline_'"${version}"'_darwin_amd64.command
+          xcrun notarytool store-credentials "notary_credentials" --apple-id "build@shorelinesoftware.com" --team-id "8BF8P3HDAA" --password "${{ secrets.AC_PASSWORD }}"
+          create-dmg --notarize "notary_credentials" terraform-provider-shoreline_'"${version}"'_darwin_amd64.dmg ./
       - name: Sign and notarize mac M1 cli
         env:
           AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
@@ -62,22 +49,9 @@ jobs:
           chmod 755 ./terraform-provider-shoreline_${version}_darwin_arm64
           mv ./terraform-provider-shoreline_${version}_darwin_arm64 ./terraform-provider-shoreline_${version}_darwin_arm64.command
           chmod 755 ./terraform-provider-shoreline_${version}_darwin_arm64.command
-          echo '{
-            "source" : ["./terraform-provider-shoreline_'"${version}"'_darwin_arm64.command"],
-            "bundle_id" : "io.shoreline.terraform",
-            "apple_id": {
-               "username" : "build@shorelinesoftware.com",
-               "password":  "@env:AC_PASSWORD"
-            },
-            "sign" :{
-               "application_identity" : "E4C09D7E61638C54FFD01886C778C5474B9F958D"
-            },
-            "dmg" :{
-               "output_path":  "./terraform-provider-shoreline_'"${version}"'_darwin_arm64.dmg",
-               "volume_name":  "terraform-provider-shoreline_'"${version}"'_darwin_arm64.command"
-            }
-          }' | jq '.' > gon.json
-          gon -log-level=debug -log-json ./gon.json
+          codesign -s "E4C09D7E61638C54FFD01886C778C5474B9F958D" -f -v --timestamp --options runtime ./terraform-provider-shoreline_'"${version}"'_darwin_arm64.command
+          xcrun notarytool store-credentials "notary_credentials" --apple-id "build@shorelinesoftware.com" --team-id "8BF8P3HDAA" --password "${{ secrets.AC_PASSWORD }}"
+          create-dmg --notarize "notary_credentials" terraform-provider-shoreline_'"${version}"'_darwin_arm64.dmg ./
       - name: Upload signed cli to S3
         env:
           version: ${{ github.event.inputs.version }}
