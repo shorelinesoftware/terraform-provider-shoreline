@@ -38,9 +38,9 @@ jobs:
           chmod 755 ./terraform-provider-shoreline_${version}_darwin_amd64
           mv ./terraform-provider-shoreline_${version}_darwin_amd64 ./terraform-provider-shoreline_${version}_darwin_amd64.command
           chmod 755 ./terraform-provider-shoreline_${version}_darwin_amd64.command
-          # codesign -s "E4C09D7E61638C54FFD01886C778C5474B9F958D" -f -v --timestamp --options runtime ./terraform-provider-shoreline_${version}_darwin_amd64.command
+          codesign -s "E4C09D7E61638C54FFD01886C778C5474B9F958D" -f -v --options runtime ./terraform-provider-shoreline_${version}_darwin_amd64.command
           xcrun notarytool store-credentials "notary_credentials" --apple-id "build@shorelinesoftware.com" --team-id "8BF8P3HDAA" --password "${{ secrets.AC_PASSWORD }}"
-          create-dmg --codesign "E4C09D7E61638C54FFD01886C778C5474B9F958D" --notarize "notary_credentials" terraform-provider-shoreline_${version}_darwin_amd64.dmg ./
+          create-dmg --notarize "notary_credentials" terraform-provider-shoreline_${version}_darwin_amd64.dmg ./
       - name: Sign and notarize mac M1 cli
         env:
           AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
