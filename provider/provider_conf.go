@@ -412,6 +412,8 @@ var ObjectConfigJsonStr = `
 			"notebook_run_approval_expiry_time":                "System setting for maximum wait for execution after approval (in minutes).",
 			"environment_name":                                 "System setting for the name of the environment.",
 			"environment_name_background":                      "System setting for the background colour of the environment name. The format is #<6-digit hex>",
+			"param_value_max_length":                           "System setting controlling the maximum allowable length for a notebook's parameter",
+			"parallel_notebook_runs_fired_by_time_triggers":    "System setting controlling the maximum number of different parallel notebook runs initiated via time triggers",
 			"integration_name":                                 "The name/symbol of a Shoreline integration involved in triggering the bot.",
 			"editors":                                          "List of users who can edit the object (with configure permission). Empty maps to all users.",
 			"communication_cud_notifications":                  "Enables slack notifications for create/update/delete operations. (Requires workspace and channel.)",
