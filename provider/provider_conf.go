@@ -103,17 +103,13 @@ var ObjectConfigJsonStr = `
 			"type":                    { "type": "string",  "computed": true, "value": "CIRCUIT_BREAKER" },
 			"name":                    { "type": "label",   "required": true, "forcenew": true, "skip": true },
 			"command":                 { "type": "command", "required": true, "primary": true, "forcenew": true, "refs": {"action":1},
-				"compound_in": "^\\s*(?P<resource_query>.+)\\s*\\|\\s*(?P<action_name>[a-zA-Z_][a-zA-Z_]*)\\s*$",
-				"compound_out": "${resource_query} | ${action_name}"
+				"compound_in": "^\\s*(?P<action_name>[a-zA-Z_][a-zA-Z_]*)\\s*$",
+				"compound_out": "${action_name}"
 			},
-			"breaker_type":            { "type": "string",  "optional": true },
-			"hard_limit":              { "type": "int",     "required": true },
-			"soft_limit":              { "type": "int",     "optional": true, "default": -1 },
-			"duration":                { "type": "time_s",  "required": true },
-			"fail_over":               { "type": "string",  "optional": true },
+			"hard_limit":              { "type": "int",     "optional": true, "default": -1 },
+			"soft_limit":              { "type": "int",     "required": true },
 			"enabled":                 { "type": "bool",    "optional": true, "default": false },
 			"action_name":             { "type": "command", "internal": true },
-			"resource_query":          { "type": "command", "internal": true },
 			"communication_workspace": { "type": "string",  "optional": true, "min_ver": "14.1.0", "step": "communication.workspace"},
 			"communication_channel":   { "type": "string",  "optional": true, "min_ver": "14.1.0", "step": "communication.channel"}
 		}
