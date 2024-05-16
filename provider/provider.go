@@ -1535,7 +1535,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 			appendActionLog(fmt.Sprintf("CheckEnableState: %s: '%s' write(%v) val(%v) change(%v) hasChange:(%v) doDiff(%v)\n", typ, name, writeEnable, enableVal, anyChange, d.HasChange(key), doDiff))
 			continue
 		}
-		if doDiff && skip && !checkKeyChanged(d, typ, key, val, defowlt) && !forcedChangeKeys[key] && !forcedUpdate[key] {
+		if doDiff && !checkKeyChanged(d, typ, key, val, defowlt) && !forcedChangeKeys[key] && !forcedUpdate[key] {
 			continue
 		}
 
