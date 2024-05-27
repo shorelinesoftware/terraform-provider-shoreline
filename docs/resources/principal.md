@@ -27,7 +27,7 @@ Shoreline principal. An authorization group (e.g. Okta groups). Note: Admin priv
 - **configure_permission** (Boolean) If a permissions group is allowed to perform "configure" actions.
 - **execute_limit** (Number) The number of simultaneous linux (shell) commands allowed for a permissions group.
 - **id** (String) The ID of this resource.
-- **idp_name** (String) The provider's (e.g. Okta) name. Defaults to `default`.
+- **idp_name** (String) The Identity Provider's name. Defaults to `default`.
 - **view_limit** (Number) The number of simultaneous metrics allowed for a permissions group.
 
 ### Read-Only

@@ -356,7 +356,7 @@ var ObjectConfigJsonStr = `
 			"fire_short_template":     "The short description of the Alarm's triggering condition.",
 			"fire_title_template":     "UI title of the Alarm's triggering condition.",
 			"identity":                "The email address or provider's (e.g. Okta) group-name for a permissions group.",
-			"idp_name":                "The provider's (e.g. Okta) name.",
+			"idp_name":                "The Identity Provider's name.",
 			"input_file":              "The local source of a distributed File object. (conflicts with inline_data)",
 			"inline_data":             "The inline file data of a distributed File object. (conflicts with input_file)",
 			"is_run_output_persisted": "A boolean value denoting whether or not cell outputs should be persisted when running a notebook",
