@@ -192,7 +192,9 @@ var ObjectConfigJsonStr = `
 
 			"tenant_id":                   { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.tenant_id" },
 			"client_id":                   { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.client_id" },
-			"client_secret":               { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.client_secret" }
+			"client_secret":               { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.client_secret" },
+
+			"idp_name":                    { "type": "string", "optional": true, "min_ver": "21.0.0", "step": "params_unpack.idp_name" }
 		}
 	},
 
@@ -260,7 +262,8 @@ var ObjectConfigJsonStr = `
 			"action_limit":          { "type": "int",      "optional": true },
 			"execute_limit":         { "type": "int",      "optional": true },
 			"configure_permission":  { "type": "intbool",  "optional": true },
-			"administer_permission": { "type": "intbool",  "optional": true }
+			"administer_permission": { "type": "intbool",  "optional": true },
+			"idp_name":              { "type": "string",   "optional": true, "default": "default" }
 		}
 	},
 
@@ -353,6 +356,7 @@ var ObjectConfigJsonStr = `
 			"fire_short_template":     "The short description of the Alarm's triggering condition.",
 			"fire_title_template":     "UI title of the Alarm's triggering condition.",
 			"identity":                "The email address or provider's (e.g. Okta) group-name for a permissions group.",
+			"idp_name":                "The provider's (e.g. Okta) name.",
 			"input_file":              "The local source of a distributed File object. (conflicts with inline_data)",
 			"inline_data":             "The inline file data of a distributed File object. (conflicts with input_file)",
 			"is_run_output_persisted": "A boolean value denoting whether or not cell outputs should be persisted when running a notebook",
