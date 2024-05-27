@@ -40,7 +40,7 @@ See the Shoreline [Metrics Documentation](https://docs.shoreline.io/integrations
 - **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
 - **external_url** (String) External url for a 3rd-party service integration.
 - **id** (String) The ID of this resource.
-- **idp_name** (String) The provider's (e.g. Okta) name.
+- **idp_name** (String) The Identity Provider's name.
 - **insights_collector_api_key** (String) Insights key for a 3rd-party service integration.
 - **insights_collector_url** (String) Insights url for a 3rd-party service integration.
 - **permissions_user** (String) The user which 3rd-party service integration remediations run as (default 'Shoreline').
