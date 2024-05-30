@@ -194,7 +194,7 @@ var ObjectConfigJsonStr = `
 			"client_id":                   { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.client_id" },
 			"client_secret":               { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.client_secret" },
 
-			"idp_name":                    { "type": "string", "optional": true, "min_ver": "21.0.0", "step": "params_unpack.idp_name" }
+			"idp_name":                    { "type": "string", "optional": true, "min_ver": "22.0.0", "step": "params_unpack.idp_name" }
 		}
 	},
 
@@ -263,7 +263,7 @@ var ObjectConfigJsonStr = `
 			"execute_limit":         { "type": "int",      "optional": true },
 			"configure_permission":  { "type": "intbool",  "optional": true },
 			"administer_permission": { "type": "intbool",  "optional": true },
-			"idp_name":              { "type": "string",   "optional": true, "default": "default", "min_ver": "21.0.0" }
+			"idp_name":              { "type": "string",   "optional": true, "default": "default", "min_ver": "22.0.0" }
 		}
 	},
 
