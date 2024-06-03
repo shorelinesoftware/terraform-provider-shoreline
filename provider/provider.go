@@ -944,6 +944,11 @@ func AddNotebookParamsFields(params []interface{}) {
 			if !hasRequired {
 				theMap["required"] = true
 			}
+
+			_, hasExport := theMap["export"]
+			if !hasExport {
+				theMap["export"] = true
+			}
 		}
 	}
 }
