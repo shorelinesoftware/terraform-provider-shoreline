@@ -913,7 +913,7 @@ func AddNotebookParamsFields(params []interface{}) {
 
 			_, hasExport := theMap["export"]
 			if !hasExport {
-				theMap["export"] = true
+				theMap["export"] = false
 			}
 		}
 	}
@@ -925,7 +925,7 @@ func AddNotebookExternalParamsFields(externalParams []interface{}) {
 		if isMap {
 			_, hasExport := theMap["export"]
 			if !hasExport {
-				theMap["export"] = true
+				theMap["export"] = false
 			}
 		}
 	}
