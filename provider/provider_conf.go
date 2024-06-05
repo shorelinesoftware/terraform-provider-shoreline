@@ -219,7 +219,8 @@ var ObjectConfigJsonStr = `
 																	 "cast":       { "params": "string[]", "params_values": "string[]" },
 																	 "force_set":  [ "allowed_entities", "approvers", "is_run_output_persisted",
 																	                 "communication_workspace", "communication_channel" ],
-																	 "skip_diff":  [ "allowedUsers", "isRunOutputPersisted", "approvers", "communication" ],
+																	 "skip_diff":  [ "allowedUsers", "isRunOutputPersisted", "approvers", "communication",
+																	                 "interactve_state", "name", "allowedResourcesQuery", "timeoutMs" ],
 																	 "outtype": "json"
 			                           },
 			"description":             { "type": "string",     "optional": true },

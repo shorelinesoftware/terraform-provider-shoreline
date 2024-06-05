@@ -702,6 +702,8 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 				delete(oldJs, "enabled")
 				NormalizeNotebookJson(nuJs, attributes)
 				NormalizeNotebookJson(oldJs, attributes)
+				appendActionLog(fmt.Sprintf("NormalizeNotebookJson() NuJs:  '%s'\n", CastToString(nuJs)))
+				appendActionLog(fmt.Sprintf("NormalizeNotebookJson() OldJs: '%s'\n", CastToString(oldJs)))
 				//appendActionLog(fmt.Sprintf("notebook.data DiffSuppressFunc, new: %+v \n", nuJs))
 				//appendActionLog(fmt.Sprintf("notebook.data DiffSuppressFunc, old: %+v \n", oldJs))
 				if reflect.DeepEqual(oldJs, nuJs) {
