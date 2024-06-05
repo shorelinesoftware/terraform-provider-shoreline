@@ -1511,8 +1511,9 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		}
 
 		// NOTE: Terraform reports !exists when a value is explicitly supplied, but matches the 'default'
-		if !exists && !d.HasChange(key) && !forceSet && !forcedChangeKeys[key] && !forcedUpdate[key] {
-			defowlt := GetNestedValueOrDefault(attrs, ToKeyPath(key+".default"), nil)
+		defowlt := GetNestedValueOrDefault(attrs, ToKeyPath(key+".default"), nil)
+
+		if !exists && !checkKeyChanged(d, typ, key, val, defowlt) && !forceSet && !forcedChangeKeys[key] && !forcedUpdate[key] {
 			appendActionLog(fmt.Sprintf("FieldDoesNotExist: %s: '%s'.'%s' val(%v) HasChange(%v), forceSet(%v) isCreate(%v) default(%v)\n", typ, name, key, val, d.HasChange(key), forceSet, isCreate, defowlt))
 			// Handle GetOk() bug...
 			if isCreate {
@@ -1528,13 +1529,13 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		// we have to restore the value as needed.
 		if key == "enabled" {
 			enableVal, _ = CastToBoolMaybe(val)
-			if d.HasChange(key) || !doDiff {
+			if !checkKeyChanged(d, typ, key, val, defowlt) || !doDiff {
 				writeEnable = true
 			}
 			appendActionLog(fmt.Sprintf("CheckEnableState: %s: '%s' write(%v) val(%v) change(%v) hasChange:(%v) doDiff(%v)\n", typ, name, writeEnable, enableVal, anyChange, d.HasChange(key), doDiff))
 			continue
 		}
-		if doDiff && !d.HasChange(key) && !forcedChangeKeys[key] && !forcedUpdate[key] {
+		if doDiff && !checkKeyChanged(d, typ, key, val, defowlt) && !forcedChangeKeys[key] && !forcedUpdate[key] {
 			continue
 		}
 
@@ -1581,6 +1582,14 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	return nil
 }
 
+func checkKeyChanged(d *schema.ResourceData, typ string, key string, val interface{}, defaultVal interface{}) bool {
+	if typ == "system_settings" && defaultVal != nil {
+		return (d.HasChange(key) || val != defaultVal)
+	} else {
+		return d.HasChange(key)
+	}
+}
+
 func resourceShorelineObjectCreate(typ string, primary string, attrs map[string]interface{}, objectDef map[string]interface{}) func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 		// use the meta value to retrieve your client from the provider configure method
@@ -1606,7 +1615,7 @@ func resourceShorelineObjectCreate(typ string, primary string, attrs map[string]
 			// once the object is ok, set the ID to tell terraform it's valid...
 			d.SetId(name)
 			// update the data in terraform
-			return resourceShorelineObjectRead(typ, attrs, objectDef)(ctx, d, meta)
+			return resourceShorelineObjectUpdate(typ, attrs, objectDef)(ctx, d, meta)
 		}
 
 		primaryValStr := attrValueString(typ, primary, primaryVal, attrs)
@@ -1847,7 +1856,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 		idFromAPI := name
 		appendActionLog(fmt.Sprintf("Reading %s: '%s' (%v) :: %+v\n", typ, idFromAPI, name, d))
 
-		// return early if "no_delete"
+		// return early if "read_single_attr"
 		readSingleAttr, _ := GetNestedValueOrDefault(objectDef, ToKeyPath("internal.read_single_attr"), false).(bool)
 		if readSingleAttr {
 			for key, _ := range attrs {
