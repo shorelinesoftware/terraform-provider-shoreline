@@ -275,6 +275,38 @@ func CheckUpdateResult(result string) error {
 			}
 		}
 	}
+
+	// Added error message location...
+	execStmtErrors := GetNestedValueOrDefault(js, ToKeyPath("execute_statement_errors"), nil)
+	if execStmtErrors != nil {
+		errorStrArray := []string{}
+		hdArray, isHdArray := execStmtErrors.([]interface{})
+		if isHdArray {
+			for _, entry := range hdArray {
+				entryMap, isMap := entry.(map[string]interface{})
+				if !isMap {
+					continue
+				}
+
+				if errors, ok := entryMap["errors"]; ok {
+					errorsArr, isArr := errors.([]interface{})
+					if !isArr {
+						continue
+					}
+					for _, msg := range errorsArr {
+						msgStr, isStr := msg.(string)
+						if isStr {
+							errorStrArray = append(errorStrArray, msgStr)
+						}
+					}
+				}
+			}
+		}
+		if len(errorStrArray) > 0 {
+			return fmt.Errorf("ERROR: %s.\n", strings.Join(errorStrArray, "\n"))
+		}
+	}
+
 	return nil
 }
 
