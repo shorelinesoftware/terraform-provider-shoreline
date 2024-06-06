@@ -944,6 +944,23 @@ func AddNotebookParamsFields(params []interface{}) {
 			if !hasRequired {
 				theMap["required"] = true
 			}
+
+			_, hasExport := theMap["export"]
+			if !hasExport {
+				theMap["export"] = false
+			}
+		}
+	}
+}
+
+func AddNotebookExternalParamsFields(externalParams []interface{}) {
+	for _, v := range externalParams {
+		theMap, isMap := v.(map[string]interface{})
+		if isMap {
+			_, hasExport := theMap["export"]
+			if !hasExport {
+				theMap["export"] = false
+			}
 		}
 	}
 }
@@ -976,6 +993,11 @@ func NormalizeNotebookJson(object map[string]interface{}, attributes map[string]
 			if k == "params" {
 				AddNotebookParamsFields(arr)
 			}
+
+			if k == "external_params" {
+				AddNotebookExternalParamsFields(arr)
+			}
+
 			// remove empty lists (e.g. external_params)
 			if len(arr) == 0 {
 				appendActionLog(fmt.Sprintf("NormalizeNotebookJson() removing empty array: '%+v'\n", k))
