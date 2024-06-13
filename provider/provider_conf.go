@@ -132,7 +132,9 @@ var ObjectConfigJsonStr = `
 			"file_data":        { "type": "string",   "computed": true, "outtype": "file" },
 			"file_length":      { "type": "int",      "computed": true },
 			"checksum":         { "type": "string",   "computed": true },
-			"md5":              { "type": "string",   "optional": true, "proxy": "file_length,checksum,file_data" }
+			"md5":              { "type": "string",   "optional": true, "proxy": "file_length,checksum,file_data" },
+			"mode":             { "type": "string",   "optional": true, "min_ver": "23.0.0" },
+			"owner":            { "type": "string",   "optional": true, "min_ver": "23.0.0" }
 		}
 	},
 
@@ -364,6 +366,8 @@ var ObjectConfigJsonStr = `
 			"labels":                  "A list of strings by which notebooks can be grouped.",
 			"md5":                     "The md5 checksum of a file, e.g. filemd5(\"${path.module}/data/example-file.txt\")",
 			"metric_name":             "The Alarm's triggering Metric.",
+			"mode":                    "The File's permissions, like 'chmod', in octal (e.g. '0644').",
+			"owner":                   "The File's ownership, like 'chown' (e.g. 'user:group').",
 			"monitor_id":              "For 'datadog' monitor triggered bots, the DD monitor identifier.",
 			"mute_query":              "The Alarm's mute condition.",
 			"params":                  "Named variables to pass to an object (e.g. an Action).",

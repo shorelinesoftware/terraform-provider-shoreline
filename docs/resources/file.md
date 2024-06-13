@@ -101,6 +101,8 @@ variable "s3_bucket" {
 - **inline_data** (String) The inline file data of a distributed File object. (conflicts with input_file)
 - **input_file** (String) The local source of a distributed File object. (conflicts with inline_data)
 - **md5** (String) The md5 checksum of a file, e.g. filemd5("${path.module}/data/example-file.txt")
+- **mode** (String) The File's permissions, like 'chmod', in octal (e.g. '0644').
+- **owner** (String) The File's ownership, like 'chown' (e.g. 'user:group').
 
 ### Read-Only
 
