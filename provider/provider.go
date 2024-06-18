@@ -496,6 +496,7 @@ func New(version string) func() *schema.Provider {
 				"shoreline_integration":     resourceShorelineObject(ObjectConfigJsonStr, "integration"),
 				"shoreline_metric":          resourceShorelineObject(ObjectConfigJsonStr, "metric"),
 				"shoreline_notebook":        resourceShorelineObject(ObjectConfigJsonStr, "notebook"),
+				// "shoreline_runbook":        resourceShorelineObject(ObjectConfigJsonStr, "runbook"),
 				"shoreline_principal":       resourceShorelineObject(ObjectConfigJsonStr, "principal"),
 				"shoreline_resource":        resourceShorelineObject(ObjectConfigJsonStr, "resource"),
 				"shoreline_system_settings": resourceShorelineObject(ObjectConfigJsonStr, "system_settings"),
@@ -1457,18 +1458,36 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 
 	// Have to explicitly set "data" first, as it overrides some other attributes (e.g. "approvers")
 	if typ == "notebook" {
-		key := "data"
-		val, exists := d.GetOk(key)
+		var runbookData interface{}
+		var err error
+
+		key := "cells"
+		cells, exists := d.GetOk(key)
+		appendActionLog(fmt.Sprintf("cell data value found: %v\n", cells))
 		// NOTE: Terraform reports !exists when a value is explicitly supplied, but matches the 'default'
 		if exists || d.HasChange(key) {
-			changed, diags := setFieldInner(key, val, name, typ, attrs, ctx, d, meta, doDiff, isCreate, forcedChangeKeys, forcedChangeVals)
-			if diags != nil {
+			runbookData, err = buildRunbookDataObject(d, cells)
+			if err != nil {
+				diags = diag.Errorf("Failed to build runbook data object: %s", err)
 				return diags
 			}
-			if changed {
-				anyChange = true
+		} else {
+			key = "data"
+			val, exists := d.GetOk(key)
+			// NOTE: Terraform reports !exists when a value is explicitly supplied, but matches the 'default'
+			if exists || d.HasChange(key) {
+				runbookData = val
 			}
 		}
+
+		changed, diags := setFieldInner("data", runbookData, name, typ, attrs, ctx, d, meta, doDiff, isCreate, forcedChangeKeys, forcedChangeVals)
+		if diags != nil {
+			return diags
+		}
+		if changed {
+			anyChange = true
+		}
+
 		forced, hasForced := GetNestedValueOrDefault(attrs, ToKeyPath(key+".force_set"), false).([]interface{})
 		if hasForced {
 			for _, k := range forced {
@@ -1480,6 +1499,9 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	orderedAttrs := []string{}
 	skipKeys := map[string]bool{}
 	if typ == "notebook" {
+		skipKeys["cells"] = true               // aggregated into the `data` field
+		skipKeys["parameters"] = true          // aggregated into the `data` field
+		skipKeys["external_parameters"] = true // aggregated into the `data` field
 		skipKeys["data"] = true
 		skipKeys["approvers"] = true
 		skipKeys["allowed_entities"] = true
