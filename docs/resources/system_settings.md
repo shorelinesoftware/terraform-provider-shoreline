@@ -34,16 +34,29 @@ See the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/se
 - **approval_optional_request_ticket_url** (Boolean) System setting controlling if the ticket url is optional when creating an approval request. Defaults to `false`.
 - **environment_name** (String) System setting for the name of the environment. Defaults to ``.
 - **environment_name_background** (String) System setting for the background colour of the environment name. The format is #<6-digit hex> Defaults to `#EF5350`.
+- **external_audit_storage_api_token** (String) System setting for alternate audit storage API access token.
 - **external_audit_storage_batch_period_sec** (Number) System setting for alternate audit storage batching interval (in seconds). Defaults to `5`.
 - **external_audit_storage_enabled** (Boolean) System setting controlling if audit information is stored in an alternate location. Defaults to `false`.
 - **external_audit_storage_type** (String) System setting for alternate audit storage type (e.g. 'ELASTIC'). Defaults to `ELASTIC`.
+- **external_audit_storage_url** (String) System setting for alternate audit storage URL.
 - **id** (String) The ID of this resource.
+<<<<<<< HEAD
 - **maintenance_mode_enabled** (Boolean) System setting that when enabled, rejects new runs, allowing ongoing tasks to complete before stopping. Defaults to `false`.
 - **notebook_ad_hoc_approval_request_enabled** (Boolean) System setting controlling if approvals are enabled for ad-hoc notebook execution. Defaults to `true`.
 - **notebook_approval_request_expiry_time** (Number) System setting for maximum wait for approval after request (in minutes). Defaults to `60`.
 - **notebook_run_approval_expiry_time** (Number) System setting for maximum wait for execution after approval (in minutes). Defaults to `60`.
 - **parallel_notebook_runs_fired_by_time_triggers** (Number) System setting controlling the maximum number of different parallel notebook runs initiated via time triggers Defaults to `10`.
+=======
+- **notebook_ad_hoc_approval_request_enabled** (Boolean, Deprecated) **Deprecated** Please use 'runbook_ad_hoc_approval_request_enabled' instead. System setting controlling if approvals are enabled for ad-hoc notebook execution.
+- **notebook_approval_request_expiry_time** (Number, Deprecated) **Deprecated** Please use 'runbook_approval_request_expiry_time' instead. System setting for maximum wait for approval after request (in minutes).
+- **notebook_run_approval_expiry_time** (Number, Deprecated) **Deprecated** Please use 'run_approval_expiry_time' instead. System setting for maximum wait for execution after approval (in minutes).
+- **parallel_notebook_runs_fired_by_time_triggers** (Number, Deprecated) **Deprecated** Please use 'parallel_runs_fired_by_time_triggers' instead. System setting controlling the maximum number of different parallel notebook runs initiated via time triggers
+- **parallel_runs_fired_by_time_triggers** (Number)
+>>>>>>> 3987d1a (add new system settings)
 - **param_value_max_length** (Number) System setting controlling the maximum allowable length for a notebook's parameter Defaults to `10000`.
+- **run_approval_expiry_time** (Number)
+- **runbook_ad_hoc_approval_request_enabled** (Boolean)
+- **runbook_approval_request_expiry_time** (Number)
 - **time_trigger_permissions_user** (String) System setting for the user that time-triggered notebooks run as. Defaults to `Shoreline`.
 
 ### Read-Only
