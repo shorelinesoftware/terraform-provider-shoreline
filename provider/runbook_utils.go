@@ -54,8 +54,10 @@ func buildCellsData(cells interface{}) (interface{}, error) {
 	for _, cell := range decodedCells {
 		markdownContent := cell.(map[string]interface{})["md"]
 		oplangContent := cell.(map[string]interface{})["op"]
+		if markdownContent == nil && oplangContent == nil {
+			return nil, fmt.Errorf(`runbook cell must specify either an oplang command or markdown content using the "md" or "op" fields`)
+		}
 		if markdownContent != nil && oplangContent != nil {
-			// error, cannot have both markdown and oplang content
 			return nil, fmt.Errorf("runbook cell cannot have both markdown and oplang content")
 		}
 
