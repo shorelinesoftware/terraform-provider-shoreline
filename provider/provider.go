@@ -196,6 +196,7 @@ func runOpCommand(command string, checkResult bool) (string, error) {
 				appendActionLog(fmt.Sprintf("Failed OpLang update (retries %d/%d)   ---   error:(( %s ))\n", r, RetryLimit, err.Error()))
 			}
 		} else {
+			// aici
 			appendActionLog(fmt.Sprintf("Failed OpLang command (retries %d/%d)   ---   error:(( %s ))\n", r, RetryLimit, err.Error()))
 		}
 	}
@@ -853,8 +854,10 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 			}
 			sch.ConflictsWith = confArr
 		}
+
 		replacesField := GetNestedValueOrDefault(attrMap, ToKeyPath("replaces"), "").(string)
 		if replacesField != "" {
+			appendActionLog(fmt.Sprintf("[AICI] attrMap '%s'\n", attrMap))
 			sch.ConflictsWith = []string{replacesField}
 		}
 		//WriteMsg("WARNING: JSON config from resourceShorelineObject(%s) %s.Optional = %+v.\n", key, k, sch.Optional)
@@ -1919,6 +1922,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 				if key == "type" || key == "name" {
 					continue
 				}
+
 				op := fmt.Sprintf("%s.%s", name, key)
 				js, err := runOpCommandToJson(op)
 				if err != nil {
@@ -1927,6 +1931,22 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 				}
 
 				val := GetNestedValueOrDefault(js, ToKeyPath("get_configuration_attribute"), nil)
+
+				replaces := GetNestedValueOrDefault(attrs, ToKeyPath(key+".replaces"), "").(string)
+				if replaces != "" {
+					_, replacesSet := d.GetOk(replaces)
+					if replacesSet {
+						appendActionLog(fmt.Sprintf("Reading deprecated/renamed skipping new (for obsolete) field : %s: '%s'.'%s'->'%s'  '%v'\n", typ, name, key, replaces, val))
+						continue
+					}
+				}
+
+				deprecatedFor := GetNestedValueOrDefault(attrs, ToKeyPath(key+".deprecated_for"), "").(string)
+				if deprecatedFor != "" {
+					appendActionLog(fmt.Sprintf("Reading deprecated/renamed field : %s: '%s'.'%s'->'%s'  '%v'\n", typ, name, key, deprecatedFor, val))
+					continue
+				}
+
 				if val != nil {
 					SetSingleAttrFromRead(typ, name, key, val, attrs, ctx, d, meta)
 				}
