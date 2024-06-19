@@ -496,7 +496,7 @@ func New(version string) func() *schema.Provider {
 				"shoreline_integration":     resourceShorelineObject(ObjectConfigJsonStr, "integration"),
 				"shoreline_metric":          resourceShorelineObject(ObjectConfigJsonStr, "metric"),
 				"shoreline_notebook":        resourceShorelineObject(ObjectConfigJsonStr, "notebook"),
-				// "shoreline_runbook":        resourceShorelineObject(ObjectConfigJsonStr, "runbook"),
+				"shoreline_runbook":         resourceShorelineObject(ObjectConfigJsonStr, "notebook"), // alias shoreline_runbook to shoreline_notebook
 				"shoreline_principal":       resourceShorelineObject(ObjectConfigJsonStr, "principal"),
 				"shoreline_resource":        resourceShorelineObject(ObjectConfigJsonStr, "resource"),
 				"shoreline_system_settings": resourceShorelineObject(ObjectConfigJsonStr, "system_settings"),
