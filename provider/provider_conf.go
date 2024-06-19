@@ -294,11 +294,11 @@ var ObjectConfigJsonStr = `
 			"administrator_grants_read_user_token":             { "type": "bool",     "optional": true, "default": true },
 			"approval_feature_enabled":                         { "type": "bool",     "optional": true, "default": true },
 			"notebook_ad_hoc_approval_request_enabled":         { "type": "bool",     "optional": true, "deprecated_for": "runbook_ad_hoc_approval_request_enabled" },
-			"runbook_ad_hoc_approval_request_enabled":          { "type": "bool",     "optional": true, "replaces": "notebook_ad_hoc_approval_request_enabled" },
+			"runbook_ad_hoc_approval_request_enabled":          { "type": "bool",     "optional": true, "replaces": "notebook_ad_hoc_approval_request_enabled", "min_ver": "25.0.0" },
 			"notebook_approval_request_expiry_time":            { "type": "int",      "optional": true, "deprecated_for": "runbook_approval_request_expiry_time" },
-			"runbook_approval_request_expiry_time":             { "type": "int",      "optional": true, "replaces": "notebook_approval_request_expiry_time" },
+			"runbook_approval_request_expiry_time":             { "type": "int",      "optional": true, "replaces": "notebook_approval_request_expiry_time", "min_ver": "25.0.0" },
 			"notebook_run_approval_expiry_time":                { "type": "int",      "optional": true, "deprecated_for": "run_approval_expiry_time" },
-			"run_approval_expiry_time":                         { "type": "int",      "optional": true, "replaces": "notebook_run_approval_expiry_time" },
+			"run_approval_expiry_time":                         { "type": "int",      "optional": true, "replaces": "notebook_run_approval_expiry_time", "min_ver": "25.0.0" },
 			"approval_editable_allowed_resource_query_enabled": { "type": "bool",     "optional": true, "default": true },
 			"approval_allow_individual_notification":           { "type": "bool",     "optional": true, "min_ver": "17.0.0", "default": true },
 			"approval_optional_request_ticket_url":             { "type": "bool",     "optional": true, "min_ver": "17.0.0", "default": false },
@@ -312,7 +312,7 @@ var ObjectConfigJsonStr = `
 			"environment_name_background":                      { "type": "string",   "optional": true, "min_ver": "18.0.0", "default": "#EF5350" },
 			"param_value_max_length":                           { "type": "int",      "optional": true, "min_ver": "19.0.0", "default": 10000 },
 			"parallel_notebook_runs_fired_by_time_triggers":    { "type": "int",      "optional": true, "min_ver": "20.0.2", "deprecated_for": "parallel_runs_fired_by_time_triggers" },
-			"parallel_runs_fired_by_time_triggers":             { "type": "int",      "optional": true, "replaces": "parallel_notebook_runs_fired_by_time_triggers" }
+			"parallel_runs_fired_by_time_triggers":             { "type": "int",      "optional": true, "replaces": "parallel_notebook_runs_fired_by_time_triggers", "min_ver": "25.0.0" }
 			"maintenance_mode_enabled":                         { "type": "bool",     "optional": true, "min_ver": "25.1.0", "default": false }
 		}
 	},
