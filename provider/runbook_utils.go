@@ -29,7 +29,11 @@ func buildRunbookDataObject(d *schema.ResourceData, cells interface{}) (interfac
 	}
 	runbookData["external_params"] = externalParametersData
 
-	// TODO enabled field, is it for the whole runbook?
+	enabled, exists := d.GetOk("enabled")
+	if !exists {
+		enabled = true
+	}
+	runbookData["enabled"] = enabled
 
 	// return the json encoded runbookData
 	encodedRunbookData, err := json.Marshal(runbookData)

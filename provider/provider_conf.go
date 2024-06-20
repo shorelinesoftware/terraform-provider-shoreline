@@ -228,6 +228,7 @@ var ObjectConfigJsonStr = `
 			"cells":                   { "type": "b64json",    "optional": true, "step": ".", "outtype": "json", "conflicts": ["data"]},
 			"parameters":              { "type": "b64json",    "optional": true, "step": ".", "outtype": "json", "conflicts": ["data"]},
 			"external_parameters":     { "type": "b64json",    "optional": true, "step": ".", "outtype": "json", "conflicts": ["data"]},
+			"enabled":                 { "type": "bool",       "optional": true, "step": ".", "default": true, "conflicts": ["data"]},
 			"description":             { "type": "string",     "optional": true },
 			"timeout_ms":              { "type": "unsigned",   "optional": true, "default": 60000 },
 			"allowed_entities":        { "type": "string_set", "optional": true },

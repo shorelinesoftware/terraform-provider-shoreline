@@ -1502,6 +1502,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		skipKeys["cells"] = true               // aggregated into the `data` field
 		skipKeys["parameters"] = true          // aggregated into the `data` field
 		skipKeys["external_parameters"] = true // aggregated into the `data` field
+		skipKeys["enabled"] = true             // aggregated into the `data` field
 		skipKeys["data"] = true
 		skipKeys["approvers"] = true
 		skipKeys["allowed_entities"] = true
