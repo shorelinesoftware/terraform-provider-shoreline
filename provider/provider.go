@@ -330,6 +330,20 @@ func ExtractRegexToMap(expr string, regex string) map[string]interface{} {
 	return result
 }
 
+func ValidateLabel(val interface{}, context string) error {
+	re := regexp.MustCompile("^[a-zA-Z0-9_]*$")
+	v, isStr := val.(string)
+	if !isStr || (!re.MatchString(v)) {
+		return fmt.Errorf("%q must be an alphanumeric/underscore string, got: '%+v'", context, val)
+	} else {
+		res := regexp.MustCompile("^[a-zA-Z_]")
+		if !res.MatchString(v) {
+			return fmt.Errorf("%q must start with a letter or underscore, got: '%+v'", context, val)
+		}
+	}
+	return nil
+}
+
 func ValidateVariableName(name string) bool {
 	// match valid variable string names
 	matched, _ := regexp.MatchString(`^[_a-zA-Z][_a-zA-Z0-9]*$`, name)
@@ -694,6 +708,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		sch.Description = description
 
 		attrMap := attrs.(map[string]interface{})
+		etyp := GetNestedValueOrDefault(attrMap, ToKeyPath("elem_type"), "string")
 		typ := GetNestedValueOrDefault(attrMap, ToKeyPath("type"), "string")
 		switch typ {
 		case "command":
@@ -789,6 +804,23 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 				//appendActionLog(fmt.Sprintf("string_set DiffSuppressFunc (sorted lists),   oldList: '%+v'   newList: '%+v'\n", oldSortedList, newSortedList))
 				return reflect.DeepEqual(oldSortedList, newSortedList)
 			}
+			if etyp == "label" {
+				sch.ValidateFunc = func(val interface{}, key string) (warns []string, errs []error) {
+					//valArr, isArr := val.([]interface{})
+					valArr, isArr := val.([]string)
+					if !isArr {
+						errs = append(errs, fmt.Errorf("%q must be an array!", key))
+						return
+					}
+					for _, cur := range valArr {
+						err = ValidateLabel(cur, key)
+						if err != nil {
+							errs = append(errs, err)
+						}
+					}
+					return
+				}
+			}
 		case "bool":
 			sch.Type = schema.TypeBool
 		case "intbool":
@@ -812,17 +844,23 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 			sch.Type = schema.TypeString
 			// ValidateVariableName()
 			sch.ValidateFunc = func(val interface{}, key string) (warns []string, errs []error) {
-				re := regexp.MustCompile("^[a-zA-Z0-9_]*$")
-				v, isStr := val.(string)
-				if !isStr || (!re.MatchString(v)) {
-					errs = append(errs, fmt.Errorf("%q must be an alphanumeric/underscore string, got: '%+v'", key, val))
-				} else {
-					res := regexp.MustCompile("^[a-zA-Z_]")
-					if !res.MatchString(v) {
-						errs = append(errs, fmt.Errorf("%q must start with a letter or underscore, got: '%+v'", key, val))
-					}
+				err = ValidateLabel(val, key)
+				if err != nil {
+					errs = append(errs, err)
 				}
 				return
+
+				//re := regexp.MustCompile("^[a-zA-Z0-9_]*$")
+				//v, isStr := val.(string)
+				//if !isStr || (!re.MatchString(v)) {
+				//	errs = append(errs, fmt.Errorf("%q must be an alphanumeric/underscore string, got: '%+v'", key, val))
+				//} else {
+				//	res := regexp.MustCompile("^[a-zA-Z_]")
+				//	if !res.MatchString(v) {
+				//		errs = append(errs, fmt.Errorf("%q must start with a letter or underscore, got: '%+v'", key, val))
+				//	}
+				//}
+				//return
 			}
 		case "resource":
 			sch.Type = schema.TypeString

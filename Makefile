@@ -24,6 +24,11 @@ check:
 format:
 	gofmt -w .
 
+
+check-json-config:
+	cat provider/provider_conf.go | sed -e '1,6d' -e '$$d' | jq . >/dev/null
+
+
 # NOTE: This relies on your ~/.terraformrc pointing to /tmp/tf-repo.
 #   See terraformrc in the current dir
 install: build

@@ -234,7 +234,7 @@ var ObjectConfigJsonStr = `
 			"allowed_resources_query": { "type": "command",    "optional": true, "replaces": "resource_query", "min_ver": "12.3.0" },
 			"communication_workspace": { "type": "string",     "optional": true, "min_ver": "12.5.0", "step": "communication_workspace" },
 			"communication_channel":   { "type": "string",     "optional": true, "min_ver": "12.5.0", "step": "communication_channel" },
-			"labels":                  { "type": "string_set", "optional": true, "min_ver": "16.0", "step": "labels" },
+			"labels":                  { "type": "string_set",  "optional": true, "min_ver": "16.0", "step": "labels", "elem_type": "label" },
 			"editors":                 { "type": "string_set", "optional": true, "min_ver": "15.1.0" },
 			"communication_cud_notifications":       { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_cud_notifications" },
 			"communication_approval_notifications":  { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_approval_notifications" },
