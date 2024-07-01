@@ -98,7 +98,7 @@ func buildCellsData(cells interface{}) (interface{}, error) {
 func buildParametersData(d *schema.ResourceData) ([]interface{}, error) {
 	var decodedParameters []interface{}
 	parametersData := []interface{}{}
-	parameters, exists := d.GetOk("parameters")
+	parameters, exists := d.GetOk("params")
 
 	appendActionLog(fmt.Sprintf("building runbook parameters from: %v\n", parameters))
 
@@ -145,7 +145,7 @@ func buildParametersData(d *schema.ResourceData) ([]interface{}, error) {
 func buildExternalParametersData(d *schema.ResourceData) ([]interface{}, error) {
 	var decodedExternalParameters []interface{}
 	externalParametersData := []interface{}{}
-	externalParameters, exists := d.GetOk("external_parameters")
+	externalParameters, exists := d.GetOk("external_params")
 
 	appendActionLog(fmt.Sprintf("building runbook external parameters from: %v\n", externalParameters))
 
