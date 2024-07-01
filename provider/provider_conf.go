@@ -215,7 +215,7 @@ var ObjectConfigJsonStr = `
 		"attributes": {
 			"type":                    { "type": "string",     "computed": true, "value": "NOTEBOOK" },
 			"name":                    { "type": "label",      "required": true, "forcenew": true, "skip": true },
-			"data":                    { "type": "b64json",    "optional": true, "step": ".", "primary": true, "default": "{}",
+			"data":                    { "type": "b64json",    "optional": true, "step": ".", "primary": true,
 																	 "omit":       { "cells": "dynamic_cell_fields", ".": "dynamic_fields" },
 																	 "omit_items": { "external_params": "dynamic_params" },
 																	 "cast":       { "params": "string[]", "params_values": "string[]" },
@@ -225,10 +225,10 @@ var ObjectConfigJsonStr = `
 																	                 "interactve_state", "name", "allowedResourcesQuery", "timeoutMs" ],
 																	 "outtype": "json"
 			                           },
-			"cells":                   { "type": "b64json",    "optional": true, "step": ".", "outtype": "json", "conflicts": ["data"]},
-			"parameters":              { "type": "b64json",    "optional": true, "step": ".", "outtype": "json", "conflicts": ["data"]},
-			"external_parameters":     { "type": "b64json",    "optional": true, "step": ".", "outtype": "json", "conflicts": ["data"]},
-			"enabled":                 { "type": "bool",       "optional": true, "step": ".", "default": true, "conflicts": ["data"]},
+			"#cells":                   { "type": "b64json",    "optional": true, "step": "cells", "outtype": "json", "conflicts": ["data"]},
+			"#parameters":              { "type": "b64json",    "optional": true, "step": "parameters", "outtype": "json", "conflicts": ["data"]},
+			"#external_parameters":     { "type": "b64json",    "optional": true, "step": "external_parameters", "outtype": "json", "conflicts": ["data"]},
+			"#enabled":                 { "type": "bool",       "optional": true, "step": "enabled", "default": true, "conflicts": ["data"]},
 			"description":             { "type": "string",     "optional": true },
 			"timeout_ms":              { "type": "unsigned",   "optional": true, "default": 60000 },
 			"allowed_entities":        { "type": "string_set", "optional": true },
