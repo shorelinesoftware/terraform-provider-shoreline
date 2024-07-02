@@ -54,7 +54,6 @@ resource "shoreline_notebook" "my_notebook" {
 
 ### Required
 
-- **data** (String) The downloaded (JSON) representation of a Notebook.
 - **name** (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
 
 ### Optional
@@ -67,6 +66,7 @@ resource "shoreline_notebook" "my_notebook" {
 - **communication_cud_notifications** (Boolean) Enables slack notifications for create/update/delete operations. (Requires workspace and channel.) Defaults to `true`.
 - **communication_execution_notifications** (Boolean) Enables slack notifications for the object executions. (Requires workspace and channel.) Defaults to `true`.
 - **communication_workspace** (String) A string value denoting the slack workspace where notifications related to the object should be sent to.
+- **data** (String) The downloaded (JSON) representation of a Notebook.
 - **description** (String) A user-friendly explanation of an object.
 - **editors** (List of String) List of users who can edit the object (with configure permission). Empty maps to all users.
 - **id** (String) The ID of this resource.

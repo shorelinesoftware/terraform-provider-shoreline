@@ -497,6 +497,7 @@ func New(version string) func() *schema.Provider {
 				"shoreline_integration":     resourceShorelineObject(ObjectConfigJsonStr, "integration"),
 				"shoreline_metric":          resourceShorelineObject(ObjectConfigJsonStr, "metric"),
 				"shoreline_notebook":        resourceShorelineObject(ObjectConfigJsonStr, "notebook"),
+				"shoreline_runbook":         resourceShorelineObject(ObjectConfigJsonStr, "notebook"), // alias shoreline_runbook to shoreline_notebook
 				"shoreline_principal":       resourceShorelineObject(ObjectConfigJsonStr, "principal"),
 				"shoreline_resource":        resourceShorelineObject(ObjectConfigJsonStr, "resource"),
 				"shoreline_system_settings": resourceShorelineObject(ObjectConfigJsonStr, "system_settings"),
@@ -708,7 +709,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 			}
 		case "time_s":
 			sch.Type = schema.TypeString
-			// special case for notebook cells
+			// special case for circuit_breaker
 			sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
 				oldT := timeSuffixToIntSec(old)
 				nuT := timeSuffixToIntSec(nu)
@@ -1344,6 +1345,19 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	// valid-variable-name check (and non-null)
 	//appendActionLog(fmt.Sprintf("RESOURCE TYPE IS: %s\n", typ))
 
+	specialSkipFields := map[string]bool{}
+	if typ == "notebook" || typ == "runbook" {
+		if notebookIsInline(typ, attrs, objectDef, ctx, d, meta) {
+			// TODO move this to the json-config
+			specialSkipFields["cells"] = true
+			specialSkipFields["parameters"] = true
+			specialSkipFields["external_parameters"] = true
+			specialSkipFields["enabled"] = true
+		} else {
+			specialSkipFields["data"] = true
+		}
+	}
+
 	needVersion := false
 	writeEnable := false
 	enableVal := false
@@ -1460,18 +1474,39 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 
 	// Have to explicitly set "data" first, as it overrides some other attributes (e.g. "approvers")
 	if typ == "notebook" {
-		key := "data"
-		val, exists := d.GetOk(key)
+		var runbookData interface{}
+		var err error
+
+		key := "cells"
+		cells, exists := d.GetOk(key)
+		//appendActionLog(fmt.Sprintf("cell data value exists:%v, hasChange():%v, value: %v\n", exists, d.HasChange(key), cells))
 		// NOTE: Terraform reports !exists when a value is explicitly supplied, but matches the 'default'
-		if exists || d.HasChange(key) {
-			changed, diags := setFieldInner(key, val, name, typ, attrs, ctx, d, meta, doDiff, isCreate, forcedChangeKeys, forcedChangeVals)
-			if diags != nil {
-				return diags
+		//if exists || d.HasChange(key) {
+		if notebookIsInline(typ, attrs, objectDef, ctx, d, meta) {
+			if exists {
+				runbookData, err = buildRunbookDataObject(d, cells)
+				if err != nil {
+					diags = diag.Errorf("Failed to build runbook data object: %s", err)
+					return diags
+				}
 			}
-			if changed {
-				anyChange = true
+		} else {
+			key = "data"
+			val, exists := d.GetOk(key)
+			// NOTE: Terraform reports !exists when a value is explicitly supplied, but matches the 'default'
+			if exists || d.HasChange(key) {
+				runbookData = val
 			}
 		}
+
+		changed, diags := setFieldInner("data", runbookData, name, typ, attrs, ctx, d, meta, doDiff, isCreate, forcedChangeKeys, forcedChangeVals)
+		if diags != nil {
+			return diags
+		}
+		if changed {
+			anyChange = true
+		}
+
 		forced, hasForced := GetNestedValueOrDefault(attrs, ToKeyPath(key+".force_set"), false).([]interface{})
 		if hasForced {
 			for _, k := range forced {
@@ -1483,6 +1518,10 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	orderedAttrs := []string{}
 	skipKeys := map[string]bool{}
 	if typ == "notebook" {
+		skipKeys["cells"] = true               // aggregated into the `data` field
+		skipKeys["parameters"] = true          // aggregated into the `data` field
+		skipKeys["external_parameters"] = true // aggregated into the `data` field
+		skipKeys["enabled"] = true             // aggregated into the `data` field
 		skipKeys["data"] = true
 		skipKeys["approvers"] = true
 		skipKeys["allowed_entities"] = true
@@ -1539,6 +1578,11 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	}
 
 	for _, key := range orderedAttrs {
+		if specialSkipFields[key] {
+			val := "nil"
+			appendActionLog(fmt.Sprintf("Skipping set (special-skip) %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
+			continue
+		}
 		// NOTE: GetOk() has bugs: it checks vs 0/false/"" instead of presence of an explicit value, or even equality to the default
 		val, exists := d.GetOk(key)
 
@@ -1647,6 +1691,31 @@ func checkKeyChanged(d *schema.ResourceData, typ string, key string, val interfa
 	} else {
 		return d.HasChange(key)
 	}
+}
+
+func notebookIsInline(typ string, attrs map[string]interface{}, objectDef map[string]interface{}, ctx context.Context, d *schema.ResourceData, meta interface{}) bool {
+	key := "cells"
+	cells, cellsExists := d.GetOk(key)
+	appendActionLog(fmt.Sprintf("Runbook 'cells' value... exists:%v, hasChange():%v, value: %v\n", cellsExists, d.HasChange(key), cells))
+	key = "data"
+	data, dataExists := d.GetOk(key)
+	appendActionLog(fmt.Sprintf("Runbook 'data' value... exists:%v, hasChange():%v, value: %v\n", dataExists, d.HasChange(key), data))
+
+	// NOTE: Terraform reports !exists when a value is explicitly supplied, but matches the 'default'
+	// HasChange() has some similar deficiencies (especially after initial apply)...
+	if cellsExists {
+		return true
+	}
+	if dataExists {
+		return false
+	}
+	if cells != "" {
+		return true
+	}
+	if data != "" {
+		return false
+	}
+	return false
 }
 
 func resourceShorelineObjectCreate(typ string, primary string, attrs map[string]interface{}, objectDef map[string]interface{}) func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -1905,6 +1974,19 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 		// use the meta value to retrieve your client from the provider configure method
 		// client := meta.(*apiClient)
 
+		specialSkipFields := map[string]bool{}
+		if typ == "notebook" || typ == "runbook" {
+			if notebookIsInline(typ, attrs, objectDef, ctx, d, meta) {
+				// TODO move this to the json-config
+				specialSkipFields["cells"] = true
+				specialSkipFields["parameters"] = true
+				specialSkipFields["external_parameters"] = true
+				specialSkipFields["enabled"] = true
+			} else {
+				specialSkipFields["data"] = true
+			}
+		}
+
 		var diags diag.Diagnostics
 		name := d.Get("name").(string)
 		if name == "" {
@@ -2017,6 +2099,12 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 		}
 
 		for key, _ := range attrs {
+			if specialSkipFields[key] {
+				val := "nil"
+				appendActionLog(fmt.Sprintf("Skipping read (special-skip) %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
+				continue
+			}
+
 			curAlias, _ := GetNestedValueOrDefault(aliasMap, ToKeyPath(key+".alias_out"), "").(string)
 			skip, val, diags := resourceShorelineObjectReadSingleAttr(name, typ, key, attrs, record, stepsJs, d, curAlias, aliasMap)
 
