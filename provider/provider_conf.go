@@ -172,7 +172,7 @@ var ObjectConfigJsonStr = `
 			"site_url":                    { "type": "string",   "optional": true, "step": "params_unpack.site_url", "min_ver": "19.0.0"},
 			"api_key":                     { "type": "string",   "optional": true, "step": "params_unpack.api_key" },
 			"app_key":                     { "type": "string",   "optional": true, "step": "params_unpack.app_key" },
-			"dashboard_name":              { "type": "string",   "optional": true, "step": "params_unpack.dashboard_name" },
+			"dashboard_name":              { "type": "string",   "optional": true, "step": "params_unpack.dashboard_name", "max_ver": "25.99.999", "deprecated": true },
 			"webhook_name":                { "type": "string",   "optional": true, "step": "params_unpack.webhook_name" },
 			"##description":               { "type": "string",   "optional": true },
 
