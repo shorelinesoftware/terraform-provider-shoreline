@@ -36,7 +36,7 @@ See the Shoreline [Metrics Documentation](https://docs.shoreline.io/integrations
 - **client_id** (String) Application id for a 3rd-party service integration (Microsoft Entra ID).
 - **client_secret** (String) Client secret for a 3rd-party service integration (Microsoft Entra ID).
 - **credentials** (String) The credentials used for a 3rd-party service integration (google cloud identity), encoded in base64.
-- **dashboard_name** (String) The name of a dashboard for 3rd-party service integration (datadog).
+- **dashboard_name** (String) (Deprecated) The name of a dashboard for 3rd-party service integration (datadog).
 - **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
 - **external_url** (String) External url for a 3rd-party service integration.
 - **id** (String) The ID of this resource.

@@ -172,7 +172,7 @@ var ObjectConfigJsonStr = `
 			"site_url":                    { "type": "string",   "optional": true, "step": "params_unpack.site_url", "min_ver": "19.0.0"},
 			"api_key":                     { "type": "string",   "optional": true, "step": "params_unpack.api_key" },
 			"app_key":                     { "type": "string",   "optional": true, "step": "params_unpack.app_key" },
-			"dashboard_name":              { "type": "string",   "optional": true, "step": "params_unpack.dashboard_name" },
+			"dashboard_name":              { "type": "string",   "optional": true, "step": "params_unpack.dashboard_name", "skip": true, "skip_diff": true},
 			"webhook_name":                { "type": "string",   "optional": true, "step": "params_unpack.webhook_name" },
 			"##description":               { "type": "string",   "optional": true },
 
@@ -402,7 +402,7 @@ var ObjectConfigJsonStr = `
 			"insights_collector_url":  "Insights url for a 3rd-party service integration.",
 			"insights_collector_api_key": "Insights key for a 3rd-party service integration.",
 			"permissions_user":        "The user which 3rd-party service integration remediations run as (default 'Shoreline').",
-			"dashboard_name":          "The name of a dashboard for 3rd-party service integration (datadog).",
+			"dashboard_name":          "(Deprecated) The name of a dashboard for 3rd-party service integration (datadog).",
 			"webhook_name":            "The name of a webhook for 3rd-party service integration (datadog).",
 			"cache_ttl":               "The amount of time group memberships will be cached (in milliseconds).",
 			"api_rate_limit":          "The number of API calls a client is able to make in a minute.",

@@ -754,6 +754,16 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 			//}
 		case "string":
 			sch.Type = schema.TypeString
+
+			// Check if key has skip_diff attribute. Don't show diffs for fields having skip_diff attribute.
+			computed := GetNestedValueOrDefault(attrMap, ToKeyPath("computed"), false).(bool)
+			skipDiff := GetNestedValueOrDefault(attrMap, ToKeyPath("skip_diff"), false).(bool)
+
+			if !computed && skipDiff {
+				sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
+					return true
+				}
+			}
 		case "string[]":
 			sch.Type = schema.TypeList
 			sch.Elem = &schema.Schema{
@@ -1983,6 +1993,8 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 				specialSkipFields["data"] = true
 			}
 		}
+
+		specialSkipFields["dashboard_name"] = false
 
 		var diags diag.Diagnostics
 		name := d.Get("name").(string)
