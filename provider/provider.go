@@ -1994,8 +1994,6 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 			}
 		}
 
-		specialSkipFields["dashboard_name"] = false
-
 		var diags diag.Diagnostics
 		name := d.Get("name").(string)
 		if name == "" {
