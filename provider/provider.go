@@ -1347,8 +1347,8 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		if notebookIsInline(typ, attrs, objectDef, ctx, d, meta) {
 			// TODO move this to the json-config
 			specialSkipFields["cells"] = true
-			specialSkipFields["parameters"] = true
-			specialSkipFields["external_parameters"] = true
+			specialSkipFields["params"] = true
+			specialSkipFields["external_params"] = true
 			specialSkipFields["enabled"] = true
 		} else {
 			specialSkipFields["data"] = true
@@ -1515,10 +1515,10 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	orderedAttrs := []string{}
 	skipKeys := map[string]bool{}
 	if typ == "notebook" {
-		skipKeys["cells"] = true               // aggregated into the `data` field
-		skipKeys["parameters"] = true          // aggregated into the `data` field
-		skipKeys["external_parameters"] = true // aggregated into the `data` field
-		skipKeys["enabled"] = true             // aggregated into the `data` field
+		skipKeys["cells"] = true           // aggregated into the `data` field
+		skipKeys["params"] = true          // aggregated into the `data` field
+		skipKeys["external_params"] = true // aggregated into the `data` field
+		skipKeys["enabled"] = true         // aggregated into the `data` field
 		skipKeys["data"] = true
 		skipKeys["approvers"] = true
 		skipKeys["allowed_entities"] = true
@@ -1976,8 +1976,8 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 			if notebookIsInline(typ, attrs, objectDef, ctx, d, meta) {
 				// TODO move this to the json-config
 				specialSkipFields["cells"] = true
-				specialSkipFields["parameters"] = true
-				specialSkipFields["external_parameters"] = true
+				specialSkipFields["params"] = true
+				specialSkipFields["external_params"] = true
 				specialSkipFields["enabled"] = true
 			} else {
 				specialSkipFields["data"] = true
