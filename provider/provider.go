@@ -754,16 +754,6 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 			//}
 		case "string":
 			sch.Type = schema.TypeString
-
-			// Check if key has skip_diff attribute. Don't show diffs for fields having skip_diff attribute.
-			computed := GetNestedValueOrDefault(attrMap, ToKeyPath("computed"), false).(bool)
-			skipDiff := GetNestedValueOrDefault(attrMap, ToKeyPath("skip_diff"), false).(bool)
-
-			if !computed && skipDiff {
-				sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
-					return true
-				}
-			}
 		case "string[]":
 			sch.Type = schema.TypeList
 			sch.Elem = &schema.Schema{
@@ -1343,6 +1333,18 @@ func shouldSkipSetField(key string, val interface{}, name string, typ string, at
 			return true, nil
 		}
 	}
+
+	max_ver := GetNestedValueOrDefault(attrs, ToKeyPath(key+".max_ver"), "").(string)
+	if max_ver != "" {
+		maxVersion := ParseVersionString(max_ver)
+		gtlteq, valid := CompareVersionRecords(backendVersion, maxVersion)
+
+		if valid && gtlteq >= 0 {
+			appendActionLog(fmt.Sprintf("Set (skipping): %s: '%s'.'%s' ver(%v) backend_ver(%v)\n", typ, name, key, max_ver, backendVersion.Version))
+			return true, nil
+		}
+	}
+
 	return false, nil
 }
 
