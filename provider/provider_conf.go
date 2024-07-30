@@ -68,7 +68,7 @@ var ObjectConfigJsonStr = `
 			"type":                   { "type": "string",   "computed": true, "value": "TIME_TRIGGER" },
 			"name":                   { "type": "label",    "required": true, "forcenew": true, "skip": true },
 			"fire_query":             { "type": "command",  "required": true, "primary": true },
-			"start_date":             { "type": "string", 	"optional": true },
+			"start_date":             { "type": "string", 	"optional": true, "suppress_null_regex": "^[-+:0-9T]*$" },
 			"end_date":               { "type": "string", 	"optional": true },
 			"enabled":                { "type": "intbool",  "optional": true, "default": false }
 		}
