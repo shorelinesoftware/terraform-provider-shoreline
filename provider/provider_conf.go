@@ -402,7 +402,7 @@ var ObjectConfigJsonStr = `
 			"insights_collector_url":  "Insights url for a 3rd-party service integration.",
 			"insights_collector_api_key": "Insights key for a 3rd-party service integration.",
 			"permissions_user":        "The user which 3rd-party service integration remediations run as (default 'Shoreline').",
-			"dashboard_name":          "(Deprecated) The name of a dashboard for 3rd-party service integration (datadog).",
+			"dashboard_name":          "The name of a dashboard for 3rd-party service integration (datadog).",
 			"webhook_name":            "The name of a webhook for 3rd-party service integration (datadog).",
 			"cache_ttl":               "The amount of time group memberships will be cached (in milliseconds).",
 			"api_rate_limit":          "The number of API calls a client is able to make in a minute.",
