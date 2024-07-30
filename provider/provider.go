@@ -1389,6 +1389,11 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		if min_ver != "" {
 			needVersion = true
 		}
+
+		max_ver := GetNestedValueOrDefault(attrs, ToKeyPath(key+".max_ver"), "").(string)
+		if max_ver != "" {
+			needVersion = true
+		}
 	}
 
 	var backendVersion VersionRecord
