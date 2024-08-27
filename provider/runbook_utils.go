@@ -20,11 +20,14 @@ func buildRunbookDataObject(d *schema.ResourceData, cells interface{}) (interfac
 	}
 	runbookData["cells"] = cellsData
 
-	parametersData, err := buildParametersData(d)
+	// TODO this should be passed in, it might not always come from ResourceData
+	params, exists := d.GetOk("params")
+	appendActionLog(fmt.Sprintf("calling buildParametersData (exists:%v) from: %v\n", exists, params))
+	paramsData, err := buildParametersData(CastToObject(params), exists)
 	if err != nil {
 		return nil, err
 	}
-	runbookData["params"] = parametersData
+	runbookData["params"] = paramsData
 
 	externalParametersData, err := buildExternalParametersData(d)
 	if err != nil {
@@ -47,20 +50,15 @@ func buildRunbookDataObject(d *schema.ResourceData, cells interface{}) (interfac
 }
 
 func buildCellsData(cells interface{}) (interface{}, error) {
-	var decodedCells []interface{}
+	decodedCells := cells.([]interface{})
 	var cellContent map[string]interface{}
 	cellsData := []interface{}{}
 
 	appendActionLog(fmt.Sprintf("building runbook cells from: %v\n", cells))
 
-	err := json.Unmarshal([]byte(cells.(string)), &decodedCells)
-	if err != nil {
-		return nil, fmt.Errorf("error decoding cells: %v", err)
-	}
-
 	for _, cell := range decodedCells {
-		markdownContent := cell.(map[string]interface{})["md"]
-		oplangContent := cell.(map[string]interface{})["op"]
+		markdownContent := GetNestedValueOrDefault(cell, ToKeyPath("md"), nil)
+		oplangContent := GetNestedValueOrDefault(cell, ToKeyPath("op"), nil)
 		if markdownContent == nil && oplangContent == nil {
 			return nil, fmt.Errorf(`runbook cell must specify either an oplang command or markdown content using the "md" or "op" fields`)
 		}
@@ -68,12 +66,15 @@ func buildCellsData(cells interface{}) (interface{}, error) {
 			return nil, fmt.Errorf("runbook cell cannot have both markdown and oplang content")
 		}
 
-		enabled, exists := cell.(map[string]interface{})["enabled"]
-		if !exists {
-			enabled = true
+		enabled, enOk := GetNestedValueOrDefault(cell, ToKeyPath("enabled"), true).(bool)
+		if !enOk {
+			return nil, fmt.Errorf(`runbook cell 'enabled' must be a boolean (or not set).`)
 		}
 
 		if markdownContent != nil {
+			if _, ok := markdownContent.(string); !ok {
+				return nil, fmt.Errorf(`runbook cell markdown must be a string`)
+			}
 			cellContent = map[string]interface{}{
 				"content": markdownContent,
 				"enabled": enabled,
@@ -81,6 +82,9 @@ func buildCellsData(cells interface{}) (interface{}, error) {
 				"name":    "unnamed",
 			}
 		} else {
+			if _, ok := oplangContent.(string); !ok {
+				return nil, fmt.Errorf(`runbook cell oplang must be a string`)
+			}
 			cellContent = map[string]interface{}{
 				"content": oplangContent,
 				"enabled": enabled,
@@ -95,39 +99,26 @@ func buildCellsData(cells interface{}) (interface{}, error) {
 	return cellsData, nil
 }
 
-func buildParametersData(d *schema.ResourceData) ([]interface{}, error) {
-	var decodedParameters []interface{}
-	parametersData := []interface{}{}
-	parameters, exists := d.GetOk("parameters")
+func buildParametersData(params interface{}, exists bool) ([]interface{}, error) {
+	appendActionLog(fmt.Sprintf("building runbook params (exists:%v) from: %v\n", exists, params))
 
-	appendActionLog(fmt.Sprintf("building runbook parameters from: %v\n", parameters))
-
+	paramsOut := []interface{}{}
+	paramsArray, ok := params.([]interface{})
 	if !exists {
 		return []interface{}{}, nil
 	}
-
-	err := json.Unmarshal([]byte(parameters.(string)), &decodedParameters)
-	if err != nil {
-		return nil, fmt.Errorf("error decoding parameters: %v", err)
+	if !ok {
+		return nil, fmt.Errorf("error notebook params is not an object array.")
 	}
 
-	for _, parameter := range decodedParameters {
-		name, exists := parameter.(map[string]interface{})["name"]
-		if !exists {
-			return nil, fmt.Errorf("parameter name is required")
+	for _, parameter := range paramsArray {
+		name, ok := GetNestedValueOrDefault(parameter, ToKeyPath("name"), nil).(string)
+		if !ok {
+			return nil, fmt.Errorf("parameter name is required string")
 		}
-		required, exists := parameter.(map[string]interface{})["required"]
-		if !exists {
-			required = true
-		}
-		value, exists := parameter.(map[string]interface{})["value"]
-		if !exists {
-			value = ""
-		}
-		export, exists := parameter.(map[string]interface{})["export"]
-		if !exists {
-			export = false
-		}
+		required := CastToBool(GetNestedValueOrDefault(parameter, ToKeyPath("required"), true))
+		value := CastToString(GetNestedValueOrDefault(parameter, ToKeyPath("value"), ""))
+		export := CastToBool(GetNestedValueOrDefault(parameter, ToKeyPath("export"), false))
 
 		parameterData := map[string]interface{}{
 			"export":   export, // false by default
@@ -136,18 +127,18 @@ func buildParametersData(d *schema.ResourceData) ([]interface{}, error) {
 			"value":    value,    // empty string by default
 		}
 
-		parametersData = append(parametersData, parameterData)
+		paramsOut = append(paramsOut, parameterData)
 	}
 
-	return parametersData, nil
+	return paramsOut, nil
 }
 
 func buildExternalParametersData(d *schema.ResourceData) ([]interface{}, error) {
 	var decodedExternalParameters []interface{}
 	externalParametersData := []interface{}{}
-	externalParameters, exists := d.GetOk("external_parameters")
+	externalParameters, exists := d.GetOk("external_params")
 
-	appendActionLog(fmt.Sprintf("building runbook external parameters from: %v\n", externalParameters))
+	appendActionLog(fmt.Sprintf("building runbook external params from: %v\n", externalParameters))
 
 	if !exists {
 		return []interface{}{}, nil
@@ -155,7 +146,7 @@ func buildExternalParametersData(d *schema.ResourceData) ([]interface{}, error) 
 
 	err := json.Unmarshal([]byte(externalParameters.(string)), &decodedExternalParameters)
 	if err != nil {
-		return nil, fmt.Errorf("error decoding external parameters: %v", err)
+		return nil, fmt.Errorf("error decoding external params: %v", err)
 	}
 
 	for _, externalParameter := range decodedExternalParameters {
