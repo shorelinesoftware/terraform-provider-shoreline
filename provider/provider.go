@@ -1373,6 +1373,18 @@ func shouldSkipSetField(key string, val interface{}, name string, typ string, at
 			return true, nil
 		}
 	}
+
+	max_ver := GetNestedValueOrDefault(attrs, ToKeyPath(key+".max_ver"), "").(string)
+	if max_ver != "" {
+		maxVersion := ParseVersionString(max_ver)
+		gtlteq, valid := CompareVersionRecords(backendVersion, maxVersion)
+
+		if valid && gtlteq >= 0 {
+			appendActionLog(fmt.Sprintf("Set (skipping): %s: '%s'.'%s' ver(%v) backend_ver(%v)\n", typ, name, key, max_ver, backendVersion.Version))
+			return true, nil
+		}
+	}
+
 	return false, nil
 }
 
@@ -1477,6 +1489,11 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		}
 		min_ver := GetNestedValueOrDefault(attrs, ToKeyPath(key+".min_ver"), "").(string)
 		if min_ver != "" {
+			needVersion = true
+		}
+
+		max_ver := GetNestedValueOrDefault(attrs, ToKeyPath(key+".max_ver"), "").(string)
+		if max_ver != "" {
 			needVersion = true
 		}
 	}
