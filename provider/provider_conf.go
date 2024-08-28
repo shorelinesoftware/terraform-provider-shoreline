@@ -172,7 +172,7 @@ var ObjectConfigJsonStr = `
 			"site_url":                    { "type": "string",   "optional": true, "step": "params_unpack.site_url", "min_ver": "19.0.0"},
 			"api_key":                     { "type": "string",   "optional": true, "step": "params_unpack.api_key" },
 			"app_key":                     { "type": "string",   "optional": true, "step": "params_unpack.app_key" },
-			"dashboard_name":              { "type": "string",   "optional": true, "step": "params_unpack.dashboard_name" },
+			"dashboard_name":              { "type": "string",   "optional": true, "step": "params_unpack.dashboard_name", "max_ver": "25.99.999", "deprecated": true },
 			"webhook_name":                { "type": "string",   "optional": true, "step": "params_unpack.webhook_name" },
 			"##description":               { "type": "string",   "optional": true },
 
@@ -304,7 +304,8 @@ var ObjectConfigJsonStr = `
 			"environment_name":                                 { "type": "string",   "optional": true, "default": "" },
 			"environment_name_background":                      { "type": "string",   "optional": true, "min_ver": "18.0.0", "default": "#EF5350" },
 			"param_value_max_length":                           { "type": "int",      "optional": true, "min_ver": "19.0.0", "default": 10000 },
-			"parallel_notebook_runs_fired_by_time_triggers":    { "type": "int",      "optional": true, "min_ver": "20.0.2", "default": 10 }
+			"parallel_notebook_runs_fired_by_time_triggers":    { "type": "int",      "optional": true, "min_ver": "20.0.2", "default": 10 },
+			"maintenance_mode_enabled":                         { "type": "bool",     "optional": true, "min_ver": "25.1.0", "default": false }
 		}
 	},
 
@@ -427,6 +428,7 @@ var ObjectConfigJsonStr = `
 			"environment_name_background":                      "System setting for the background colour of the environment name. The format is #<6-digit hex>",
 			"param_value_max_length":                           "System setting controlling the maximum allowable length for a notebook's parameter",
 			"parallel_notebook_runs_fired_by_time_triggers":    "System setting controlling the maximum number of different parallel notebook runs initiated via time triggers",
+			"maintenance_mode_enabled":                         "System setting that when enabled, rejects new runs, allowing ongoing tasks to complete before stopping.",
 			"integration_name":                                 "The name/symbol of a Shoreline integration involved in triggering the bot.",
 			"editors":                                          "List of users who can edit the object (with configure permission). Empty maps to all users.",
 			"communication_cud_notifications":                  "Enables slack notifications for create/update/delete operations. (Requires workspace and channel.)",
