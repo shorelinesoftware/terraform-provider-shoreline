@@ -1718,7 +1718,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		// we have to restore the value as needed.
 		if key == "enabled" {
 			enableVal, _ = CastToBoolMaybe(val)
-			if !d.HasChange(key) || !doDiff {
+			if d.HasChange(key) || !doDiff {
 				writeEnable = true
 			}
 			appendActionLog(fmt.Sprintf("CheckEnableState: %s: '%s' write(%v) val(%v) change(%v) hasChange:(%v) doDiff(%v)\n", typ, name, writeEnable, enableVal, anyChange, d.HasChange(key), doDiff))
