@@ -249,7 +249,7 @@ func CheckUpdateResult(result string) error {
 			if def != nil {
 				errKey := key + ".error.message"
 				err := GetNestedValueOrDefault(js, ToKeyPath(errKey), nil)
-				if (typ == "notebook" || typ == "configuration") && (err == nil || err == "") {
+				if (typ == "notebook" || typ == "runbook" || typ == "configuration") && (err == nil || err == "") {
 					// have to special-case for notebooks
 					err = ""
 					errArray := []string{}
@@ -720,27 +720,45 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 			}
 		case "b64json":
 			sch.Type = schema.TypeString
-			// special case for notebook JSON data
+			// special case for notebook JSON data, or cells
 			sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
+				//appendActionLog(fmt.Sprintf("notebook.params DiffSuppressFunc(%v : %v) \n", key, k))
+				//appendActionLog(fmt.Sprintf("NormalizeNotebookJson() PreParse Nu:  '%s'\n", nu))
+				//appendActionLog(fmt.Sprintf("NormalizeNotebookJson() PreParse Old: '%s'\n", old))
 				if old == "" && nu == "" {
 					return true
 				}
-				oldJs, oldErr := StringToJson(old)
-				nuJs, nuErr := StringToJson(nu)
-				if oldErr != nil || nuErr != nil {
-					return false
+				// NOTE: notebook.params has "match_null", so it's handled below
+				if k == "cells" {
+					oldArr, oldErr := StringToJsonArray(old)
+					nuArr, nuErr := StringToJsonArray(nu)
+					if oldErr != nil || nuErr != nil {
+						return false
+					}
+					NormalizeNotebookCells(&nuArr)
+					NormalizeNotebookCells(&oldArr)
+					if reflect.DeepEqual(oldArr, nuArr) {
+						return true
+					}
 				}
-				// special case top-level notebook "enabled" which may be returned by old backends
-				delete(nuJs, "enabled")
-				delete(oldJs, "enabled")
-				NormalizeNotebookJson(nuJs, attributes)
-				NormalizeNotebookJson(oldJs, attributes)
-				//appendActionLog(fmt.Sprintf("NormalizeNotebookJson() NuJs:  '%s'\n", CastToString(nuJs)))
-				//appendActionLog(fmt.Sprintf("NormalizeNotebookJson() OldJs: '%s'\n", CastToString(oldJs)))
-				//appendActionLog(fmt.Sprintf("notebook.data DiffSuppressFunc, new: %+v \n", nuJs))
-				//appendActionLog(fmt.Sprintf("notebook.data DiffSuppressFunc, old: %+v \n", oldJs))
-				if reflect.DeepEqual(oldJs, nuJs) {
-					return true
+				if k == "data" {
+					oldJs, oldErr := StringToJson(old)
+					nuJs, nuErr := StringToJson(nu)
+					if oldErr != nil || nuErr != nil {
+						return false
+					}
+					// special case top-level notebook "enabled" which may be returned by old backends
+					delete(nuJs, "enabled")
+					delete(oldJs, "enabled")
+					NormalizeNotebookJson(nuJs, attributes)
+					NormalizeNotebookJson(oldJs, attributes)
+					//appendActionLog(fmt.Sprintf("NormalizeNotebookJson() NuJs:  '%s'\n", CastToString(nuJs)))
+					//appendActionLog(fmt.Sprintf("NormalizeNotebookJson() OldJs: '%s'\n", CastToString(oldJs)))
+					//appendActionLog(fmt.Sprintf("notebook.data DiffSuppressFunc, new: %+v \n", nuJs))
+					//appendActionLog(fmt.Sprintf("notebook.data DiffSuppressFunc, old: %+v \n", oldJs))
+					if reflect.DeepEqual(oldJs, nuJs) {
+						return true
+					}
 				}
 				return false
 			}
@@ -896,6 +914,24 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 				if nu == "" && old == matchNull {
 					return true
 				}
+
+				if k == "params" {
+					oldJs, oldErr := StringToJsonArray(old)
+					nuJs, nuErr := StringToJsonArray(nu)
+					//appendActionLog(fmt.Sprintf("notebook.params DiffSuppressFunc(), PRE  old: %+v \n", oldJs))
+					//appendActionLog(fmt.Sprintf("notebook.params DiffSuppressFunc(), PRE  nu: %+v \n", nuJs))
+					if oldErr != nil || nuErr != nil {
+						return false
+					}
+					AddNotebookParamsFields(nuJs)
+					AddNotebookParamsFields(oldJs)
+					//appendActionLog(fmt.Sprintf("notebook.params DiffSuppressFunc(), POST old: %+v \n", oldJs))
+					//appendActionLog(fmt.Sprintf("notebook.params DiffSuppressFunc(), POST nu: %+v \n", nuJs))
+					if reflect.DeepEqual(oldJs, nuJs) {
+						return true
+					}
+				}
+
 				return false
 			}
 		}
@@ -949,6 +985,15 @@ func AddNotebookParamsFields(params []interface{}) {
 			_, hasExport := theMap["export"]
 			if !hasExport {
 				theMap["export"] = false
+			}
+			val, hasValue := theMap["value"]
+			if !hasValue {
+				theMap["value"] = ""
+			} else {
+				_, isStr := val.(string)
+				if !isStr {
+					theMap["value"] = CastToString(val)
+				}
 			}
 		}
 	}
@@ -1041,6 +1086,34 @@ func NormalizeNotebookJson(object map[string]interface{}, attributes map[string]
 
 	}
 
+}
+
+func NormalizeNotebookCells(cells *[]interface{}) {
+	omitList := []interface{}{"id", "dynamic_cell_fields", "dynamic_fields"}
+	OmitJsonArrayFields(cells, omitList)
+
+	for _, v := range *cells {
+		vmap := v.(map[string]interface{})
+		ctyp := GetNestedValueOrDefault(vmap, ToKeyPath("type"), "").(string)
+		content := GetNestedValueOrDefault(vmap, ToKeyPath("content"), nil)
+		if ctyp == "OP_LANG" {
+			vmap["op"] = content
+			delete(vmap, "type")
+			delete(vmap, "content")
+		} else if ctyp == "MARKDOWN" {
+			vmap["md"] = content
+			delete(vmap, "type")
+			delete(vmap, "content")
+		}
+		enabled := GetNestedValueOrDefault(vmap, ToKeyPath("enabled"), nil)
+		name := GetNestedValueOrDefault(vmap, ToKeyPath("name"), nil)
+		if enabled == nil {
+			vmap["enabled"] = true
+		}
+		if name == nil {
+			vmap["name"] = "unnamed"
+		}
+	}
 }
 
 func EscapeString(val interface{}) string {
@@ -1352,18 +1425,27 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	var diags diag.Diagnostics
 	name := d.Get("name").(string)
 	// valid-variable-name check (and non-null)
-	//appendActionLog(fmt.Sprintf("RESOURCE TYPE IS: %s\n", typ))
+	appendActionLog(fmt.Sprintf("RESOURCE TYPE IS: %s (resourceShorelineObjectSetFields)\n", typ))
 
 	specialSkipFields := map[string]bool{}
 	if typ == "notebook" || typ == "runbook" {
 		if notebookIsInline(typ, attrs, objectDef, ctx, d, meta) {
+			appendActionLog(fmt.Sprintf("Setting %s:%v :: IS_INLINE\n", typ, name))
 			// TODO move this to the json-config
-			specialSkipFields["cells"] = true
-			specialSkipFields["parameters"] = true
-			specialSkipFields["external_parameters"] = true
-			specialSkipFields["enabled"] = true
-		} else {
+			//specialSkipFields["cells"] = true
+			//specialSkipFields["params"] = true
+			//specialSkipFields["external_params"] = true
+			//specialSkipFields["enabled"] = true
+
 			specialSkipFields["data"] = true
+		} else {
+			appendActionLog(fmt.Sprintf("Setting %s:%v :: NOT_INLINE\n", typ, name))
+			//specialSkipFields["data"] = true
+
+			specialSkipFields["cells"] = true
+			specialSkipFields["params"] = true
+			specialSkipFields["external_params"] = true
+			specialSkipFields["enabled"] = true
 		}
 	}
 
@@ -1487,7 +1569,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	}
 
 	// Have to explicitly set "data" first, as it overrides some other attributes (e.g. "approvers")
-	if typ == "notebook" {
+	if typ == "notebook" || typ == "runbook" {
 		var runbookData interface{}
 		var err error
 
@@ -1498,7 +1580,9 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		//if exists || d.HasChange(key) {
 		if notebookIsInline(typ, attrs, objectDef, ctx, d, meta) {
 			if exists {
-				runbookData, err = buildRunbookDataObject(d, cells)
+				runbookData, err = buildRunbookDataObject(d, CastToObject(cells))
+				appendActionLog(fmt.Sprintf("buildRunbookDataObject input: [[[ %v ]]]\n", runbookData))
+				appendActionLog(fmt.Sprintf("buildRunbookDataObject output: [[[ %v ]]]\n", runbookData))
 				if err != nil {
 					diags = diag.Errorf("Failed to build runbook data object: %s", err)
 					return diags
@@ -1531,14 +1615,19 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 
 	orderedAttrs := []string{}
 	skipKeys := map[string]bool{}
-	if typ == "notebook" {
-		skipKeys["cells"] = true               // aggregated into the `data` field
-		skipKeys["parameters"] = true          // aggregated into the `data` field
-		skipKeys["external_parameters"] = true // aggregated into the `data` field
-		skipKeys["enabled"] = true             // aggregated into the `data` field
+	if typ == "notebook" || typ == "runbook" {
+		skipKeys["cells"] = true           // aggregated into the `data` field
+		skipKeys["params"] = true          // aggregated into the `data` field
+		skipKeys["external_params"] = true // aggregated into the `data` field
+		//skipKeys["enabled"] = true         // aggregated into the `data` field
 		skipKeys["data"] = true
 		skipKeys["approvers"] = true
 		skipKeys["allowed_entities"] = true
+		if notebookIsInline(typ, attrs, objectDef, ctx, d, meta) {
+			skipKeys["data"] = true
+		} else {
+			skipKeys["enabled"] = true // aggregated into the `data` field
+		}
 	}
 	if typ == "system_settings" {
 		skipKeys["external_audit_storage_enabled"] = true
@@ -1555,7 +1644,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 			appendActionLog(fmt.Sprintf("Notebook/System skipping key: %s\n", key))
 		}
 	}
-	if typ == "notebook" {
+	if typ == "notebook" || typ == "runbook" {
 		// XXX: work around backend issue with data-dependent ordering
 		aVal, _ := d.Get("allowed_entities").([]interface{})
 		//appendActionLog(fmt.Sprintf("Notebook allowed_entities has len: %v\n", len(aVal)))
@@ -1607,7 +1696,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		if skip {
 			continue
 		}
-		if typ == "notebook" && key == "data" {
+		if (typ == "notebook" || typ == "runbook") && key == "data" {
 			// set first above, skip here
 			continue
 		}
@@ -1675,7 +1764,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		}
 	}
 
-	appendActionLog(fmt.Sprintf("EnableState: %s: '%s' write(%v) val(%v) change(%v)\n", typ, name, writeEnable, enableVal, anyChange))
+	appendActionLog(fmt.Sprintf("EnableState: %s: '%s' write(%v) val(%v) anyChange(%v)\n", typ, name, writeEnable, enableVal, anyChange))
 	// Enabled is automatically toggled to "false" by oplang on any other attribute change.
 	// So, it requires special handling.
 	if writeEnable || (enableVal && anyChange) {
@@ -1710,25 +1799,22 @@ func checkKeyChanged(d *schema.ResourceData, typ string, key string, val interfa
 func notebookIsInline(typ string, attrs map[string]interface{}, objectDef map[string]interface{}, ctx context.Context, d *schema.ResourceData, meta interface{}) bool {
 	key := "cells"
 	cells, cellsExists := d.GetOk(key)
-	appendActionLog(fmt.Sprintf("Runbook 'cells' value... exists:%v, hasChange():%v, value: %v\n", cellsExists, d.HasChange(key), cells))
+	appendActionLog(fmt.Sprintf("Runbook 'cells' value... exists:%v, hasChange():%v, value(%T): %v\n", cellsExists, d.HasChange(key), cells, cells))
 	key = "data"
 	data, dataExists := d.GetOk(key)
-	appendActionLog(fmt.Sprintf("Runbook 'data' value... exists:%v, hasChange():%v, value: %v\n", dataExists, d.HasChange(key), data))
+	appendActionLog(fmt.Sprintf("Runbook 'data' value... exists:%v, hasChange():%v, value(%T): %v\n", dataExists, d.HasChange(key), data, data))
 
 	// NOTE: Terraform reports !exists when a value is explicitly supplied, but matches the 'default'
 	// HasChange() has some similar deficiencies (especially after initial apply)...
-	if cellsExists {
+	if cellsExists && cells != nil && cells != "" {
+		//appendActionLog(fmt.Sprintf("InlineCheck: cellsExists(%v) isNill(%v) isEmptyStr(%v) :: value= %+v\n", cellsExists, (cells == nil), (cells == ""), cells))
 		return true
 	}
-	if dataExists {
+	if dataExists && data != nil && data != "" {
+		//appendActionLog(fmt.Sprintf("InlineCheck: dataExists(%v) isNill(%v) isEmptyStr(%v) :: value= %+v\n", dataExists, (data == nil), (data == ""), data))
 		return false
 	}
-	if cells != "" {
-		return true
-	}
-	if data != "" {
-		return false
-	}
+	appendActionLog(fmt.Sprintf("InlineCheck: DEFAULT\n"))
 	return false
 }
 
@@ -1761,6 +1847,14 @@ func resourceShorelineObjectCreate(typ string, primary string, attrs map[string]
 		}
 
 		primaryValStr := attrValueString(typ, primary, primaryVal, attrs)
+		if typ == "notebook" || typ == "runbook" {
+			if primaryValStr == "" || primaryValStr == "\"\"" {
+				// base64 encoded "{}", as notebooks don't seem to allow creation with an empty string anymore
+				// however, we need to create the notebook "empty", when there's no file-data provided
+				primaryValStr = "\"e30K\""
+				//appendActionLog(fmt.Sprintf("Create setting notebook %s primary to '%s'\n", name, primaryValStr))
+			}
+		}
 		//appendActionLog(fmt.Sprintf("primaryValStr is ((( %+v )))\n", primaryValStr))
 		//op := fmt.Sprintf("%s %s = \"%s\"", typ, name, primaryVal)
 		op := fmt.Sprintf("%s %s = %s", typ, name, primaryValStr)
@@ -1892,11 +1986,13 @@ func resourceShorelineObjectReadSingleAttr(name string, typ string, key string, 
 					omitList, isList := GetNestedValueOrDefault(stepsJs, ToKeyPath(omitTagStr), []interface{}{}).([]interface{})
 					//appendActionLog(fmt.Sprintf("Omit-list path:'%+v' tag: '%+v' list:'%+v'\n", omitPath, omitTag, omitList))
 					if cur != nil && isList {
-						if typ == "notebook" && omitPath == "." {
+						if (typ == "notebook" || typ == "runbook") && omitPath == "." {
 							// NOTE: The top-level object returned by get_notebook_class contains most/all of the object attributes.
 							// So remove them from the inner object
 							for akey, _ := range attrs {
-								omitList = append(omitList, akey)
+								if akey != "cells" && akey != "params" && akey != "external_params" {
+									omitList = append(omitList, akey)
+								}
 							}
 							omitList = append(omitList, "enabled")
 						}
@@ -1953,7 +2049,7 @@ func resourceShorelineObjectReadSingleAttr(name string, typ string, key string, 
 }
 
 func SetSingleAttrFromRead(typ string, name string, key string, val interface{}, attrs map[string]interface{}, ctx context.Context, d *schema.ResourceData, meta interface{}) {
-	appendActionLog(fmt.Sprintf("Reading (updating local state) %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
+	appendActionLog(fmt.Sprintf("Reading (updating local state) %s field: '%s'.'%s' ::(%T) %+v\n", typ, name, key, val, val))
 	attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string").(string)
 	switch attrTyp {
 	case "float":
@@ -1988,19 +2084,6 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 		// use the meta value to retrieve your client from the provider configure method
 		// client := meta.(*apiClient)
 
-		specialSkipFields := map[string]bool{}
-		if typ == "notebook" || typ == "runbook" {
-			if notebookIsInline(typ, attrs, objectDef, ctx, d, meta) {
-				// TODO move this to the json-config
-				specialSkipFields["cells"] = true
-				specialSkipFields["parameters"] = true
-				specialSkipFields["external_parameters"] = true
-				specialSkipFields["enabled"] = true
-			} else {
-				specialSkipFields["data"] = true
-			}
-		}
-
 		var diags diag.Diagnostics
 		name := d.Get("name").(string)
 		if name == "" {
@@ -2010,6 +2093,28 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 		// valid-variable-name check
 		idFromAPI := name
 		appendActionLog(fmt.Sprintf("Reading %s: '%s' (%v) :: %+v\n", typ, idFromAPI, name, d))
+
+		specialSkipFields := map[string]bool{}
+		if typ == "notebook" || typ == "runbook" {
+			if notebookIsInline(typ, attrs, objectDef, ctx, d, meta) {
+				appendActionLog(fmt.Sprintf("Reading %s:%v :: IS_INLINE\n", typ, name))
+				// TODO move this to the json-config
+				//specialSkipFields["cells"] = true
+				//specialSkipFields["params"] = true
+				//specialSkipFields["external_params"] = true
+				//specialSkipFields["enabled"] = true
+
+				specialSkipFields["data"] = true
+			} else {
+				appendActionLog(fmt.Sprintf("Reading %s:%v :: NOT_INLINE\n", typ, name))
+				//specialSkipFields["data"] = true
+
+				specialSkipFields["cells"] = true
+				specialSkipFields["params"] = true
+				specialSkipFields["external_params"] = true
+				specialSkipFields["enabled"] = true
+			}
+		}
 
 		// return early if "read_single_attr"
 		readSingleAttr, _ := GetNestedValueOrDefault(objectDef, ToKeyPath("internal.read_single_attr"), false).(bool)
@@ -2042,7 +2147,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 
 		stepsJs := map[string]interface{}{}
 
-		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" || typ == "time_trigger" || typ == "circuit_breaker" {
+		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" || typ == "runbook" || typ == "time_trigger" || typ == "circuit_breaker" {
 			// extract fields from step objects
 			op := fmt.Sprintf("get_%s_class( %s_name = \"%s\" )", typ, typ, name)
 			extraJs, err := runOpCommandToJson(op)
@@ -2095,7 +2200,28 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 			aliasMap = GetNestedValueOrDefault(objectDef, ToKeyPath("internal.alias.map."+aliasKeyVal), map[string]interface{}{}).(map[string]interface{})
 		}
 
-		for key, _ := range attrs {
+		readFirst := map[string]bool{"enable": true, "cells": true}
+		attrFirst := []string{}
+		attrList := []string{}
+
+		if typ == "notebook" || typ == "runbook" {
+			// Normalizing the notebook removes some fields, so we have to read them first
+			for key, _ := range attrs {
+				if readFirst[key] {
+					attrFirst = append(attrFirst, key)
+				} else {
+					attrList = append(attrList, key)
+				}
+			}
+			attrList = append(attrFirst, attrList...)
+		} else {
+			for key, _ := range attrs {
+				attrList = append(attrList, key)
+			}
+		}
+
+		//for key, _ := range attrs {
+		for _, key := range attrList {
 			if specialSkipFields[key] {
 				val := "nil"
 				appendActionLog(fmt.Sprintf("Skipping read (special-skip) %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
@@ -2151,6 +2277,17 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 					d.Set(key, nil)
 					continue
 				}
+			}
+
+			if key == "cells" && (typ == "notebook" || typ == "runbook") {
+				val = GetNestedValueOrDefault(stepsJs, ToKeyPath("cells"), nil)
+				// Later cleanup (omit) of fields in 'data' may affect this, so copy...
+				val = DeepCopy(val)
+				valArr := val.([]interface{})
+				NormalizeNotebookCells(&valArr)
+				appendActionLog(fmt.Sprintf("Reading (special notebook.cells) %s field: '%s'.'%s' :: %+v\n", typ, name, key, valArr))
+				d.Set(key, CastToString(valArr))
+				continue
 			}
 
 			SetSingleAttrFromRead(typ, name, key, val, attrs, ctx, d, meta)
