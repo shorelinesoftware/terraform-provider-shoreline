@@ -312,7 +312,7 @@ var ObjectConfigJsonStr = `
 			"environment_name_background":                      { "type": "string",   "optional": true, "min_ver": "18.0.0", "default": "#EF5350" },
 			"param_value_max_length":                           { "type": "int",      "optional": true, "min_ver": "19.0.0", "default": 10000 },
 			"parallel_notebook_runs_fired_by_time_triggers":    { "type": "int",      "optional": true, "min_ver": "20.0.2", "default": 10, "deprecated_for": "parallel_runs_fired_by_time_triggers"  },
-			"parallel_runs_fired_by_time_triggers":             { "type": "int",      "optional": true, "min_ver": "25.0.0", "default": 10, "replaces": "parallel_notebook_runs_fired_by_time_triggers" }
+			"parallel_runs_fired_by_time_triggers":             { "type": "int",      "optional": true, "min_ver": "25.0.0", "default": 10, "replaces": "parallel_notebook_runs_fired_by_time_triggers" },
 			"maintenance_mode_enabled":                         { "type": "bool",     "optional": true, "min_ver": "25.1.0", "default": false }
 		}
 	},
