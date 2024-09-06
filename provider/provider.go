@@ -853,6 +853,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		sch.ForceNew = GetNestedValueOrDefault(attrMap, ToKeyPath("forcenew"), false).(bool)
 		deprecated := GetNestedValueOrDefault(attrMap, ToKeyPath("deprecated"), false).(bool)
 		deprField := GetNestedValueOrDefault(attrMap, ToKeyPath("deprecated_for"), "").(string)
+		replField := GetNestedValueOrDefault(attrMap, ToKeyPath("replaces"), "").(string)
 		conflicts := GetNestedValueOrDefault(attrMap, ToKeyPath("conflicts"), []interface{}{}).([]interface{})
 		if deprecated {
 			sch.Deprecated = fmt.Sprintf("Field '%s' is obsolete.", k)
@@ -936,6 +937,45 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 			}
 		}
 
+		associatedSettings := map[string]string{
+			"notebook_ad_hoc_approval_request_enabled":      "runbook_ad_hoc_approval_request_enabled",
+			"notebook_approval_request_expiry_time":         "runbook_approval_request_expiry_time",
+			"notebook_run_approval_expiry_time":             "run_approval_expiry_time",
+			"parallel_notebook_runs_fired_by_time_triggers": "parallel_runs_fired_by_time_triggers",
+			"runbook_ad_hoc_approval_request_enabled":       "notebook_ad_hoc_approval_request_enabled",
+			"runbook_approval_request_expiry_time":          "notebook_approval_request_expiry_time",
+			"run_approval_expiry_time":                      "notebook_run_approval_expiry_time",
+			"parallel_runs_fired_by_time_triggers":          "parallel_notebook_runs_fired_by_time_triggers",
+		}
+		if deprField != "" {
+			sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
+				deprFieldOldValue, deprFieldNewValue := d.GetChange(associatedSettings[k])
+				if old != nu && nu == fmt.Sprint(defowlt) && deprFieldOldValue != deprFieldNewValue && deprFieldNewValue == defowlt {
+					return true
+				}
+
+				if old != nu && nu == fmt.Sprint(defowlt) && deprFieldOldValue != deprFieldNewValue && deprFieldNewValue != defowlt {
+					return true
+				}
+
+				return false
+			}
+		}
+		if replField != "" {
+			sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
+				replFieldOldValue, replFieldNewValue := d.GetChange(associatedSettings[k])
+
+				if old != nu && nu == fmt.Sprint(defowlt) && replFieldOldValue != replFieldNewValue && replFieldNewValue != defowlt {
+					return true
+				}
+
+				if old != nu && nu == fmt.Sprint(defowlt) && replFieldOldValue == replFieldNewValue && replFieldNewValue != defowlt {
+					return true
+				}
+
+				return false
+			}
+		}
 		// NOTE: This actually messes up the file objects. Need a suppress function that's just for acceptance test comparisions.
 		//notStored, isBool := GetNestedValueOrDefault(attrMap, ToKeyPath("not_stored"), nil).(bool)
 		//if isBool && notStored {
@@ -1421,6 +1461,68 @@ func shouldSkipSetField(key string, val interface{}, name string, typ string, at
 	return false, nil
 }
 
+func createUpdateSystemSettingsCommand(systemSettings map[string]interface{}) string {
+	var builder strings.Builder
+	builder.WriteString("update_configuration(")
+
+	first := true
+	for key, value := range systemSettings {
+		if !first {
+			builder.WriteString(", ")
+		}
+		first = false
+
+		builder.WriteString(key)
+		builder.WriteString("=")
+
+		switch v := value.(type) {
+		case string:
+			builder.WriteString(fmt.Sprintf("\"%s\"", v))
+		case int:
+			builder.WriteString(strconv.Itoa(v))
+		case bool:
+			builder.WriteString(strconv.FormatBool(v))
+		default:
+			builder.WriteString(fmt.Sprintf("\"%v\"", v))
+		}
+	}
+
+	builder.WriteString(")")
+
+	return builder.String()
+}
+
+func updateSystemSettings(attrs map[string]interface{}, objectDef map[string]interface{}, ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	settingsToUpdate := make(map[string]interface{})
+
+	settingsToUpdate["configuration_name"] = "system_settings"
+
+	for key, _ := range attrs {
+		val, _ := d.GetOk(key)
+		changed := d.HasChange(key)
+
+		if changed {
+			settingsToUpdate[key] = val
+		}
+	}
+
+	op := createUpdateSystemSettingsCommand(settingsToUpdate)
+
+	appendActionLog(fmt.Sprintf("Updating system settings statement... '%s'\n", op))
+	result, err := runOpCommand(op, true)
+	if err != nil {
+		appendActionLog(fmt.Sprintf("Failed to update system settings: %s\n", err.Error()))
+
+		return diag.Errorf("Failed to update system settings: %s\n", err.Error())
+	}
+	err = CheckUpdateResult(result)
+	if err != nil {
+		return diag.Errorf("Failed to update system settings: %s\n", err.Error())
+	}
+
+	return nil
+}
+
 func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, objectDef map[string]interface{}, ctx context.Context, d *schema.ResourceData, meta interface{}, doDiff bool, isCreate bool) diag.Diagnostics {
 	var diags diag.Diagnostics
 	name := d.Get("name").(string)
@@ -1629,19 +1731,12 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 			skipKeys["enabled"] = true // aggregated into the `data` field
 		}
 	}
-	if typ == "system_settings" {
-		skipKeys["external_audit_storage_enabled"] = true
-		skipKeys["approval_feature_enabled"] = true
-		skipKeys["notebook_ad_hoc_approval_request_enabled"] = true
-		skipKeys["approval_editable_allowed_resource_query_enabled"] = true
-		skipKeys["approval_allow_individual_notification"] = true
-	}
 
 	for key, _ := range attrs {
 		if skipKeys[key] != true {
 			orderedAttrs = append(orderedAttrs, key)
 		} else {
-			appendActionLog(fmt.Sprintf("Notebook/System skipping key: %s\n", key))
+			appendActionLog(fmt.Sprintf("Notebook skipping key: %s\n", key))
 		}
 	}
 	if typ == "notebook" || typ == "runbook" {
@@ -1654,29 +1749,6 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		} else {
 			orderedAttrs = append(orderedAttrs, "approvers")
 			orderedAttrs = append(orderedAttrs, "allowed_entities")
-		}
-	}
-
-	if typ == "system_settings" {
-		// XXX: work around backend issues with data-dependent ordering
-		// external_audit_storage_enabled depends on several other fields...
-		orderedAttrs = append(orderedAttrs, "external_audit_storage_enabled")
-		// XXX: work around backend issues with data-dependent ordering
-		// approvalEnabled depends on several other fields, or vice versa depending on it's value
-		approvalEnabled, _ := d.GetOk("approval_feature_enabled")
-		if CastToBool(approvalEnabled) {
-			orderedAttrs = append(orderedAttrs, "approval_feature_enabled")
-			orderedAttrs = append(orderedAttrs, "approval_editable_allowed_resource_query_enabled")
-			orderedAttrs = append(orderedAttrs, "notebook_ad_hoc_approval_request_enabled")
-			orderedAttrs = append(orderedAttrs, "approval_allow_individual_notification")
-		} else {
-			// approval_feature_enabled depends on slackConfig and notebook_ad_hoc_approval_request_enabled
-			orderedAttrs = append(orderedAttrs, "approval_allow_individual_notification")
-			orderedAttrs = append(orderedAttrs, "notebook_ad_hoc_approval_request_enabled")
-			// NOTE: approval_editable_allowed_resource_query_enabled depends on approval_feature_enabled
-			//         ERROR: approval_editable_allowed_resource_query_enabled cannot be true if approval_feature_enabled is false.
-			orderedAttrs = append(orderedAttrs, "approval_editable_allowed_resource_query_enabled")
-			orderedAttrs = append(orderedAttrs, "approval_feature_enabled")
 		}
 	}
 
@@ -1719,7 +1791,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		// NOTE: Terraform reports !exists when a value is explicitly supplied, but matches the 'default'
 		defowlt := GetNestedValueOrDefault(attrs, ToKeyPath(key+".default"), nil)
 
-		if !exists && !checkKeyChanged(d, typ, key, val, defowlt) && !forceSet && !forcedChangeKeys[key] && !forcedUpdate[key] {
+		if !exists && !d.HasChange(key) && !forceSet && !forcedChangeKeys[key] && !forcedUpdate[key] {
 			appendActionLog(fmt.Sprintf("FieldDoesNotExist: %s: '%s'.'%s' val(%v) HasChange(%v), forceSet(%v) isCreate(%v) default(%v)\n", typ, name, key, val, d.HasChange(key), forceSet, isCreate, defowlt))
 			// Handle GetOk() bug...
 			if isCreate {
@@ -1735,13 +1807,13 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		// we have to restore the value as needed.
 		if key == "enabled" {
 			enableVal, _ = CastToBoolMaybe(val)
-			if checkKeyChanged(d, typ, key, val, defowlt) || !doDiff {
+			if d.HasChange(key) || !doDiff {
 				writeEnable = true
 			}
 			appendActionLog(fmt.Sprintf("CheckEnableState: %s: '%s' write(%v) val(%v) change(%v) hasChange:(%v) doDiff(%v)\n", typ, name, writeEnable, enableVal, anyChange, d.HasChange(key), doDiff))
 			continue
 		}
-		if doDiff && !checkKeyChanged(d, typ, key, val, defowlt) && !forcedChangeKeys[key] && !forcedUpdate[key] {
+		if doDiff && !d.HasChange(key) && !forcedChangeKeys[key] && !forcedUpdate[key] {
 			continue
 		}
 
@@ -1786,14 +1858,6 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		}
 	}
 	return nil
-}
-
-func checkKeyChanged(d *schema.ResourceData, typ string, key string, val interface{}, defaultVal interface{}) bool {
-	if typ == "system_settings" && defaultVal != nil {
-		return (d.HasChange(key) || val != defaultVal)
-	} else {
-		return d.HasChange(key)
-	}
 }
 
 func notebookIsInline(typ string, attrs map[string]interface{}, objectDef map[string]interface{}, ctx context.Context, d *schema.ResourceData, meta interface{}) bool {
@@ -2305,7 +2369,11 @@ func resourceShorelineObjectUpdate(typ string, attrs map[string]interface{}, obj
 		name := d.Get("name").(string)
 		appendActionLog(fmt.Sprintf("Updated object '%s': '%s' :: %+v\n", typ, name, d))
 
-		diags = resourceShorelineObjectSetFields(typ, attrs, objectDef, ctx, d, meta, true, false)
+		if typ == "system_settings" {
+			diags = updateSystemSettings(attrs, objectDef, ctx, d, meta)
+		} else {
+			diags = resourceShorelineObjectSetFields(typ, attrs, objectDef, ctx, d, meta, true, false)
+		}
 		if diags != nil {
 			// TODO delete incomplete object?
 			return diags
