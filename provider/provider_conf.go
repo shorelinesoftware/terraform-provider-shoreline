@@ -222,7 +222,7 @@ var ObjectConfigJsonStr = `
 																	 "force_set":  [ "allowed_entities", "approvers", "is_run_output_persisted",
 																	                 "communication_workspace", "communication_channel" ],
 																	 "skip_diff":  [ "allowedUsers", "isRunOutputPersisted", "approvers", "communication",
-																	                 "interactve_state", "name", "allowedResourcesQuery", "timeoutMs" ],
+																	                 "interactive_state", "name", "allowedResourcesQuery", "timeoutMs" ],
 																	 "outtype": "json"
 			                           },
 			"#cells":                   { "type": "b64json",    "optional": true, "step": "cells", "outtype": "json", "conflicts": ["data"]},

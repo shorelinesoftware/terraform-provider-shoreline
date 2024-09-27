@@ -915,7 +915,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 					return true
 				}
 
-				if k == "params" {
+				if k == "params" || k == "external_params" {
 					oldJs, oldErr := StringToJsonArray(old)
 					nuJs, nuErr := StringToJsonArray(nu)
 					//appendActionLog(fmt.Sprintf("notebook.params DiffSuppressFunc(), PRE  old: %+v \n", oldJs))
@@ -923,8 +923,13 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 					if oldErr != nil || nuErr != nil {
 						return false
 					}
-					AddNotebookParamsFields(nuJs)
-					AddNotebookParamsFields(oldJs)
+					if k == "params" {
+						AddNotebookParamsFields(nuJs)
+						AddNotebookParamsFields(oldJs)
+					} else {
+						AddNotebookExternalParamsFields(nuJs)
+						AddNotebookExternalParamsFields(oldJs)
+					}
 					//appendActionLog(fmt.Sprintf("notebook.params DiffSuppressFunc(), POST old: %+v \n", oldJs))
 					//appendActionLog(fmt.Sprintf("notebook.params DiffSuppressFunc(), POST nu: %+v \n", nuJs))
 					if reflect.DeepEqual(oldJs, nuJs) {
@@ -1003,9 +1008,9 @@ func AddNotebookExternalParamsFields(externalParams []interface{}) {
 	for _, v := range externalParams {
 		theMap, isMap := v.(map[string]interface{})
 		if isMap {
-			_, hasExport := theMap["export"]
-			if !hasExport {
-				theMap["export"] = false
+			_, hasValue := theMap["value"]
+			if !hasValue {
+				theMap["value"] = ""
 			}
 		}
 	}
