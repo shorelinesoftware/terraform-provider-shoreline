@@ -222,7 +222,7 @@ var ObjectConfigJsonStr = `
 																	 "force_set":  [ "allowed_entities", "approvers", "is_run_output_persisted",
 																	                 "communication_workspace", "communication_channel" ],
 																	 "skip_diff":  [ "allowedUsers", "isRunOutputPersisted", "approvers", "communication",
-																	                 "interactve_state", "name", "allowedResourcesQuery", "timeoutMs" ],
+																	                 "interactive_state", "name", "allowedResourcesQuery", "timeoutMs" ],
 																	 "outtype": "json"
 			                           },
 			"#cells":                   { "type": "b64json",    "optional": true, "step": "cells", "outtype": "json", "conflicts": ["data"]},
@@ -231,7 +231,7 @@ var ObjectConfigJsonStr = `
 			"#enabled":                 { "type": "bool",       "optional": true, "step": "enabled", "default": true, "conflicts": ["data"]},
 			"cells":                   { "type": "b64json",    "optional": true, "step": "skip.param", "outtype": "json", "conflicts": ["data"]},
 			"params":                  { "type": "b64json",    "optional": true, "outtype": "json", "conflicts": ["data"], "match_null": "[]"},
-			"external_params":         { "type": "b64json",    "optional": true, "outtype": "json", "conflicts": ["data"]},
+			"external_params":         { "type": "b64json",    "optional": true, "outtype": "json", "conflicts": ["data"], "match_null": "[]"},
 			"enabled":                 { "type": "bool",       "optional": true, "default": true, "conflicts": ["data"]},
 			"description":             { "type": "string",     "optional": true },
 			"timeout_ms":              { "type": "unsigned",   "optional": true, "default": 60000 },

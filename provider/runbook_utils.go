@@ -162,11 +162,16 @@ func buildExternalParametersData(d *schema.ResourceData) ([]interface{}, error) 
 		if !exists {
 			value = ""
 		}
+		jsonPath, exists := externalParameter.(map[string]interface{})["json_path"]
+		if !exists {
+			jsonPath = ""
+		}
 
 		externalParameterData := map[string]interface{}{
-			"name":   name,
-			"source": source,
-			"value":  value,
+			"name":      name,
+			"source":    source,
+			"value":     value,
+			"json_path": jsonPath,
 		}
 
 		externalParametersData = append(externalParametersData, externalParameterData)
