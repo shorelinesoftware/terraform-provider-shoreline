@@ -769,7 +769,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 
 					appendActionLogInner("ASA ESTE" + " | " + old + " | " + string(oldJsonEncoded) + " | " + nu + " | \n")
 
-					return string(oldJsonEncoded) == nu
+					return string(oldJsonEncoded) != nu
 
 				}
 				return false
