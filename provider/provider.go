@@ -534,9 +534,9 @@ func New(version string) func() *schema.Provider {
 					Type:     schema.TypeString,
 					Required: true,
 					ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-						// if !ValidateApiUrl(val.(string)) {
-						// 	errs = append(errs, fmt.Errorf("%q must be of the form %s,\n but got: %s", key, CanonicalUrl, val.(string)))
-						// }
+						if !ValidateApiUrl(val.(string)) {
+							errs = append(errs, fmt.Errorf("%q must be of the form %s,\n but got: %s", key, CanonicalUrl, val.(string)))
+						}
 						return
 					},
 					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_URL", nil),
