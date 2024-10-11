@@ -241,7 +241,7 @@ func CheckUpdateResult(result string) error {
 	}
 
 	actions := []string{"define", "delete", "update"}
-	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook", "configuration", "time_trigger", "circuit_breaker", "principal"}
+	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook", "configuration", "time_trigger", "circuit_breaker", "principal", "report"}
 	for _, act := range actions {
 		for _, typ := range types {
 			key := act + "_" + typ
@@ -500,6 +500,7 @@ func New(version string) func() *schema.Provider {
 				"shoreline_principal":       resourceShorelineObject(ObjectConfigJsonStr, "principal"),
 				"shoreline_resource":        resourceShorelineObject(ObjectConfigJsonStr, "resource"),
 				"shoreline_system_settings": resourceShorelineObject(ObjectConfigJsonStr, "system_settings"),
+				"shoreline_report":          resourceShorelineObject(ObjectConfigJsonStr, "report"),
 			},
 			DataSourcesMap: map[string]*schema.Resource{
 				"shoreline_version": &schema.Resource{
@@ -533,9 +534,9 @@ func New(version string) func() *schema.Provider {
 					Type:     schema.TypeString,
 					Required: true,
 					ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-						if !ValidateApiUrl(val.(string)) {
-							errs = append(errs, fmt.Errorf("%q must be of the form %s,\n but got: %s", key, CanonicalUrl, val.(string)))
-						}
+						// if !ValidateApiUrl(val.(string)) {
+						// 	errs = append(errs, fmt.Errorf("%q must be of the form %s,\n but got: %s", key, CanonicalUrl, val.(string)))
+						// }
 						return
 					},
 					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_URL", nil),
@@ -759,6 +760,17 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 					if reflect.DeepEqual(oldJs, nuJs) {
 						return true
 					}
+				}
+				if key == "report" && k == "blocks" {
+					oldJsonEncoded, err := base64.StdEncoding.DecodeString(old)
+					if err != nil {
+						return false
+					}
+
+					appendActionLogInner("ASA ESTE" + " | " + old + " | " + string(oldJsonEncoded) + " | " + nu + " | \n")
+
+					return string(oldJsonEncoded) == nu
+
 				}
 				return false
 			}
@@ -2308,7 +2320,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 
 		stepsJs := map[string]interface{}{}
 
-		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" || typ == "runbook" || typ == "time_trigger" || typ == "circuit_breaker" {
+		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" || typ == "runbook" || typ == "time_trigger" || typ == "circuit_breaker" || typ == "report" {
 			// extract fields from step objects
 			op := fmt.Sprintf("get_%s_class( %s_name = \"%s\" )", typ, typ, name)
 			extraJs, err := runOpCommandToJson(op)
