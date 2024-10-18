@@ -3,12 +3,12 @@
 page_title: "shoreline_report Resource - terraform-provider-shoreline"
 subcategory: ""
 description: |-
-  Shoreline report. A resource report. Note: Configure privilege (in Shoreline) to create principal objects.
+  Shoreline report. A resource report. Note: Configure privilege (in Shoreline) to create report objects.
 ---
 
 # shoreline_report (Resource)
 
-Shoreline report. A resource report. Note: Configure privilege (in Shoreline) to create principal objects.
+Shoreline report. A resource report. Note: Configure privilege (in Shoreline) to create report objects.
 
 
 
