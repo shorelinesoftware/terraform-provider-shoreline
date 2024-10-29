@@ -317,9 +317,9 @@ var ObjectConfigJsonStr = `
 		}
 	},
 
-	"report": {
+	"report_template": {
        "attributes": {
-           "type":            { "type": "string",   "computed": true, "value": "REPORT" },
+           "type":            { "type": "string",   "computed": true, "value": "REPORT_TEMPLATE" },
            "name":            { "type": "label",    "required": true, "forcenew": true, "skip": true},
            "display_name":    { "type": "string",   "optional": true, "step": "display_name", "match_null": ""},
            "blocks":          { "type": "b64json",  "required": true, "outtype": "json", "primary": true}
@@ -340,7 +340,7 @@ var ObjectConfigJsonStr = `
 			"principal": "An authorization group (e.g. Okta groups). Note: Admin privilege (in Shoreline) to create principal objects.",
 			"resource":  "A server or compute resource in the system (e.g. host, pod, container).\n\nSee the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info.",
 			"system_settings":  "System-level settings. Note: there must only be one instance of this terraform resource named 'system_settings'.\n\nSee the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/settings) for more info.",
-			"report":  "A resource report. Note: Configure privilege (in Shoreline) to create report objects."
+			"report_template":  "A resource report template. Note: Configure privilege (in Shoreline) to create report template objects."
 		},
 
 		"attributes": {
@@ -459,7 +459,7 @@ var ObjectConfigJsonStr = `
 			"client_id":               "Application id for a 3rd-party service integration (Microsoft Entra ID).",
 			"client_secret":           "Client secret for a 3rd-party service integration (Microsoft Entra ID).",
 			"display_name":            "A user friendly name shown in the UI.",
-			"blocks":           	   "The JSON encoded blocks of the report."
+			"blocks":           	   "The JSON encoded blocks of the report template."
 		}
 	}
 }
