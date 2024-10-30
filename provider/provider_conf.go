@@ -322,7 +322,8 @@ var ObjectConfigJsonStr = `
            "type":            { "type": "string",   "computed": true, "value": "REPORT_TEMPLATE" },
            "name":            { "type": "label",    "required": true, "forcenew": true, "skip": true},
            "display_name":    { "type": "string",   "optional": true, "step": "display_name", "match_null": ""},
-           "blocks":          { "type": "b64json",  "required": true, "outtype": "json", "primary": true}
+           "blocks":          { "type": "b64json",  "required": true, "outtype": "json", "primary": true},
+		   "links":           { "type": "b64json",  "optional": true, "outtype": "json", "match_null": "[]"},
        }
     },
 
@@ -459,7 +460,8 @@ var ObjectConfigJsonStr = `
 			"client_id":               "Application id for a 3rd-party service integration (Microsoft Entra ID).",
 			"client_secret":           "Client secret for a 3rd-party service integration (Microsoft Entra ID).",
 			"display_name":            "A user friendly name shown in the UI.",
-			"blocks":           	   "The JSON encoded blocks of the report template."
+			"blocks":           	   "The JSON encoded blocks of the report template.",
+			"links":           	   	   "The JSON encoded links of a report template with other report templates."
 		}
 	}
 }
