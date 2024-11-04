@@ -317,6 +317,15 @@ var ObjectConfigJsonStr = `
 		}
 	},
 
+	"report_template": {
+       "attributes": {
+           "type":            { "type": "string",   "computed": true, "value": "REPORT_TEMPLATE" },
+           "name":            { "type": "label",    "required": true, "forcenew": true, "skip": true},
+           "display_name":    { "type": "string",   "optional": true, "step": "display_name", "match_null": ""},
+           "blocks":          { "type": "b64json",  "required": true, "outtype": "json", "primary": true},
+		   "links":           { "type": "b64json",  "optional": true, "outtype": "json", "match_null": "[]"}
+       }
+    },
 
 	"docs": {
 		"objects": {
@@ -331,7 +340,8 @@ var ObjectConfigJsonStr = `
 			"notebook":  "An interactive notebook of Op commands and user documentation .\n\nSee the Shoreline [Notebook Documentation](https://docs.shoreline.io/ui/notebooks) for more info.",
 			"principal": "An authorization group (e.g. Okta groups). Note: Admin privilege (in Shoreline) to create principal objects.",
 			"resource":  "A server or compute resource in the system (e.g. host, pod, container).\n\nSee the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info.",
-			"system_settings":  "System-level settings. Note: there must only be one instance of this terraform resource named 'system_settings'.\n\nSee the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/settings) for more info."
+			"system_settings":  "System-level settings. Note: there must only be one instance of this terraform resource named 'system_settings'.\n\nSee the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/settings) for more info.",
+			"report_template":  "A resource report template. Note: Configure privilege (in Shoreline) to create report template objects."
 		},
 
 		"attributes": {
@@ -448,7 +458,10 @@ var ObjectConfigJsonStr = `
 			"credentials":             "The credentials used for a 3rd-party service integration (google cloud identity), encoded in base64.",
 			"tenant_id":               "Tenant id for a 3rd-party service integration (Microsoft Entra ID).",
 			"client_id":               "Application id for a 3rd-party service integration (Microsoft Entra ID).",
-			"client_secret":           "Client secret for a 3rd-party service integration (Microsoft Entra ID)."
+			"client_secret":           "Client secret for a 3rd-party service integration (Microsoft Entra ID).",
+			"display_name":            "A user friendly name shown in the UI.",
+			"blocks":           	   "The JSON encoded blocks of the report template.",
+			"links":           	   	   "The JSON encoded links of a report template with other report templates."
 		}
 	}
 }
