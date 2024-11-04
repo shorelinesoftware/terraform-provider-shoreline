@@ -761,7 +761,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 						return true
 					}
 				}
-				if key == "report_template" && k == "blocks" {
+				if key == "report_template" && (k == "blocks" || k == "links") {
 					oldJsonEncoded, err := base64.StdEncoding.DecodeString(old)
 					if err != nil {
 						return false
