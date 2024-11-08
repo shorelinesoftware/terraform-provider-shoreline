@@ -323,7 +323,7 @@ var ObjectConfigJsonStr = `
            "name":            { "type": "label",    "required": true, "forcenew": true, "skip": true},
            "display_name":    { "type": "string",   "optional": true, "step": "display_name", "match_null": ""},
            "blocks":          { "type": "b64json",  "required": true, "outtype": "json", "primary": true},
-		   "links":           { "type": "b64json",  "optional": true, "outtype": "json", "match_null": "[]"}
+		   "links":           { "type": "b64json",  "optional": true, "outtype": "json", "default": "[]", "step": "links"}
        }
     },
 

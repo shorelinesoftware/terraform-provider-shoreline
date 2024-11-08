@@ -761,14 +761,23 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 						return true
 					}
 				}
-				if key == "report_template" && k == "blocks" {
-					oldJsonEncoded, err := base64.StdEncoding.DecodeString(old)
-					if err != nil {
-						return false
+				if key == "report_template" {
+					switch k {
+					case "blocks":
+						oldJsonEncoded, err := base64.StdEncoding.DecodeString(old)
+						if err != nil {
+							return false
+						}
+						return string(oldJsonEncoded) == nu
+
+					case "links":
+						var conf string
+						err := json.Unmarshal([]byte(old), &conf)
+						if err != nil {
+							return false
+						}
+						return string(conf) == nu
 					}
-
-					return string(oldJsonEncoded) == nu
-
 				}
 				return false
 			}
