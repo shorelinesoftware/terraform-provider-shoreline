@@ -2246,14 +2246,6 @@ func resourceShorelineObjectReadSingleAttr(name string, typ string, key string, 
 			}
 		} else {
 			val = GetNestedValueOrDefault(record, ToKeyPath("attributes."+key), nil)
-			if typ == "dashboard" && key == "dashboard_type" {
-				switch val {
-				case "0":
-					val = "TAGS_SEQUENCE"
-				default:
-					val = "TAGS_SEQUENCE"
-				}
-			}
 		}
 	}
 	return false, val, nil
