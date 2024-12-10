@@ -246,7 +246,8 @@ var ObjectConfigJsonStr = `
 			"editors":                 { "type": "string_set", "optional": true, "min_ver": "15.1.0" },
 			"communication_cud_notifications":       { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_cud_notifications" },
 			"communication_approval_notifications":  { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_approval_notifications" },
-			"communication_execution_notifications": { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_execution_notifications" }
+			"communication_execution_notifications": { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_execution_notifications" },
+			"filter_resource_to_action": { "type": "bool", "default": true, "optional": true, "min_ver": "27.2.0" }
 		}
 	},
 
@@ -452,6 +453,7 @@ var ObjectConfigJsonStr = `
 			"communication_cud_notifications":                  "Enables slack notifications for create/update/delete operations. (Requires workspace and channel.)",
 			"communication_approval_notifications":             "Enables slack notifications for approvals operations. (Requires workspace and channel.)",
 			"communication_execution_notifications":            "Enables slack notifications for the object executions. (Requires workspace and channel.)",
+			"filter_resource_to_action":                        "Determines whether parameters containing resources are exported to actions.",
 			"external_url": 									"External url for a 3rd-party service integration.",
 			"cache_ttl_ms":            "The amount of time group memberships will be cached (in milliseconds).",
 			"subject":                 "The subject whose authentication details is used for a 3rd-party service integration (google cloud identity).",
