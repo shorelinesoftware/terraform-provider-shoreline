@@ -313,7 +313,8 @@ var ObjectConfigJsonStr = `
 			"param_value_max_length":                           { "type": "int",      "optional": true, "min_ver": "19.0.0", "default": 10000 },
 			"parallel_notebook_runs_fired_by_time_triggers":    { "type": "int",      "optional": true, "default": 10, "min_ver": "20.0.2", "deprecated_for": "parallel_runs_fired_by_time_triggers"  },
 			"parallel_runs_fired_by_time_triggers":             { "type": "int",      "optional": true, "default": 10, "min_ver": "25.0.0", "replaces": "parallel_notebook_runs_fired_by_time_triggers" },
-			"maintenance_mode_enabled":                         { "type": "bool",     "optional": true, "min_ver": "25.1.0", "default": false }
+			"maintenance_mode_enabled":                         { "type": "bool",     "optional": true, "min_ver": "25.1.0", "default": false },
+			"managed_secrets":                                  { "type": "string",   "optional": true, "min_ver": "28.0.0", "default": "LOCALLY" }
 		}
 	},
 
@@ -447,6 +448,7 @@ var ObjectConfigJsonStr = `
 			"param_value_max_length":                           "System setting controlling the maximum allowable length for a notebook's parameter",
 			"parallel_notebook_runs_fired_by_time_triggers":    "System setting controlling the maximum number of different parallel notebook runs initiated via time triggers",
 			"maintenance_mode_enabled":                         "System setting that when enabled, rejects new runs, allowing ongoing tasks to complete before stopping.",
+			"managed_secrets":                                  "System setting that discriminates between usage of external vaults and the built in one.",
 			"integration_name":                                 "The name/symbol of a Shoreline integration involved in triggering the bot.",
 			"editors":                                          "List of users who can edit the object (with configure permission). Empty maps to all users.",
 			"communication_cud_notifications":                  "Enables slack notifications for create/update/delete operations. (Requires workspace and channel.)",
