@@ -314,7 +314,7 @@ var ObjectConfigJsonStr = `
 			"parallel_notebook_runs_fired_by_time_triggers":    { "type": "int",      "optional": true, "default": 10, "min_ver": "20.0.2", "deprecated_for": "parallel_runs_fired_by_time_triggers"  },
 			"parallel_runs_fired_by_time_triggers":             { "type": "int",      "optional": true, "default": 10, "min_ver": "25.0.0", "replaces": "parallel_notebook_runs_fired_by_time_triggers" },
 			"maintenance_mode_enabled":                         { "type": "bool",     "optional": true, "min_ver": "25.1.0", "default": false },
-			"managed_secrets":                                  { "type": "string",   "optional": true, "min_ver": "28.0.0", "default": "LOCALLY" }
+			"managed_secrets":                                  { "type": "string",   "optional": true, "min_ver": "28.0.0", "default": "LOCAL" }
 		}
 	},
 
