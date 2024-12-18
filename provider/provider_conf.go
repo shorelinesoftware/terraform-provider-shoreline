@@ -354,7 +354,8 @@ var ObjectConfigJsonStr = `
 			"principal": "An authorization group (e.g. Okta groups). Note: Admin privilege (in Shoreline) to create principal objects.",
 			"resource":  "A server or compute resource in the system (e.g. host, pod, container).\n\nSee the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info.",
 			"system_settings":  "System-level settings. Note: there must only be one instance of this terraform resource named 'system_settings'.\n\nSee the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/settings) for more info.",
-			"report_template":  "A resource report template. Note: Configure privilege (in Shoreline) to create report template objects."
+			"report_template":  "A resource report template. Note: Configure privilege (in Shoreline) to create report template objects.",
+			"dashboard": "A platform for visualizing resources and their associated tags."
 		},
 
 		"attributes": {

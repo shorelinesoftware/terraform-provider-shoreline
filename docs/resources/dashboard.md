@@ -3,12 +3,12 @@
 page_title: "shoreline_dashboard Resource - terraform-provider-shoreline"
 subcategory: ""
 description: |-
-  Shoreline dashboard.
+  Shoreline dashboard. A platform for visualizing resources and their associated tags.
 ---
 
 # shoreline_dashboard (Resource)
 
-Shoreline dashboard.
+Shoreline dashboard. A platform for visualizing resources and their associated tags.
 
 
 
