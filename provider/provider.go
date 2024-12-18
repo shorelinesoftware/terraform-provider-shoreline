@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -1054,9 +1055,20 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		DeleteContext: resourceShorelineObjectDelete(key, objectDef),
 		Importer:      &schema.ResourceImporter{State: schema.ImportStatePassthrough},
 
-		Schema: params,
+		Schema:        params,
+		CustomizeDiff: buildCustomizeDiffFunc(key),
 	}
 
+}
+
+func buildCustomizeDiffFunc(objectType string) schema.CustomizeDiffFunc {
+	if !(objectType == "notebook" || objectType == "runbook") {
+		return nil
+	}
+	runbookCustomizeDiff := customdiff.ValidateChange("data", func(ctx context.Context, old, new, meta interface{}) error {
+		return validateShorelineNotebookDataField(new)
+	})
+	return runbookCustomizeDiff
 }
 
 func AddNotebookParamsFields(params []interface{}) {
@@ -1810,12 +1822,6 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 			key = "data"
 			val, exists := d.GetOk(key)
 			// NOTE: Terraform reports !exists when a value is explicitly supplied, but matches the 'default'
-			if exists {
-				validationErr := validateShorelineNotebookDataField(val)
-				if validationErr != nil {
-					return diag.Errorf(validationErr.Error())
-				}
-			}
 			if exists || d.HasChange(key) {
 				runbookData = val
 			}
