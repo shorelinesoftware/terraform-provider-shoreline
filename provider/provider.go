@@ -241,7 +241,7 @@ func CheckUpdateResult(result string) error {
 	}
 
 	actions := []string{"define", "delete", "update"}
-	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook", "configuration", "time_trigger", "circuit_breaker", "principal", "report_template"}
+	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook", "configuration", "time_trigger", "circuit_breaker", "principal", "report_template", "dashboard"}
 	for _, act := range actions {
 		for _, typ := range types {
 			key := act + "_" + typ
@@ -501,6 +501,7 @@ func New(version string) func() *schema.Provider {
 				"shoreline_resource":        resourceShorelineObject(ObjectConfigJsonStr, "resource"),
 				"shoreline_system_settings": resourceShorelineObject(ObjectConfigJsonStr, "system_settings"),
 				"shoreline_report_template": resourceShorelineObject(ObjectConfigJsonStr, "report_template"),
+				"shoreline_dashboard":       resourceShorelineObject(ObjectConfigJsonStr, "dashboard"),
 			},
 			DataSourcesMap: map[string]*schema.Resource{
 				"shoreline_version": &schema.Resource{
@@ -771,6 +772,16 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 						return string(oldJsonEncoded) == nu
 
 					case "links":
+						var conf string
+						err := json.Unmarshal([]byte(old), &conf)
+						if err != nil {
+							return false
+						}
+						return string(conf) == nu
+					}
+				}
+				if key == "dashboard" {
+					if k == "groups" || k == "values" {
 						var conf string
 						err := json.Unmarshal([]byte(old), &conf)
 						if err != nil {
@@ -1339,9 +1350,21 @@ func setFieldViaOp(typ string, attrs map[string]interface{}, name string, key st
 	var diags diag.Diagnostics
 
 	valStr := attrValueString(typ, key, val, attrs)
-	appendActionLog(fmt.Sprintf("Setting %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
-
 	op := fmt.Sprintf("%s.%s = %s", name, key, valStr)
+
+	if typ == "dashboard" {
+		isPrimary := GetNestedValueOrDefault(attrs, ToKeyPath(key+".primary"), false).(bool)
+		if isPrimary {
+			appendActionLog(fmt.Sprintf("Skipping setting %s field %s...\n", typ, key))
+			return nil
+		} else {
+			if key == "groups" || key == "values" {
+				op = fmt.Sprintf("%s.%s = %s", name, key, val)
+			}
+		}
+	}
+
+	appendActionLog(fmt.Sprintf("Setting %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
 
 	// TODO Let alias to be a list of fallbacks for versioning,
 	//   or have alternate ObjectConfigJsonStr based on backend version,
@@ -2327,7 +2350,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 
 		stepsJs := map[string]interface{}{}
 
-		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" || typ == "runbook" || typ == "time_trigger" || typ == "circuit_breaker" || typ == "report_template" {
+		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" || typ == "runbook" || typ == "time_trigger" || typ == "circuit_breaker" || typ == "report_template" || typ == "dashboard" {
 			// extract fields from step objects
 			op := fmt.Sprintf("get_%s_class( %s_name = \"%s\" )", typ, typ, name)
 			extraJs, err := runOpCommandToJson(op)
@@ -2345,6 +2368,18 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 					err := json.Unmarshal([]byte(confStr), &conf)
 					if err == nil {
 						SetNestedValue(stepsJs, ToKeyPath("params_unpack"), conf)
+					}
+				}
+			}
+			if typ == "dashboard" {
+				confStr, hasConfStr := GetNestedValueOrDefault(stepsJs, ToKeyPath("configuration"), nil).(string)
+
+				if hasConfStr {
+					conf := map[string]interface{}{}
+					err := json.Unmarshal([]byte(confStr), &conf)
+
+					if err == nil {
+						SetNestedValue(stepsJs, ToKeyPath("dashboard_configuration"), conf)
 					}
 				}
 			}
