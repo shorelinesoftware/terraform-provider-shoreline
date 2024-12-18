@@ -1810,6 +1810,12 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 			key = "data"
 			val, exists := d.GetOk(key)
 			// NOTE: Terraform reports !exists when a value is explicitly supplied, but matches the 'default'
+			if exists {
+				validationErr := validateShorelineNotebookDataField(val)
+				if validationErr != nil {
+					return diag.Errorf(validationErr.Error())
+				}
+			}
 			if exists || d.HasChange(key) {
 				runbookData = val
 			}
