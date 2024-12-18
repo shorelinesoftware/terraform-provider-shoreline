@@ -327,6 +327,17 @@ var ObjectConfigJsonStr = `
        }
     },
 
+	"secret_mapping": {
+       "attributes": {
+           "type":            { "type": "string",   "computed": true, "value": "SECRET_MAPPING" },
+           "name":            { "type": "label",    "required": true, "forcenew": true, "skip": true },
+		   "public_alias":    { "type": "string",   "required": true, "primary": true },
+           "secret_name":     { "type": "string",   "optional": true, "match_null": "" },
+           "namespace":       { "type": "string",   "optional": true, "match_null": "" },
+		   "path":            { "type": "string",   "optional": true, "match_null": "" }
+       }
+    },
+
 	"docs": {
 		"objects": {
 			"action":    "A command that can be run.\n\nSee the Shoreline [Actions Documentation](https://docs.shoreline.io/actions) for more info.",
@@ -341,7 +352,8 @@ var ObjectConfigJsonStr = `
 			"principal": "An authorization group (e.g. Okta groups). Note: Admin privilege (in Shoreline) to create principal objects.",
 			"resource":  "A server or compute resource in the system (e.g. host, pod, container).\n\nSee the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info.",
 			"system_settings":  "System-level settings. Note: there must only be one instance of this terraform resource named 'system_settings'.\n\nSee the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/settings) for more info.",
-			"report_template":  "A resource report template. Note: Configure privilege (in Shoreline) to create report template objects."
+			"report_template":  "A resource report template. Note: Configure privilege (in Shoreline) to create report template objects.",
+			"secret_mapping": "A mapping associated with a secret available in Shoreline."
 		},
 
 		"attributes": {
@@ -461,7 +473,11 @@ var ObjectConfigJsonStr = `
 			"client_secret":           "Client secret for a 3rd-party service integration (Microsoft Entra ID).",
 			"display_name":            "A user friendly name shown in the UI.",
 			"blocks":           	   "The JSON encoded blocks of the report template.",
-			"links":           	   	   "The JSON encoded links of a report template with other report templates."
+			"links":           	   	   "The JSON encoded links of a report template with other report templates.",
+			"secret_name":             "The name of the existing secret linked to the mapping.",
+			"public_alias":            "The name used to reference the secret in the runbook's parameters.",
+			"namespace":               "Applicable only to remotely managed secrets. Defines the namespace where the secret is available.",
+			"path":                    "Applicable only to remotely managed secrets. Specifies the path to the remote secret."
 		}
 	}
 }
