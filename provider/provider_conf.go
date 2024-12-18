@@ -246,7 +246,8 @@ var ObjectConfigJsonStr = `
 			"editors":                 { "type": "string_set", "optional": true, "min_ver": "15.1.0" },
 			"communication_cud_notifications":       { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_cud_notifications" },
 			"communication_approval_notifications":  { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_approval_notifications" },
-			"communication_execution_notifications": { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_execution_notifications" }
+			"communication_execution_notifications": { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_execution_notifications" },
+			"secret_aliases": { "type": "string_set", "optional": true, "min_ver": "28.0.0" }
 		}
 	},
 
@@ -461,7 +462,8 @@ var ObjectConfigJsonStr = `
 			"client_secret":           "Client secret for a 3rd-party service integration (Microsoft Entra ID).",
 			"display_name":            "A user friendly name shown in the UI.",
 			"blocks":           	   "The JSON encoded blocks of the report template.",
-			"links":           	   	   "The JSON encoded links of a report template with other report templates."
+			"links":           	   	   "The JSON encoded links of a report template with other report templates.",
+			"secret_aliases": 		   "A list of strings that contains the public secret aliases of the secrets that are used in the runbook."
 		}
 	}
 }
