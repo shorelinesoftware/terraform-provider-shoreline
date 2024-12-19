@@ -180,10 +180,19 @@ func runOpCommand(command string, checkResult bool) (string, error) {
 	//if !LoadAuthConfig(&GlobalOpts) {
 	//	return "", fmt.Errorf("Failed to load auth credentials")
 	//}
+
+	loggedCommand := "SENSITIVE"
+
+	if string(command[0]) != "*" {
+		loggedCommand = command
+	}
+
+	command = strings.TrimPrefix(command, "*")
+
 	result := ""
 	err := error(nil)
 	for r := 0; r <= RetryLimit; r += 1 {
-		appendActionLog(fmt.Sprintf("Running OpLang command (retries %d/%d)   ---   command:(( %s ))\n", r, RetryLimit, command))
+		appendActionLog(fmt.Sprintf("Running OpLang command (retries %d/%d)   ---   command:(( %s ))\n", r, RetryLimit, loggedCommand))
 		result, err = ExecuteOpCommand(&GlobalOpts, command)
 		if err == nil {
 			if !checkResult {
@@ -241,7 +250,7 @@ func CheckUpdateResult(result string) error {
 	}
 
 	actions := []string{"define", "delete", "update"}
-	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook", "configuration", "time_trigger", "circuit_breaker", "principal", "report_template", "dashboard"}
+	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook", "configuration", "time_trigger", "circuit_breaker", "principal", "secret", "report_template"}
 	for _, act := range actions {
 		for _, typ := range types {
 			key := act + "_" + typ
@@ -255,7 +264,7 @@ func CheckUpdateResult(result string) error {
 					errArray := []string{}
 					ve, isArray := GetNestedValueOrDefault(js, ToKeyPath(key+".error.validation_errors"), nil).([]interface{})
 					if isArray {
-						for i, _ := range ve {
+						for i := range ve {
 							errn, isStr := GetNestedValueOrDefault(js, ToKeyPath(fmt.Sprintf(key+".error.validation_errors.[%d].message", i)), nil).(string)
 							if isStr && errn != "" {
 								errArray = append(errArray, errn)
@@ -481,6 +490,7 @@ func dataSourceVersionRead(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func New(version string) func() *schema.Provider {
+	appendActionLog(fmt.Sprintf("Am ajuns aici -1"))
 	return func() *schema.Provider {
 		p := &schema.Provider{
 			//DataSourcesMap: map[string]*schema.Resource{
@@ -501,29 +511,29 @@ func New(version string) func() *schema.Provider {
 				"shoreline_resource":        resourceShorelineObject(ObjectConfigJsonStr, "resource"),
 				"shoreline_system_settings": resourceShorelineObject(ObjectConfigJsonStr, "system_settings"),
 				"shoreline_report_template": resourceShorelineObject(ObjectConfigJsonStr, "report_template"),
-				"shoreline_dashboard":       resourceShorelineObject(ObjectConfigJsonStr, "dashboard"),
+				"shoreline_secret":          resourceShorelineObject(ObjectConfigJsonStr, "secret"),
 			},
 			DataSourcesMap: map[string]*schema.Resource{
-				"shoreline_version": &schema.Resource{
+				"shoreline_version": {
 					ReadContext: dataSourceVersionRead,
 					Schema: map[string]*schema.Schema{
-						"build_info": &schema.Schema{
+						"build_info": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"version": &schema.Schema{
+						"version": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"major": &schema.Schema{
+						"major": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"minor": &schema.Schema{
+						"minor": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"patch": &schema.Schema{
+						"patch": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
@@ -535,9 +545,9 @@ func New(version string) func() *schema.Provider {
 					Type:     schema.TypeString,
 					Required: true,
 					ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-						if !ValidateApiUrl(val.(string)) {
-							errs = append(errs, fmt.Errorf("%q must be of the form %s,\n but got: %s", key, CanonicalUrl, val.(string)))
-						}
+						// if !ValidateApiUrl(val.(string)) {
+						// 	errs = append(errs, fmt.Errorf("%q must be of the form %s,\n but got: %s", key, CanonicalUrl, val.(string)))
+						// }
 						return
 					},
 					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_URL", nil),
@@ -678,7 +688,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		return nil
 	}
 	attributes := GetNestedValueOrDefault(object, ToKeyPath("attributes"), map[string]interface{}{}).(map[string]interface{})
-	for k, _ := range attributes {
+	for k := range attributes {
 		if strings.HasPrefix(k, "#") {
 			delete(attributes, k)
 		}
@@ -780,16 +790,6 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 						return string(conf) == nu
 					}
 				}
-				if key == "dashboard" {
-					if k == "groups" || k == "values" {
-						var conf string
-						err := json.Unmarshal([]byte(old), &conf)
-						if err != nil {
-							return false
-						}
-						return string(conf) == nu
-					}
-				}
 				return false
 			}
 			// TODO warn if "data.force_set[i]" fields are present
@@ -802,6 +802,29 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 			//}
 		case "string":
 			sch.Type = schema.TypeString
+
+			sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
+				if key == "secret" {
+					switch k {
+					case "value":
+						appendActionLog(fmt.Sprintf("My old: %s", old))
+						appendActionLog(fmt.Sprintf("My nuMasked: %s", nu))
+
+						old = strings.ReplaceAll(old, " ", "") // will have this form: ******XXXX
+						nu = strings.ReplaceAll(nu, " ", "")
+						nuMasked := maskValue(nu)
+
+						appendActionLog(fmt.Sprintf("My2 old: %s", old))
+						appendActionLog(fmt.Sprintf("My2 nuMasked: %s", nuMasked))
+
+						return old == nuMasked
+					default:
+						return false
+					}
+				}
+
+				return false
+			}
 		case "string[]":
 			sch.Type = schema.TypeList
 			sch.Elem = &schema.Schema{
@@ -1350,21 +1373,19 @@ func setFieldViaOp(typ string, attrs map[string]interface{}, name string, key st
 	var diags diag.Diagnostics
 
 	valStr := attrValueString(typ, key, val, attrs)
+	appendActionLog(fmt.Sprintf("Setting %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
+
 	op := fmt.Sprintf("%s.%s = %s", name, key, valStr)
 
-	if typ == "dashboard" {
-		isPrimary := GetNestedValueOrDefault(attrs, ToKeyPath(key+".primary"), false).(bool)
-		if isPrimary {
-			appendActionLog(fmt.Sprintf("Skipping setting %s field %s...\n", typ, key))
-			return nil
-		} else {
-			if key == "groups" || key == "values" {
-				op = fmt.Sprintf("%s.%s = %s", name, key, val)
-			}
-		}
+	if typ == "secret" && key == "value" {
+		maskedOp := fmt.Sprintf("%s.%s = %s", name, key, maskValue(valStr))
+		op = fmt.Sprintf("*%s", op)
+		appendActionLog(fmt.Sprintf("Setting %s field: '%s'.'%s' :: %+v\n", typ, name, key, maskValue(valStr)))
+		appendActionLog(fmt.Sprintf("Setting with op statement... '%s'\n", maskedOp))
+	} else {
+		appendActionLog(fmt.Sprintf("Setting %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
+		appendActionLog(fmt.Sprintf("Setting with op statement... '%s'\n", op))
 	}
-
-	appendActionLog(fmt.Sprintf("Setting %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
 
 	// TODO Let alias to be a list of fallbacks for versioning,
 	//   or have alternate ObjectConfigJsonStr based on backend version,
@@ -1375,7 +1396,6 @@ func setFieldViaOp(typ string, attrs map[string]interface{}, name string, key st
 		op = fmt.Sprintf("%s.%s = %s", name, alias, valStr)
 	}
 
-	appendActionLog(fmt.Sprintf("Setting with op statement... '%s'\n", op))
 	result, err := runOpCommand(op, true)
 	if err != nil {
 		diags = diag.Errorf("Failed to set %s %s.%s: %s", typ, name, key, err.Error())
@@ -1584,7 +1604,7 @@ func updateSystemSettings(attrs map[string]interface{}, objectDef map[string]int
 		"parallel_runs_fired_by_time_triggers":    "parallel_notebook_runs_fired_by_time_triggers",
 	}
 
-	for key, _ := range attrs {
+	for key := range attrs {
 		if skipSettings[key] {
 			continue
 		}
@@ -1700,7 +1720,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	forcedChangeKeys := map[string]bool{}
 	forcedChangeVals := map[string]interface{}{}
 
-	for key, _ := range attrs {
+	for key := range attrs {
 		proxy := GetNestedValueOrDefault(attrs, ToKeyPath(key+".proxy"), "").(string)
 		if proxy != "" {
 			proxyKeys := strings.Split(proxy, ",")
@@ -1871,7 +1891,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		}
 	}
 
-	for key, _ := range attrs {
+	for key := range attrs {
 		if skipKeys[key] != true {
 			orderedAttrs = append(orderedAttrs, key)
 		} else {
@@ -2162,7 +2182,7 @@ func resourceShorelineObjectReadSingleAttr(name string, typ string, key string, 
 				// "." has to be last, or it will wipe out other objects
 				omitPaths := []string{}
 				hasDot := false
-				for omitPath, _ := range omitMap {
+				for omitPath := range omitMap {
 					if omitPath != "." {
 						omitPaths = append(omitPaths, omitPath)
 					} else {
@@ -2192,7 +2212,7 @@ func resourceShorelineObjectReadSingleAttr(name string, typ string, key string, 
 						if (typ == "notebook" || typ == "runbook") && omitPath == "." {
 							// NOTE: The top-level object returned by get_notebook_class contains most/all of the object attributes.
 							// So remove them from the inner object
-							for akey, _ := range attrs {
+							for akey := range attrs {
 								if akey != "cells" && akey != "params" && akey != "external_params" {
 									omitList = append(omitList, akey)
 								}
@@ -2322,7 +2342,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 		// return early if "read_single_attr"
 		readSingleAttr, _ := GetNestedValueOrDefault(objectDef, ToKeyPath("internal.read_single_attr"), false).(bool)
 		if readSingleAttr {
-			for key, _ := range attrs {
+			for key := range attrs {
 				if key == "type" || key == "name" {
 					continue
 				}
@@ -2350,7 +2370,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 
 		stepsJs := map[string]interface{}{}
 
-		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" || typ == "runbook" || typ == "time_trigger" || typ == "circuit_breaker" || typ == "report_template" || typ == "dashboard" {
+		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" || typ == "runbook" || typ == "time_trigger" || typ == "circuit_breaker" || typ == "secret" || typ == "report_template" {
 			// extract fields from step objects
 			op := fmt.Sprintf("get_%s_class( %s_name = \"%s\" )", typ, typ, name)
 			extraJs, err := runOpCommandToJson(op)
@@ -2368,18 +2388,6 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 					err := json.Unmarshal([]byte(confStr), &conf)
 					if err == nil {
 						SetNestedValue(stepsJs, ToKeyPath("params_unpack"), conf)
-					}
-				}
-			}
-			if typ == "dashboard" {
-				confStr, hasConfStr := GetNestedValueOrDefault(stepsJs, ToKeyPath("configuration"), nil).(string)
-
-				if hasConfStr {
-					conf := map[string]interface{}{}
-					err := json.Unmarshal([]byte(confStr), &conf)
-
-					if err == nil {
-						SetNestedValue(stepsJs, ToKeyPath("dashboard_configuration"), conf)
 					}
 				}
 			}
@@ -2421,7 +2429,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 
 		if typ == "notebook" || typ == "runbook" {
 			// Normalizing the notebook removes some fields, so we have to read them first
-			for key, _ := range attrs {
+			for key := range attrs {
 				if readFirst[key] {
 					attrFirst = append(attrFirst, key)
 				} else {
@@ -2430,7 +2438,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 			}
 			attrList = append(attrFirst, attrList...)
 		} else {
-			for key, _ := range attrs {
+			for key := range attrs {
 				attrList = append(attrList, key)
 			}
 		}
@@ -2563,4 +2571,8 @@ func resourceShorelineObjectDelete(typ string, objectDef map[string]interface{})
 		}
 		return diags
 	}
+}
+
+func maskValue(value string) string {
+	return fmt.Sprintf("******%s", value[len(value)-4:])
 }

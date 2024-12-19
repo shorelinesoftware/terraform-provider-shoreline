@@ -3,7 +3,7 @@
 page_title: "shoreline_system_settings Resource - terraform-provider-shoreline"
 subcategory: ""
 description: |-
-  Shoreline system_settings. System-level settings. Note: there must only be one instance of this terraform resource named 'system_settings'.
+  Shoreline systemsettings. System-level settings. Note: there must only be one instance of this terraform resource named 'systemsettings'.
   See the Shoreline Settings Documentation https://docs.shoreline.io/platform/settings for more info.
 ---
 
@@ -37,6 +37,7 @@ See the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/se
 - **external_audit_storage_batch_period_sec** (Number) System setting for alternate audit storage batching interval (in seconds). Defaults to `5`.
 - **external_audit_storage_enabled** (Boolean) System setting controlling if audit information is stored in an alternate location. Defaults to `false`.
 - **external_audit_storage_type** (String) System setting for alternate audit storage type (e.g. 'ELASTIC'). Defaults to `ELASTIC`.
+- **id** (String) The ID of this resource.
 - **maintenance_mode_enabled** (Boolean) System setting that when enabled, rejects new runs, allowing ongoing tasks to complete before stopping. Defaults to `false`.
 - **notebook_ad_hoc_approval_request_enabled** (Boolean, Deprecated) **Deprecated** Please use 'runbook_ad_hoc_approval_request_enabled' instead. System setting controlling if approvals are enabled for ad-hoc notebook execution. Defaults to `true`.
 - **notebook_approval_request_expiry_time** (Number, Deprecated) **Deprecated** Please use 'runbook_approval_request_expiry_time' instead. System setting for maximum wait for approval after request (in minutes). Defaults to `60`.
@@ -51,7 +52,6 @@ See the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/se
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
 - **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
 
 
