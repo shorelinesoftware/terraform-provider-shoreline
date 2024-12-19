@@ -490,7 +490,6 @@ func dataSourceVersionRead(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func New(version string) func() *schema.Provider {
-	appendActionLog(fmt.Sprintf("Am ajuns aici -1"))
 	return func() *schema.Provider {
 		p := &schema.Provider{
 			//DataSourcesMap: map[string]*schema.Resource{
@@ -546,9 +545,9 @@ func New(version string) func() *schema.Provider {
 					Type:     schema.TypeString,
 					Required: true,
 					ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-						// if !ValidateApiUrl(val.(string)) {
-						// 	errs = append(errs, fmt.Errorf("%q must be of the form %s,\n but got: %s", key, CanonicalUrl, val.(string)))
-						// }
+						if !ValidateApiUrl(val.(string)) {
+							errs = append(errs, fmt.Errorf("%q must be of the form %s,\n but got: %s", key, CanonicalUrl, val.(string)))
+						}
 						return
 					},
 					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_URL", nil),
@@ -1369,7 +1368,6 @@ func setFieldViaOp(typ string, attrs map[string]interface{}, name string, key st
 	var diags diag.Diagnostics
 
 	valStr := attrValueString(typ, key, val, attrs)
-	appendActionLog(fmt.Sprintf("Setting %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
 
 	op := fmt.Sprintf("%s.%s = %s", name, key, valStr)
 
