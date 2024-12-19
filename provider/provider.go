@@ -250,7 +250,7 @@ func CheckUpdateResult(result string) error {
 	}
 
 	actions := []string{"define", "delete", "update"}
-	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook", "configuration", "time_trigger", "circuit_breaker", "principal", "secret", "report_template"}
+	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook", "configuration", "time_trigger", "circuit_breaker", "principal", "secret", "report_template", "dashboard"}
 	for _, act := range actions {
 		for _, typ := range types {
 			key := act + "_" + typ
@@ -515,26 +515,26 @@ func New(version string) func() *schema.Provider {
 				"shoreline_secret":          resourceShorelineObject(ObjectConfigJsonStr, "secret"),
 			},
 			DataSourcesMap: map[string]*schema.Resource{
-				"shoreline_version": {
+				"shoreline_version": &schema.Resource{
 					ReadContext: dataSourceVersionRead,
 					Schema: map[string]*schema.Schema{
-						"build_info": {
+						"build_info": &schema.Schema{
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"version": {
+						"version": &schema.Schema{
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"major": {
+						"major": &schema.Schema{
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"minor": {
+						"minor": &schema.Schema{
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"patch": {
+						"patch": &schema.Schema{
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
