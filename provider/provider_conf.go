@@ -314,8 +314,8 @@ var ObjectConfigJsonStr = `
 			"parallel_notebook_runs_fired_by_time_triggers":    { "type": "int",      "optional": true, "default": 10, "min_ver": "20.0.2", "deprecated_for": "parallel_runs_fired_by_time_triggers"  },
 			"parallel_runs_fired_by_time_triggers":             { "type": "int",      "optional": true, "default": 10, "min_ver": "25.0.0", "replaces": "parallel_notebook_runs_fired_by_time_triggers" },
 			"maintenance_mode_enabled":                         { "type": "bool",     "optional": true, "min_ver": "25.1.0", "default": false },
-			"allowed_tags":                 					{ "type": "string_set", "optional": true, "min_ver": "27.2.0" },
-			"skipped_tags":                 					{ "type": "string_set", "optional": true, "min_ver": "27.2.0" }
+			"allowed_tags":                                     { "type": "string_set", "optional": true, "min_ver": "27.2.0" },
+			"skipped_tags":                                     { "type": "string_set", "optional": true, "min_ver": "27.2.0" }
 		}
 	},
 
@@ -462,9 +462,9 @@ var ObjectConfigJsonStr = `
 			"environment_name_background":                      "System setting for the background colour of the environment name. The format is #<6-digit hex>",
 			"param_value_max_length":                           "System setting controlling the maximum allowable length for a notebook's parameter",
 			"parallel_notebook_runs_fired_by_time_triggers":    "System setting controlling the maximum number of different parallel notebook runs initiated via time triggers",
-			"maintenance_mode_enabled":                         "System setting that when enabled, rejects new runs, allowing ongoing tasks to complete before stopping.",
-			"allowed_tags":                         			"Defines a list of tags that are allowed on agent tag ingestion",
-			"skipped_tags":                         			"Defines a list of tags that are skipped on agent tag ingestion",
+			"maintenance_mode_enabled":                        	"System setting that when enabled, rejects new runs, allowing ongoing tasks to complete before stopping.",
+			"allowed_tags":                                     "Defines a list of tags that are allowed on agent tag ingestion",
+			"skipped_tags":                                     "Defines a list of tags that are skipped on agent tag ingestion",
 			"integration_name":                                 "The name/symbol of a Shoreline integration involved in triggering the bot.",
 			"editors":                                          "List of users who can edit the object (with configure permission). Empty maps to all users.",
 			"communication_cud_notifications":                  "Enables slack notifications for create/update/delete operations. (Requires workspace and channel.)",
