@@ -367,7 +367,7 @@ var ObjectConfigJsonStr = `
 			"system_settings":  "System-level settings. Note: there must only be one instance of this terraform resource named 'system_settings'.\n\nSee the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/settings) for more info.",
 			"report_template":  "A resource report template. Note: Configure privilege (in Shoreline) to create report template objects.",
 			"dashboard": "A platform for visualizing resources and their associated tags.",
-			"secret_mapping": "A mapping associated with a secret available in Shoreline."
+			"secret_mapping": "A mapping associated with a secret available in Shoreline and usable within the context of a runbook."
 		},
 
 		"attributes": {
@@ -495,7 +495,7 @@ var ObjectConfigJsonStr = `
 			"secret_name":             "The name of the existing secret linked to the mapping.",
 			"public_alias":            "The name used to reference the secret in the runbook's parameters.",
 			"namespace":               "Applicable only to remotely managed secrets. Defines the namespace where the secret is available.",
-			"path":   
+			"path":                    "Applicable only to remotely managed secrets. Specifies the path to the remote secret."
 		}
 	}
 }

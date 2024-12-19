@@ -3,12 +3,12 @@
 page_title: "shoreline_secret_mapping Resource - terraform-provider-shoreline"
 subcategory: ""
 description: |-
-  Shoreline secret_mapping. A mapping associated with a secret available in Shoreline.
+  Shoreline secret_mapping. A mapping associated with a secret available in Shoreline and usable within the context of a runbook.
 ---
 
 # shoreline_secret_mapping (Resource)
 
-Shoreline secret_mapping. A mapping associated with a secret available in Shoreline.
+Shoreline secret_mapping. A mapping associated with a secret available in Shoreline and usable within the context of a runbook.
 
 
 
