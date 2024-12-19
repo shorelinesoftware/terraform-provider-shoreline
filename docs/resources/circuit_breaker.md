@@ -20,23 +20,21 @@ See the Shoreline [CircuitBreakers Documentation](https://docs.shoreline.io/circ
 
 ### Required
 
-- **command** (String) A specific action to run.
-- **duration** (String)
-- **hard_limit** (Number)
-- **name** (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
+- `command` (String) A specific action to run.
+- `duration` (String)
+- `hard_limit` (Number)
+- `name` (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
 
 ### Optional
 
-- **breaker_type** (String)
-- **communication_channel** (String) A string value denoting the slack channel where notifications related to the object should be sent to.
-- **communication_workspace** (String) A string value denoting the slack workspace where notifications related to the object should be sent to.
-- **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
-- **fail_over** (String)
-- **id** (String) The ID of this resource.
-- **soft_limit** (Number) Defaults to `-1`.
+- `breaker_type` (String)
+- `communication_channel` (String) A string value denoting the slack channel where notifications related to the object should be sent to.
+- `communication_workspace` (String) A string value denoting the slack workspace where notifications related to the object should be sent to.
+- `enabled` (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
+- `fail_over` (String)
+- `soft_limit` (Number) Defaults to `-1`.
 
 ### Read-Only
 
-- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
-
-
+- `id` (String) The ID of this resource.
+- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).

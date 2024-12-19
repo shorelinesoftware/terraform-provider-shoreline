@@ -9,9 +9,11 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"io"
+
 	zstd "github.com/klauspost/compress/zstd"
 	"github.com/spf13/viper"
-	"io"
+
 	//"io/ioutil"
 	prand "math/rand"
 	"net/http"
@@ -302,8 +304,8 @@ func FileMd5AndSize(filename string) (error, string, int64) {
 	return nil, md5Sum, fileLen
 }
 
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////
 func DownloadFileHttps(src string, dst string, token string) error {
 	out, err := os.Create(dst)
 	if err != nil {
