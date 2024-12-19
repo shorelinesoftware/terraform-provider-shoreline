@@ -72,6 +72,7 @@ resource "shoreline_notebook" "my_notebook" {
 - **editors** (List of String) List of users who can edit the object (with configure permission). Empty maps to all users.
 - **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `true`.
 - **external_params** (String)
+- **filter_resource_to_action** (Boolean) Determines whether parameters containing resources are exported to actions. Defaults to `true`.
 - **id** (String) The ID of this resource.
 - **is_run_output_persisted** (Boolean) A boolean value denoting whether or not cell outputs should be persisted when running a notebook Defaults to `true`.
 - **labels** (List of String) A list of strings by which notebooks can be grouped.
