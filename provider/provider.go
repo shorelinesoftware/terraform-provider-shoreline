@@ -515,26 +515,26 @@ func New(version string) func() *schema.Provider {
 				"shoreline_secret":          resourceShorelineObject(ObjectConfigJsonStr, "secret"),
 			},
 			DataSourcesMap: map[string]*schema.Resource{
-				"shoreline_version": &schema.Resource{
+				"shoreline_version": {
 					ReadContext: dataSourceVersionRead,
 					Schema: map[string]*schema.Schema{
-						"build_info": &schema.Schema{
+						"build_info": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"version": &schema.Schema{
+						"version": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"major": &schema.Schema{
+						"major": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"minor": &schema.Schema{
+						"minor": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"patch": &schema.Schema{
+						"patch": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
@@ -816,27 +816,10 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		case "string":
 			sch.Type = schema.TypeString
 
-			sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
-				if key == "secret" {
-					switch k {
-					case "value":
-						appendActionLog(fmt.Sprintf("My old: %s", old))
-						appendActionLog(fmt.Sprintf("My nuMasked: %s", nu))
-
-						old = strings.ReplaceAll(old, " ", "") // will have this form: ******XXXX
-						nu = strings.ReplaceAll(nu, " ", "")
-						nuMasked := maskValue(nu)
-
-						appendActionLog(fmt.Sprintf("My2 old: %s", old))
-						appendActionLog(fmt.Sprintf("My2 nuMasked: %s", nuMasked))
-
-						return old == nuMasked
-					default:
-						return false
-					}
+			if key == "secret" && k == "value" {
+				sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
+					return diffSuppressSecretValues(old, nu)
 				}
-
-				return false
 			}
 		case "string[]":
 			sch.Type = schema.TypeList
@@ -2597,6 +2580,14 @@ func resourceShorelineObjectDelete(typ string, objectDef map[string]interface{})
 		}
 		return diags
 	}
+}
+
+func diffSuppressSecretValues(previousValue string, newValue string) bool {
+	previousValue = strings.ReplaceAll(previousValue, " ", "") // will have this form: ******XXXX
+	newValue = strings.ReplaceAll(newValue, " ", "")
+	nuMasked := maskValue(newValue)
+
+	return previousValue == nuMasked
 }
 
 func maskValue(value string) string {
