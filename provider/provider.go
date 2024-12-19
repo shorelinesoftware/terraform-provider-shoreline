@@ -514,26 +514,26 @@ func New(version string) func() *schema.Provider {
 				"shoreline_secret":          resourceShorelineObject(ObjectConfigJsonStr, "secret"),
 			},
 			DataSourcesMap: map[string]*schema.Resource{
-				"shoreline_version": {
+				"shoreline_version": &schema.Resource{
 					ReadContext: dataSourceVersionRead,
 					Schema: map[string]*schema.Schema{
-						"build_info": {
+						"build_info": &schema.Schema{
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"version": {
+						"version": &schema.Schema{
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"major": {
+						"major": &schema.Schema{
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"minor": {
+						"minor": &schema.Schema{
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"patch": {
+						"patch": &schema.Schema{
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
@@ -1370,6 +1370,18 @@ func setFieldViaOp(typ string, attrs map[string]interface{}, name string, key st
 	valStr := attrValueString(typ, key, val, attrs)
 
 	op := fmt.Sprintf("%s.%s = %s", name, key, valStr)
+
+	if typ == "dashboard" {
+		isPrimary := GetNestedValueOrDefault(attrs, ToKeyPath(key+".primary"), false).(bool)
+		if isPrimary {
+			appendActionLog(fmt.Sprintf("Skipping setting %s field %s...\n", typ, key))
+			return nil
+		} else {
+			if key == "groups" || key == "values" {
+				op = fmt.Sprintf("%s.%s = %s", name, key, val)
+			}
+		}
+	}
 
 	if typ == "secret" && key == "value" {
 		maskedOp := fmt.Sprintf("%s.%s = %s", name, key, maskValue(valStr))
@@ -2581,8 +2593,8 @@ func resourceShorelineObjectDelete(typ string, objectDef map[string]interface{})
 }
 
 func diffSuppressSecretValues(previousValue string, newValue string) bool {
-	previousValue = strings.ReplaceAll(previousValue, " ", "") // will have this form: ******XXXX
-	newValue = strings.ReplaceAll(newValue, " ", "")
+	previousValue = strings.Trim(previousValue, " ") // will have this form: ******XXXX
+	newValue = strings.Trim(newValue, " ")
 	nuMasked := maskValue(newValue)
 
 	return previousValue == nuMasked
