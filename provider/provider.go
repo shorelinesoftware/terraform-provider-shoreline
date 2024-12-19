@@ -511,6 +511,7 @@ func New(version string) func() *schema.Provider {
 				"shoreline_resource":        resourceShorelineObject(ObjectConfigJsonStr, "resource"),
 				"shoreline_system_settings": resourceShorelineObject(ObjectConfigJsonStr, "system_settings"),
 				"shoreline_report_template": resourceShorelineObject(ObjectConfigJsonStr, "report_template"),
+				"shoreline_dashboard":       resourceShorelineObject(ObjectConfigJsonStr, "dashboard"),
 				"shoreline_secret":          resourceShorelineObject(ObjectConfigJsonStr, "secret"),
 			},
 			DataSourcesMap: map[string]*schema.Resource{
@@ -790,6 +791,18 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 						return string(conf) == nu
 					}
 				}
+
+				if key == "dashboard" {
+					if k == "groups" || k == "values" {
+						var conf string
+						err := json.Unmarshal([]byte(old), &conf)
+						if err != nil {
+							return false
+						}
+						return string(conf) == nu
+					}
+				}
+
 				return false
 			}
 			// TODO warn if "data.force_set[i]" fields are present
@@ -2370,7 +2383,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 
 		stepsJs := map[string]interface{}{}
 
-		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" || typ == "runbook" || typ == "time_trigger" || typ == "circuit_breaker" || typ == "secret" || typ == "report_template" {
+		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" || typ == "runbook" || typ == "time_trigger" || typ == "circuit_breaker" || typ == "secret" || typ == "report_template" || typ == "dashboard" {
 			// extract fields from step objects
 			op := fmt.Sprintf("get_%s_class( %s_name = \"%s\" )", typ, typ, name)
 			extraJs, err := runOpCommandToJson(op)
@@ -2388,6 +2401,19 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 					err := json.Unmarshal([]byte(confStr), &conf)
 					if err == nil {
 						SetNestedValue(stepsJs, ToKeyPath("params_unpack"), conf)
+					}
+				}
+			}
+
+			if typ == "dashboard" {
+				confStr, hasConfStr := GetNestedValueOrDefault(stepsJs, ToKeyPath("configuration"), nil).(string)
+
+				if hasConfStr {
+					conf := map[string]interface{}{}
+					err := json.Unmarshal([]byte(confStr), &conf)
+
+					if err == nil {
+						SetNestedValue(stepsJs, ToKeyPath("dashboard_configuration"), conf)
 					}
 				}
 			}
