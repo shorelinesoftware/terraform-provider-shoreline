@@ -327,6 +327,19 @@ var ObjectConfigJsonStr = `
        }
     },
 
+	"dashboard": {
+       "attributes": {
+           "type":               { "type": "string",     "computed": true, "value": "DASHBOARD" },
+           "name":               { "type": "label",      "required": true, "forcenew": true, "skip": true},
+           "display_name":       { "type": "string",     "optional": true, "match_null": ""},
+           "dashboard_type":     { "type": "string",     "required": true, "primary": true },
+           "resource_query":     { "type": "string",     "optional": true, "step": "dashboard_configuration.resource_query" },
+           "groups":             { "type": "b64json",    "optional": true, "step": "dashboard_configuration.groups", "outtype": "json" },
+           "values":             { "type": "b64json",    "optional": true, "step": "dashboard_configuration.values", "outtype": "json" },
+           "other_tags":         { "type": "string_set", "optional": true, "step": "dashboard_configuration.other_tags" }
+       }
+    },
+
 	"secret_mapping": {
        "attributes": {
            "type":            { "type": "string",   "computed": true, "value": "SECRET_MAPPING" },
@@ -353,6 +366,7 @@ var ObjectConfigJsonStr = `
 			"resource":  "A server or compute resource in the system (e.g. host, pod, container).\n\nSee the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info.",
 			"system_settings":  "System-level settings. Note: there must only be one instance of this terraform resource named 'system_settings'.\n\nSee the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/settings) for more info.",
 			"report_template":  "A resource report template. Note: Configure privilege (in Shoreline) to create report template objects.",
+			"dashboard": "A platform for visualizing resources and their associated tags.",
 			"secret_mapping": "A mapping associated with a secret available in Shoreline."
 		},
 
@@ -474,10 +488,14 @@ var ObjectConfigJsonStr = `
 			"display_name":            "A user friendly name shown in the UI.",
 			"blocks":           	   "The JSON encoded blocks of the report template.",
 			"links":           	   	   "The JSON encoded links of a report template with other report templates.",
+			"dashboard_type":          "Specifies the type of the dashboard configuration. Currently, only 'TAGS_SEQUENCE' is supported.",
+			"groups":                  "A JSON-encoded list of groups in the dashboard configuration. Each group is an object with 'name' (the group's name) and 'tags' (a list of tag names belonging to the group). Tags not assigned to any group must be included in a default group named '__unclassified__'.",
+			"values":                  "A JSON-encoded list of objects defining the values and their associated colors in the dashboard configuration. Each object contains: 'color' (the color associated with the values) and 'values' (a list of values corresponding to specific tags).",
+			"other_tags":              "A list of additional tags that will be displayed for the resources.",
 			"secret_name":             "The name of the existing secret linked to the mapping.",
 			"public_alias":            "The name used to reference the secret in the runbook's parameters.",
 			"namespace":               "Applicable only to remotely managed secrets. Defines the namespace where the secret is available.",
-			"path":                    "Applicable only to remotely managed secrets. Specifies the path to the remote secret."
+			"path":   
 		}
 	}
 }
