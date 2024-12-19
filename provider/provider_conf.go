@@ -430,7 +430,7 @@ var ObjectConfigJsonStr = `
 			"start_title_template":    "UI title of the start of the Action.",
 			"timeout":                 "Maximum time to wait, in milliseconds.",
 			"units":                   "Units of a Metric (e.g., bytes, blocks, packets, percent).",
-			"value":                   "The Op statement that defines a Metric or Resource.",
+			"value":                   "The Op statement that defines a Metric or Resource, or a string representing a secret value.",
 			"view_limit":              "The number of simultaneous metrics allowed for a permissions group.",
 			"is_run_output_persisted": "A boolean value denoting whether or not cell outputs should be persisted when running a notebook",
 			"communication_workspace": "A string value denoting the slack workspace where notifications related to the object should be sent to.",

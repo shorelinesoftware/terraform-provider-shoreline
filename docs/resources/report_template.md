@@ -142,15 +142,15 @@ resource "shoreline_report_template" "my_report_2" {
 
 ### Required
 
-- **blocks** (String) The JSON encoded blocks of the report template.
-- **name** (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
+- `blocks` (String) The JSON encoded blocks of the report template.
+- `name` (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
 
 ### Optional
 
-- **display_name** (String) A user friendly name shown in the UI.
-- **id** (String) The ID of this resource.
-- **links** (String) The JSON encoded links of a report template with other report templates. Defaults to `[]`.
+- `display_name` (String) A user friendly name shown in the UI.
+- `links` (String) The JSON encoded links of a report template with other report templates. Defaults to `[]`.
 
 ### Read-Only
 
-- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
+- `id` (String) The ID of this resource.
+- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).

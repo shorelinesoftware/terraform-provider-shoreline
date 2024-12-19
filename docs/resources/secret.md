@@ -17,15 +17,10 @@ Shoreline secret. An entity that stores a secret value. To be assigned to a secr
 
 ### Required
 
-- **name** (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
-- **value** (String) The Op statement that defines a Metric or Resource.
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `name` (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
+- `value` (String) The Op statement that defines a Metric or Resource, or a string representing a secret value.
 
 ### Read-Only
 
-- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
-
-
+- `id` (String) The ID of this resource.
+- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
