@@ -322,7 +322,6 @@ var ObjectConfigJsonStr = `
        "attributes": {
            "type":            { "type": "string",   "computed": true, "value": "REPORT_TEMPLATE" },
            "name":            { "type": "label",    "required": true, "forcenew": true, "skip": true},
-           "display_name":    { "type": "string",   "optional": true, "step": "display_name", "match_null": ""},
            "blocks":          { "type": "b64json",  "required": true, "outtype": "json", "primary": true},
 		   "links":           { "type": "b64json",  "optional": true, "outtype": "json", "default": "[]", "step": "links"}
        }
@@ -332,7 +331,6 @@ var ObjectConfigJsonStr = `
        "attributes": {
            "type":               { "type": "string",     "computed": true, "value": "DASHBOARD" },
            "name":               { "type": "label",      "required": true, "forcenew": true, "skip": true},
-           "display_name":       { "type": "string",     "optional": true, "match_null": ""},
            "dashboard_type":     { "type": "string",     "required": true, "primary": true },
            "resource_query":     { "type": "string",     "optional": true, "step": "dashboard_configuration.resource_query" },
            "groups":             { "type": "b64json",    "optional": true, "step": "dashboard_configuration.groups", "outtype": "json" },
@@ -475,11 +473,10 @@ var ObjectConfigJsonStr = `
 			"tenant_id":               "Tenant id for a 3rd-party service integration (Microsoft Entra ID).",
 			"client_id":               "Application id for a 3rd-party service integration (Microsoft Entra ID).",
 			"client_secret":           "Client secret for a 3rd-party service integration (Microsoft Entra ID).",
-			"display_name":            "A user friendly name shown in the UI.",
 			"blocks":           	   "The JSON encoded blocks of the report template.",
 			"links":           	   	   "The JSON encoded links of a report template with other report templates.",
 			"dashboard_type":          "Specifies the type of the dashboard configuration. Currently, only 'TAGS_SEQUENCE' is supported.",
-			"groups":                  "A JSON-encoded list of groups in the dashboard configuration. Each group is an object with 'name' (the group's name) and 'tags' (a list of tag names belonging to the group). Tags not assigned to any group must be included in a default group named '__unclassified__'.",
+			"groups":                  "A JSON-encoded list of groups in the dashboard configuration. Each group is an object with 'name' (the group's name) and 'tags' (a list of tag names belonging to the group).",
 			"values":                  "A JSON-encoded list of objects defining the values and their associated colors in the dashboard configuration. Each object contains: 'color' (the color associated with the values) and 'values' (a list of values corresponding to specific tags).",
 			"other_tags":              "A list of additional tags that will be displayed for the resources."
 		}
