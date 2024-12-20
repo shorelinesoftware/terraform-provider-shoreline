@@ -22,7 +22,6 @@ Shoreline dashboard. A platform for visualizing resources and their associated t
 
 ### Optional
 
-- **display_name** (String) A user friendly name shown in the UI.
 - **groups** (String) A JSON-encoded list of groups in the dashboard configuration. Each group is an object with `name` (the group's name) and `tags` (a list of tag names belonging to the group). Tags not assigned to any group must be included in a default group named `__unclassified__`.
 - **other_tags** (List of String) A list of additional tags that will be displayed for the resources.
 - **resource_query** (String) A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
