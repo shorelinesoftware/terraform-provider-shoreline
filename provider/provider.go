@@ -1564,6 +1564,11 @@ func createUpdateSystemSettingsCommand(systemSettings map[string]interface{}) st
 			builder.WriteString(strconv.Itoa(v))
 		case bool:
 			builder.WriteString(strconv.FormatBool(v))
+		case []interface{}:
+			encodedList, _ := json.Marshal(v)
+
+			builder.WriteString(string(encodedList))
+
 		default:
 			builder.WriteString(fmt.Sprintf("\"%v\"", v))
 		}
