@@ -28,7 +28,7 @@ See the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/se
 - `administrator_grants_create_user_token` (Boolean) System setting controlling if administrators can create user access tokens. Defaults to `true`.
 - `administrator_grants_read_user_token` (Boolean) System setting controlling if administrators can view user access tokens. Defaults to `true`.
 - `administrator_grants_regenerate_user_token` (Boolean) System setting controlling if administrators can update user access tokens. Defaults to `true`.
-- `allow_tags` (List of String) Defines a list of tags that are allowed on agent tag ingestion
+- `allowed_tags` (List of String) Defines a list of tags that are allowed on agent tag ingestion
 - `approval_allow_individual_notification` (Boolean) System setting controlling if approvals notifications are sent to individual users, in case no specific notebook communication setting is defined. Defaults to `true`.
 - `approval_editable_allowed_resource_query_enabled` (Boolean) System setting controlling if notebook resource queries can be modified on approved executions. Defaults to `true`.
 - `approval_feature_enabled` (Boolean) System setting controlling if notebook approvals are enabled. Defaults to `true`.
@@ -48,7 +48,7 @@ See the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/se
 - `run_approval_expiry_time` (Number) Defaults to `60`.
 - `runbook_ad_hoc_approval_request_enabled` (Boolean) Defaults to `true`.
 - `runbook_approval_request_expiry_time` (Number) Defaults to `60`.
-- `skip_tags` (List of String) Defines a list of tags that are skipped on agent tag ingestion
+- `skipped_tags` (List of String) Defines a list of tags that are skipped on agent tag ingestion
 - `time_trigger_permissions_user` (String) System setting for the user that time-triggered notebooks run as. Defaults to `Shoreline`.
 
 ### Read-Only
