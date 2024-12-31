@@ -275,7 +275,7 @@ var ObjectConfigJsonStr = `
 			"execute_limit":         { "type": "int",      "optional": true },
 			"configure_permission":  { "type": "intbool",  "optional": true },
 			"administer_permission": { "type": "intbool",  "optional": true },
-			"idp_name":              { "type": "string",   "optional": true, "default": "default", "min_ver": "22.0.0" }
+			"idp_name":              { "type": "string",   "optional": true, "min_ver": "22.0.0" }
 		}
 	},
 
