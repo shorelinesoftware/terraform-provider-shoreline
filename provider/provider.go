@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -1066,9 +1067,20 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		DeleteContext: resourceShorelineObjectDelete(key, objectDef),
 		Importer:      &schema.ResourceImporter{State: schema.ImportStatePassthrough},
 
-		Schema: params,
+		Schema:        params,
+		CustomizeDiff: buildCustomizeDiffFunc(key),
 	}
 
+}
+
+func buildCustomizeDiffFunc(objectType string) schema.CustomizeDiffFunc {
+	if !(objectType == "notebook" || objectType == "runbook") {
+		return nil
+	}
+	runbookCustomizeDiff := customdiff.ValidateChange("data", func(ctx context.Context, old, new, meta interface{}) error {
+		return validateShorelineNotebookDataField(new)
+	})
+	return runbookCustomizeDiff
 }
 
 func AddNotebookParamsFields(params []interface{}) {
@@ -1553,6 +1565,11 @@ func createUpdateSystemSettingsCommand(systemSettings map[string]interface{}) st
 			builder.WriteString(strconv.Itoa(v))
 		case bool:
 			builder.WriteString(strconv.FormatBool(v))
+		case []interface{}:
+			encodedList, _ := json.Marshal(v)
+
+			builder.WriteString(string(encodedList))
+
 		default:
 			builder.WriteString(fmt.Sprintf("\"%v\"", v))
 		}
