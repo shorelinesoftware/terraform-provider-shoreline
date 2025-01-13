@@ -339,7 +339,7 @@ var ObjectConfigJsonStr = `
            "groups":             { "type": "b64json",    "optional": true, "step": "dashboard_configuration.groups", "outtype": "json" },
            "values":             { "type": "b64json",    "optional": true, "step": "dashboard_configuration.values", "outtype": "json" },
            "other_tags":         { "type": "string_set", "optional": true, "step": "dashboard_configuration.other_tags" },
-		   "identifiers":        { "type": "string_set", "optional": true, "step": "dashboard_configuration.identifiers" }
+           "identifiers":        { "type": "string_set", "optional": true, "step": "dashboard_configuration.identifiers" }
        }
     },
 
