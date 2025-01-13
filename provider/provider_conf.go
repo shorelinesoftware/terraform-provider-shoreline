@@ -342,6 +342,17 @@ var ObjectConfigJsonStr = `
        }
     },
 
+	"secret_mapping": {
+       "attributes": {
+           "type":            { "type": "string",   "computed": true, "value": "SECRET_MAPPING" },
+           "name":            { "type": "label",    "required": true, "forcenew": true, "skip": true },
+		   "public_alias":    { "type": "string",   "required": true, "primary": true },
+           "secret_name":     { "type": "string",   "optional": true, "match_null": "" },
+           "namespace":       { "type": "string",   "optional": true, "match_null": "" },
+		   "path":            { "type": "string",   "optional": true, "match_null": "" }
+       }
+    },
+
 	"docs": {
 		"objects": {
 			"action":    "A command that can be run.\n\nSee the Shoreline [Actions Documentation](https://docs.shoreline.io/actions) for more info.",
@@ -357,7 +368,8 @@ var ObjectConfigJsonStr = `
 			"resource":  "A server or compute resource in the system (e.g. host, pod, container).\n\nSee the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info.",
 			"system_settings":  "System-level settings. Note: there must only be one instance of this terraform resource named 'system_settings'.\n\nSee the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/settings) for more info.",
 			"report_template":  "A resource report template. Note: Configure privilege (in Shoreline) to create report template objects.",
-			"dashboard": "A platform for visualizing resources and their associated tags."
+			"dashboard": "A platform for visualizing resources and their associated tags.",
+			"secret_mapping": "A mapping associated with a secret available in Shoreline and usable within the context of a runbook."
 		},
 
 		"attributes": {
@@ -484,7 +496,11 @@ var ObjectConfigJsonStr = `
 			"dashboard_type":          "Specifies the type of the dashboard configuration. Currently, only 'TAGS_SEQUENCE' is supported.",
 			"groups":                  "A JSON-encoded list of groups in the dashboard configuration. Each group is an object with 'name' (the group's name) and 'tags' (a list of tag names belonging to the group).",
 			"values":                  "A JSON-encoded list of objects defining the values and their associated colors in the dashboard configuration. Each object contains: 'color' (the color associated with the values) and 'values' (a list of values corresponding to specific tags).",
-			"other_tags":              "A list of additional tags that will be displayed for the resources."
+			"other_tags":              "A list of additional tags that will be displayed for the resources.",
+			"secret_name":             "The name of the existing secret linked to the mapping.",
+			"public_alias":            "The name used to reference the secret in the runbook's parameters.",
+			"namespace":               "Applicable only to remotely managed secrets. Defines the namespace where the secret is available.",
+			"path":                    "Applicable only to remotely managed secrets. Specifies the path to the remote secret."
 		}
 	}
 }
