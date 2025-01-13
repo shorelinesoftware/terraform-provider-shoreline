@@ -24,7 +24,7 @@ func maybeAddValidateFunc(sch *schema.Schema, shorelineObjectType, fieldName str
 func getExtraShorelineNotebookDataFields(data interface{}) []string {
 	dataObject := CastToObject(data)
 	if dataObject == nil {
-		return nil
+		return []string{}
 	}
 	allowedKeys := map[string]bool{"cells": true, "params": true, "external_params": true, "enabled": true}
 	extraKeys := []string{}
