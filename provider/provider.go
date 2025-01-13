@@ -803,6 +803,15 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 			//}
 		case "string":
 			sch.Type = schema.TypeString
+
+			if key == "principal" && k == "idp_name" {
+				sch.DiffSuppressFunc = func(diffKey, old, nu string, d *schema.ResourceData) bool {
+					// TODO: add a get_principal_class function in shoreline backend
+					// and return the appropriate idp_name using the idp_id from db
+					// otherwise it cannot be returned from symbol table manager
+					return diffKey == "idp_name"
+				}
+			}
 		case "string[]":
 			sch.Type = schema.TypeList
 			sch.Elem = &schema.Schema{

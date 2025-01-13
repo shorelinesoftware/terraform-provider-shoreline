@@ -110,7 +110,7 @@ var ObjectConfigJsonStr = `
 			"hard_limit":              { "type": "int",     "required": true },
 			"soft_limit":              { "type": "int",     "optional": true, "default": -1 },
 			"duration":                { "type": "time_s",  "required": true },
-			"fail_over":               { "type": "string",  "optional": true },
+			"fail_over":               { "type": "string",  "optional": true, "default": "safe"},
 			"enabled":                 { "type": "bool",    "optional": true, "default": false },
 			"action_name":             { "type": "command", "internal": true },
 			"resource_query":          { "type": "command", "internal": true },
@@ -275,7 +275,7 @@ var ObjectConfigJsonStr = `
 			"execute_limit":         { "type": "int",      "optional": true },
 			"configure_permission":  { "type": "intbool",  "optional": true },
 			"administer_permission": { "type": "intbool",  "optional": true },
-			"idp_name":              { "type": "string",   "optional": true, "default": "default", "min_ver": "22.0.0" }
+			"idp_name":              { "type": "string",   "optional": true, "min_ver": "22.0.0" }
 		}
 	},
 
