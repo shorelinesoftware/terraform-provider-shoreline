@@ -502,7 +502,7 @@ var ObjectConfigJsonStr = `
 			"public_alias":            "The name used to reference the secret in the runbook's parameters.",
 			"namespace":               "Applicable only to remotely managed secrets. Defines the namespace where the secret is available.",
 			"path":                    "Applicable only to remotely managed secrets. Specifies the path to the remote secret.",
-			"secret_aliases": 		   "A list of strings that contains the public secret aliases of the secrets that are used in the runbook."
+			"secret_aliases":          "A list of strings that contains the public secret aliases of the secrets that are used in the runbook."
 		}
 	}
 }
