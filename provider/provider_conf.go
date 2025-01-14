@@ -247,7 +247,8 @@ var ObjectConfigJsonStr = `
 			"communication_cud_notifications":       { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_cud_notifications" },
 			"communication_approval_notifications":  { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_approval_notifications" },
 			"communication_execution_notifications": { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_execution_notifications" },
-			"filter_resource_to_action": { "type": "bool", "default": true, "optional": true, "min_ver": "27.2.0" }
+			"filter_resource_to_action": { "type": "bool", "default": true, "optional": true, "min_ver": "27.2.0" },
+			"secret_aliases": { "type": "string_set", "optional": true, "min_ver": "28.0.0" }
 		}
 	},
 
@@ -509,7 +510,8 @@ var ObjectConfigJsonStr = `
 			"secret_name":             "The name of the existing secret linked to the mapping.",
 			"public_alias":            "The name used to reference the secret in the runbook's parameters.",
 			"namespace":               "Applicable only to remotely managed secrets. Defines the namespace where the secret is available.",
-			"path":                    "Applicable only to remotely managed secrets. Specifies the path to the remote secret."
+			"path":                    "Applicable only to remotely managed secrets. Specifies the path to the remote secret.",
+			"secret_aliases":          "A list of strings that contains the public aliases of the secrets that are used in the runbook."
 		}
 	}
 }
