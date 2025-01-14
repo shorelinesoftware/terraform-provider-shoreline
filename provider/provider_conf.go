@@ -321,6 +321,14 @@ var ObjectConfigJsonStr = `
 		}
 	},
 
+	"secret": {
+		"attributes": {
+			"type":                  { "type": "string",   "computed": true, "value": "SECRET" },
+			"name":                  { "type": "label",    "required": true, "forcenew": true, "skip": true },
+			"value":              	 { "type": "string",   "required": true, "primary": true }
+		}
+	},
+
 	"report_template": {
        "attributes": {
            "type":            { "type": "string",   "computed": true, "value": "REPORT_TEMPLATE" },
@@ -367,6 +375,7 @@ var ObjectConfigJsonStr = `
 			"principal": "An authorization group (e.g. Okta groups). Note: Admin privilege (in Shoreline) to create principal objects.",
 			"resource":  "A server or compute resource in the system (e.g. host, pod, container).\n\nSee the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info.",
 			"system_settings":  "System-level settings. Note: there must only be one instance of this terraform resource named 'system_settings'.\n\nSee the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/settings) for more info.",
+			"secret": "An entity that stores a secret value. To be assigned to a secret mapping.",
 			"report_template":  "A resource report template. Note: Configure privilege (in Shoreline) to create report template objects.",
 			"dashboard": "A platform for visualizing resources and their associated tags.",
 			"secret_mapping": "A mapping associated with a secret available in Shoreline and usable within the context of a runbook."
@@ -435,7 +444,7 @@ var ObjectConfigJsonStr = `
 			"start_title_template":    "UI title of the start of the Action.",
 			"timeout":                 "Maximum time to wait, in milliseconds.",
 			"units":                   "Units of a Metric (e.g., bytes, blocks, packets, percent).",
-			"value":                   "The Op statement that defines a Metric or Resource.",
+			"value":                   "The Op statement that defines a Metric or Resource, or a string representing a secret value.",
 			"view_limit":              "The number of simultaneous metrics allowed for a permissions group.",
 			"is_run_output_persisted": "A boolean value denoting whether or not cell outputs should be persisted when running a notebook",
 			"communication_workspace": "A string value denoting the slack workspace where notifications related to the object should be sent to.",

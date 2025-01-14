@@ -20,7 +20,7 @@ See the Shoreline [Notebook Documentation](https://docs.shoreline.io/ui/notebook
 
 ### Required
 
-- **name** (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
+- `name` (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
 
 ### Optional
 
@@ -48,6 +48,5 @@ See the Shoreline [Notebook Documentation](https://docs.shoreline.io/ui/notebook
 
 ### Read-Only
 
-- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
-
-
+- `id` (String) The ID of this resource.
+- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).

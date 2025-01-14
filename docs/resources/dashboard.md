@@ -17,8 +17,8 @@ Shoreline dashboard. A platform for visualizing resources and their associated t
 
 ### Required
 
-- **dashboard_type** (String) Specifies the type of the dashboard configuration. Currently, only `TAGS_SEQUENCE` is supported.
-- **name** (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
+- `dashboard_type` (String) Specifies the type of the dashboard configuration. Currently, only 'TAGS_SEQUENCE' is supported.
+- `name` (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
 
 ### Optional
 
@@ -29,5 +29,5 @@ Shoreline dashboard. A platform for visualizing resources and their associated t
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
-- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
+- `id` (String) The ID of this resource.
+- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
