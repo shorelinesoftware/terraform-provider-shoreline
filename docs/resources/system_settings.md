@@ -28,6 +28,7 @@ See the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/se
 - `administrator_grants_create_user_token` (Boolean) System setting controlling if administrators can create user access tokens. Defaults to `true`.
 - `administrator_grants_read_user_token` (Boolean) System setting controlling if administrators can view user access tokens. Defaults to `true`.
 - `administrator_grants_regenerate_user_token` (Boolean) System setting controlling if administrators can update user access tokens. Defaults to `true`.
+- `allowed_tags` (List of String) Defines a list of tags that are allowed on agent tag ingestion
 - `approval_allow_individual_notification` (Boolean) System setting controlling if approvals notifications are sent to individual users, in case no specific notebook communication setting is defined. Defaults to `true`.
 - `approval_editable_allowed_resource_query_enabled` (Boolean) System setting controlling if notebook resource queries can be modified on approved executions. Defaults to `true`.
 - `approval_feature_enabled` (Boolean) System setting controlling if notebook approvals are enabled. Defaults to `true`.
@@ -38,6 +39,7 @@ See the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/se
 - `external_audit_storage_enabled` (Boolean) System setting controlling if audit information is stored in an alternate location. Defaults to `false`.
 - `external_audit_storage_type` (String) System setting for alternate audit storage type (e.g. 'ELASTIC'). Defaults to `ELASTIC`.
 - `maintenance_mode_enabled` (Boolean) System setting that when enabled, rejects new runs, allowing ongoing tasks to complete before stopping. Defaults to `false`.
+- `managed_secrets` (String) System setting that discriminates between usage of external vaults and the built in one. Defaults to `LOCAL`.
 - `notebook_ad_hoc_approval_request_enabled` (Boolean, Deprecated) **Deprecated** Please use 'runbook_ad_hoc_approval_request_enabled' instead. System setting controlling if approvals are enabled for ad-hoc notebook execution. Defaults to `true`.
 - `notebook_approval_request_expiry_time` (Number, Deprecated) **Deprecated** Please use 'runbook_approval_request_expiry_time' instead. System setting for maximum wait for approval after request (in minutes). Defaults to `60`.
 - `notebook_run_approval_expiry_time` (Number, Deprecated) **Deprecated** Please use 'run_approval_expiry_time' instead. System setting for maximum wait for execution after approval (in minutes). Defaults to `60`.
@@ -47,6 +49,7 @@ See the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/se
 - `run_approval_expiry_time` (Number) Defaults to `60`.
 - `runbook_ad_hoc_approval_request_enabled` (Boolean) Defaults to `true`.
 - `runbook_approval_request_expiry_time` (Number) Defaults to `60`.
+- `skipped_tags` (List of String) Defines a list of tags that are skipped on agent tag ingestion
 - `time_trigger_permissions_user` (String) System setting for the user that time-triggered notebooks run as. Defaults to `Shoreline`.
 
 ### Read-Only

@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -250,7 +251,8 @@ func CheckUpdateResult(result string) error {
 	}
 
 	actions := []string{"define", "delete", "update"}
-	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook", "configuration", "time_trigger", "circuit_breaker", "principal", "secret", "report_template", "dashboard"}
+	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook", "configuration", "time_trigger", "circuit_breaker", "principal", "secret", "report_template", "dashboard", "secret_mapping"}
+
 	for _, act := range actions {
 		for _, typ := range types {
 			key := act + "_" + typ
@@ -512,6 +514,7 @@ func New(version string) func() *schema.Provider {
 				"shoreline_report_template": resourceShorelineObject(ObjectConfigJsonStr, "report_template"),
 				"shoreline_dashboard":       resourceShorelineObject(ObjectConfigJsonStr, "dashboard"),
 				"shoreline_secret":          resourceShorelineObject(ObjectConfigJsonStr, "secret"),
+				"shoreline_secret_mapping":  resourceShorelineObject(ObjectConfigJsonStr, "secret_mapping"),
 			},
 			DataSourcesMap: map[string]*schema.Resource{
 				"shoreline_version": &schema.Resource{
@@ -1083,9 +1086,20 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		DeleteContext: resourceShorelineObjectDelete(key, objectDef),
 		Importer:      &schema.ResourceImporter{State: schema.ImportStatePassthrough},
 
-		Schema: params,
+		Schema:        params,
+		CustomizeDiff: buildCustomizeDiffFunc(key),
 	}
 
+}
+
+func buildCustomizeDiffFunc(objectType string) schema.CustomizeDiffFunc {
+	if !(objectType == "notebook" || objectType == "runbook") {
+		return nil
+	}
+	runbookCustomizeDiff := customdiff.ValidateChange("data", func(ctx context.Context, old, new, meta interface{}) error {
+		return validateShorelineNotebookDataField(new)
+	})
+	return runbookCustomizeDiff
 }
 
 func AddNotebookParamsFields(params []interface{}) {
@@ -1578,6 +1592,11 @@ func createUpdateSystemSettingsCommand(systemSettings map[string]interface{}) st
 			builder.WriteString(strconv.Itoa(v))
 		case bool:
 			builder.WriteString(strconv.FormatBool(v))
+		case []interface{}:
+			encodedList, _ := json.Marshal(v)
+
+			builder.WriteString(string(encodedList))
+
 		default:
 			builder.WriteString(fmt.Sprintf("\"%v\"", v))
 		}
@@ -2376,7 +2395,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 
 		stepsJs := map[string]interface{}{}
 
-		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" || typ == "runbook" || typ == "time_trigger" || typ == "circuit_breaker" || typ == "secret" || typ == "report_template" || typ == "dashboard" {
+		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" || typ == "runbook" || typ == "time_trigger" || typ == "circuit_breaker" || typ == "secret" || typ == "report_template" || typ == "dashboard" || typ == "secret_mapping" {
 			// extract fields from step objects
 			op := fmt.Sprintf("get_%s_class( %s_name = \"%s\" )", typ, typ, name)
 			extraJs, err := runOpCommandToJson(op)

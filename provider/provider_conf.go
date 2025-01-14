@@ -246,7 +246,8 @@ var ObjectConfigJsonStr = `
 			"editors":                 { "type": "string_set", "optional": true, "min_ver": "15.1.0" },
 			"communication_cud_notifications":       { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_cud_notifications" },
 			"communication_approval_notifications":  { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_approval_notifications" },
-			"communication_execution_notifications": { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_execution_notifications" }
+			"communication_execution_notifications": { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_execution_notifications" },
+			"filter_resource_to_action": { "type": "bool", "default": true, "optional": true, "min_ver": "27.2.0" }
 		}
 	},
 
@@ -313,7 +314,10 @@ var ObjectConfigJsonStr = `
 			"param_value_max_length":                           { "type": "int",      "optional": true, "min_ver": "19.0.0", "default": 10000 },
 			"parallel_notebook_runs_fired_by_time_triggers":    { "type": "int",      "optional": true, "default": 10, "min_ver": "20.0.2", "deprecated_for": "parallel_runs_fired_by_time_triggers"  },
 			"parallel_runs_fired_by_time_triggers":             { "type": "int",      "optional": true, "default": 10, "min_ver": "25.0.0", "replaces": "parallel_notebook_runs_fired_by_time_triggers" },
-			"maintenance_mode_enabled":                         { "type": "bool",     "optional": true, "min_ver": "25.1.0", "default": false }
+			"maintenance_mode_enabled":                         { "type": "bool",     "optional": true, "min_ver": "25.1.0", "default": false },
+			"allowed_tags":                                     { "type": "string_set", "optional": true, "min_ver": "27.2.0" },
+			"skipped_tags":                                     { "type": "string_set", "optional": true, "min_ver": "27.2.0" },
+            "managed_secrets":                                  { "type": "string", "optional": true, "min_ver": "28.0.0", "default": "LOCAL" }
 		}
 	},
 
@@ -329,7 +333,6 @@ var ObjectConfigJsonStr = `
        "attributes": {
            "type":            { "type": "string",   "computed": true, "value": "REPORT_TEMPLATE" },
            "name":            { "type": "label",    "required": true, "forcenew": true, "skip": true},
-           "display_name":    { "type": "string",   "optional": true, "step": "display_name", "match_null": ""},
            "blocks":          { "type": "b64json",  "required": true, "outtype": "json", "primary": true},
 		   "links":           { "type": "b64json",  "optional": true, "outtype": "json", "default": "[]", "step": "links"}
        }
@@ -339,12 +342,22 @@ var ObjectConfigJsonStr = `
        "attributes": {
            "type":               { "type": "string",     "computed": true, "value": "DASHBOARD" },
            "name":               { "type": "label",      "required": true, "forcenew": true, "skip": true},
-           "display_name":       { "type": "string",     "optional": true, "match_null": ""},
            "dashboard_type":     { "type": "string",     "required": true, "primary": true },
            "resource_query":     { "type": "string",     "optional": true, "step": "dashboard_configuration.resource_query" },
            "groups":             { "type": "b64json",    "optional": true, "step": "dashboard_configuration.groups", "outtype": "json" },
            "values":             { "type": "b64json",    "optional": true, "step": "dashboard_configuration.values", "outtype": "json" },
            "other_tags":         { "type": "string_set", "optional": true, "step": "dashboard_configuration.other_tags" }
+       }
+    },
+
+	"secret_mapping": {
+       "attributes": {
+           "type":            { "type": "string",   "computed": true, "value": "SECRET_MAPPING" },
+           "name":            { "type": "label",    "required": true, "forcenew": true, "skip": true },
+		   "public_alias":    { "type": "string",   "required": true, "primary": true },
+           "secret_name":     { "type": "string",   "optional": true, "match_null": "" },
+           "namespace":       { "type": "string",   "optional": true, "match_null": "" },
+		   "path":            { "type": "string",   "optional": true, "match_null": "" }
        }
     },
 
@@ -364,7 +377,8 @@ var ObjectConfigJsonStr = `
 			"system_settings":  "System-level settings. Note: there must only be one instance of this terraform resource named 'system_settings'.\n\nSee the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/settings) for more info.",
 			"secret": "An entity that stores a secret value. To be assigned to a secret mapping.",
 			"report_template":  "A resource report template. Note: Configure privilege (in Shoreline) to create report template objects.",
-			"dashboard": "A platform for visualizing resources and their associated tags."
+			"dashboard": "A platform for visualizing resources and their associated tags.",
+			"secret_mapping": "A mapping associated with a secret available in Shoreline and usable within the context of a runbook."
 		},
 
 		"attributes": {
@@ -469,12 +483,16 @@ var ObjectConfigJsonStr = `
 			"environment_name_background":                      "System setting for the background colour of the environment name. The format is #<6-digit hex>",
 			"param_value_max_length":                           "System setting controlling the maximum allowable length for a notebook's parameter",
 			"parallel_notebook_runs_fired_by_time_triggers":    "System setting controlling the maximum number of different parallel notebook runs initiated via time triggers",
-			"maintenance_mode_enabled":                         "System setting that when enabled, rejects new runs, allowing ongoing tasks to complete before stopping.",
+			"maintenance_mode_enabled":                        	"System setting that when enabled, rejects new runs, allowing ongoing tasks to complete before stopping.",
+			"allowed_tags":                                     "Defines a list of tags that are allowed on agent tag ingestion",
+			"skipped_tags":                                     "Defines a list of tags that are skipped on agent tag ingestion",
+            "managed_secrets":                                  "System setting that discriminates between usage of external vaults and the built in one.",
 			"integration_name":                                 "The name/symbol of a Shoreline integration involved in triggering the bot.",
 			"editors":                                          "List of users who can edit the object (with configure permission). Empty maps to all users.",
 			"communication_cud_notifications":                  "Enables slack notifications for create/update/delete operations. (Requires workspace and channel.)",
 			"communication_approval_notifications":             "Enables slack notifications for approvals operations. (Requires workspace and channel.)",
 			"communication_execution_notifications":            "Enables slack notifications for the object executions. (Requires workspace and channel.)",
+			"filter_resource_to_action":                        "Determines whether parameters containing resources are exported to actions.",
 			"external_url": 									"External url for a 3rd-party service integration.",
 			"cache_ttl_ms":            "The amount of time group memberships will be cached (in milliseconds).",
 			"subject":                 "The subject whose authentication details is used for a 3rd-party service integration (google cloud identity).",
@@ -482,13 +500,16 @@ var ObjectConfigJsonStr = `
 			"tenant_id":               "Tenant id for a 3rd-party service integration (Microsoft Entra ID).",
 			"client_id":               "Application id for a 3rd-party service integration (Microsoft Entra ID).",
 			"client_secret":           "Client secret for a 3rd-party service integration (Microsoft Entra ID).",
-			"display_name":            "A user friendly name shown in the UI.",
 			"blocks":           	   "The JSON encoded blocks of the report template.",
 			"links":           	   	   "The JSON encoded links of a report template with other report templates.",
 			"dashboard_type":          "Specifies the type of the dashboard configuration. Currently, only 'TAGS_SEQUENCE' is supported.",
-			"groups":                  "A JSON-encoded list of groups in the dashboard configuration. Each group is an object with 'name' (the group's name) and 'tags' (a list of tag names belonging to the group). Tags not assigned to any group must be included in a default group named '__unclassified__'.",
+			"groups":                  "A JSON-encoded list of groups in the dashboard configuration. Each group is an object with 'name' (the group's name) and 'tags' (a list of tag names belonging to the group).",
 			"values":                  "A JSON-encoded list of objects defining the values and their associated colors in the dashboard configuration. Each object contains: 'color' (the color associated with the values) and 'values' (a list of values corresponding to specific tags).",
-			"other_tags":              "A list of additional tags that will be displayed for the resources."
+			"other_tags":              "A list of additional tags that will be displayed for the resources.",
+			"secret_name":             "The name of the existing secret linked to the mapping.",
+			"public_alias":            "The name used to reference the secret in the runbook's parameters.",
+			"namespace":               "Applicable only to remotely managed secrets. Defines the namespace where the secret is available.",
+			"path":                    "Applicable only to remotely managed secrets. Specifies the path to the remote secret."
 		}
 	}
 }
