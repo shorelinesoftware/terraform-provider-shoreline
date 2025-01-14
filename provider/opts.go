@@ -184,7 +184,7 @@ func ValidateApiUrl(url string) bool {
 	// NOTE: standard URLs are in the form -- "https://<customer>.<region>.api.shoreline-<cluster>.io"
 	//   However, users can have custom backends with arbitrary URLs
 	//urlRegex := regexp.MustCompile(`^https://\w+\.\w+\.api\.shoreline-\w+\.io$`)
-	urlRegex := regexp.MustCompile(`^https://[\.a-z0-9-]+$`)
+	urlRegex := regexp.MustCompile(`^https?://[\.\:a-z0-9-]+$`)
 	if !urlRegex.MatchString(url) {
 		WriteMsg("ERROR: Invalid URL to auth! (%s)\n", url)
 		WriteMsg("It should be of the form: '" + CanonicalUrl + "' \n")
@@ -354,13 +354,14 @@ func UploadFileHttps(src string, dst string, token string) error {
 	reqOb.ContentLength = fileSize
 
 	response, err := http.DefaultClient.Do(reqOb)
-	defer response.Body.Close()
 	if err != nil {
 		fmt.Printf("Couldn't upload file: " + err.Error())
 		return fmt.Errorf("Couldn't upload file: " + err.Error())
 	} else {
 		fmt.Printf("Uploaded file '%s' (%d bytes) status: %v - %v\n", src, fileSize, response.StatusCode, http.StatusText(response.StatusCode))
 	}
+	defer response.Body.Close()
+
 	return nil
 }
 

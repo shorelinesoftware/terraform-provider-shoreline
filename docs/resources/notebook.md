@@ -55,6 +55,7 @@ resource "shoreline_notebook" "my_notebook" {
 ### Required
 
 - `name` (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
+- `name` (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
 
 ### Optional
 

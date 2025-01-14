@@ -18,7 +18,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -705,6 +704,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		}
 
 		sch := &schema.Schema{}
+		maybeAddValidateFunc(sch, key, k)
 
 		description := CastToString(GetNestedValueOrDefault(objects, ToKeyPath("docs.attributes."+k), ""))
 		sch.Description = description
@@ -821,6 +821,14 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 			if key == "secret" && k == "value" {
 				sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
 					return diffSuppressSecretValues(old, nu)
+				}
+			} else if key == "principal" && k == "idp_name" {
+				sch.DiffSuppressFunc = func(diffKey, old, nu string, d *schema.ResourceData) bool {
+					// TODO: add a get_principal_class function in shoreline backend
+					// and return the appropriate idp_name using the idp_id from db
+					// otherwise it cannot be returned from symbol table manager
+					return diffKey == "idp_name"
+
 				}
 			}
 		case "string[]":
@@ -1086,20 +1094,9 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		DeleteContext: resourceShorelineObjectDelete(key, objectDef),
 		Importer:      &schema.ResourceImporter{State: schema.ImportStatePassthrough},
 
-		Schema:        params,
-		CustomizeDiff: buildCustomizeDiffFunc(key),
+		Schema: params,
 	}
 
-}
-
-func buildCustomizeDiffFunc(objectType string) schema.CustomizeDiffFunc {
-	if !(objectType == "notebook" || objectType == "runbook") {
-		return nil
-	}
-	runbookCustomizeDiff := customdiff.ValidateChange("data", func(ctx context.Context, old, new, meta interface{}) error {
-		return validateShorelineNotebookDataField(new)
-	})
-	return runbookCustomizeDiff
 }
 
 func AddNotebookParamsFields(params []interface{}) {

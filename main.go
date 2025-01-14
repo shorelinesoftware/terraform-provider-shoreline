@@ -7,6 +7,7 @@ import (
 	"context"
 	"flag"
 	"log"
+
 	"shoreline.io/terraform/terraform-provider-shoreline/provider"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"

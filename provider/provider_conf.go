@@ -110,7 +110,7 @@ var ObjectConfigJsonStr = `
 			"hard_limit":              { "type": "int",     "required": true },
 			"soft_limit":              { "type": "int",     "optional": true, "default": -1 },
 			"duration":                { "type": "time_s",  "required": true },
-			"fail_over":               { "type": "string",  "optional": true },
+			"fail_over":               { "type": "string",  "optional": true, "default": "safe"},
 			"enabled":                 { "type": "bool",    "optional": true, "default": false },
 			"action_name":             { "type": "command", "internal": true },
 			"resource_query":          { "type": "command", "internal": true },
@@ -276,7 +276,7 @@ var ObjectConfigJsonStr = `
 			"execute_limit":         { "type": "int",      "optional": true },
 			"configure_permission":  { "type": "intbool",  "optional": true },
 			"administer_permission": { "type": "intbool",  "optional": true },
-			"idp_name":              { "type": "string",   "optional": true, "default": "default", "min_ver": "22.0.0" }
+			"idp_name":              { "type": "string",   "optional": true, "min_ver": "22.0.0" }
 		}
 	},
 
@@ -347,7 +347,8 @@ var ObjectConfigJsonStr = `
            "resource_query":     { "type": "string",     "optional": true, "step": "dashboard_configuration.resource_query" },
            "groups":             { "type": "b64json",    "optional": true, "step": "dashboard_configuration.groups", "outtype": "json" },
            "values":             { "type": "b64json",    "optional": true, "step": "dashboard_configuration.values", "outtype": "json" },
-           "other_tags":         { "type": "string_set", "optional": true, "step": "dashboard_configuration.other_tags" }
+           "other_tags":         { "type": "string_set", "optional": true, "step": "dashboard_configuration.other_tags" },
+           "identifiers":        { "type": "string_set", "optional": true, "step": "dashboard_configuration.identifiers" }
        }
     },
 
@@ -420,6 +421,7 @@ var ObjectConfigJsonStr = `
 			"fire_short_template":     "The short description of the Alarm's triggering condition.",
 			"fire_title_template":     "UI title of the Alarm's triggering condition.",
 			"identity":                "The email address or provider's (e.g. Okta) group-name for a permissions group.",
+			"identifiers":             "A list of additional tags that will be used to identify certain resources. They will be displayed before the tags_sequence column.",
 			"idp_name":                "The Identity Provider's name.",
 			"input_file":              "The local source of a distributed File object. (conflicts with inline_data)",
 			"inline_data":             "The inline file data of a distributed File object. (conflicts with input_file)",
