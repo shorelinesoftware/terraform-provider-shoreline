@@ -20,34 +20,32 @@ See the Shoreline [Notebook Documentation](https://docs.shoreline.io/ui/notebook
 
 ### Required
 
-- **name** (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
+- `name` (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
 
 ### Optional
 
-- **allowed_entities** (List of String) The list of users who can run an action or notebook. Any user can run if left empty.
-- **allowed_resources_query** (String) The list of resources on which an action or notebook can run. No restriction, if left empty.
-- **approvers** (List of String)
-- **cells** (String) The data cells inside a notebook.
-- **communication_approval_notifications** (Boolean) Enables slack notifications for approvals operations. (Requires workspace and channel.) Defaults to `true`.
-- **communication_channel** (String) A string value denoting the slack channel where notifications related to the object should be sent to.
-- **communication_cud_notifications** (Boolean) Enables slack notifications for create/update/delete operations. (Requires workspace and channel.) Defaults to `true`.
-- **communication_execution_notifications** (Boolean) Enables slack notifications for the object executions. (Requires workspace and channel.) Defaults to `true`.
-- **communication_workspace** (String) A string value denoting the slack workspace where notifications related to the object should be sent to.
-- **data** (String) The downloaded (JSON) representation of a Notebook.
-- **description** (String) A user-friendly explanation of an object.
-- **editors** (List of String) List of users who can edit the object (with configure permission). Empty maps to all users.
-- **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `true`.
-- **external_params** (String)
-- **filter_resource_to_action** (Boolean) Determines whether parameters containing resources are exported to actions. Defaults to `true`.
-- **id** (String) The ID of this resource.
-- **is_run_output_persisted** (Boolean) A boolean value denoting whether or not cell outputs should be persisted when running a notebook Defaults to `true`.
-- **labels** (List of String) A list of strings by which notebooks can be grouped.
-- **params** (String) Named variables to pass to an object (e.g. an Action).
-- **resource_query** (String, Deprecated) **Deprecated** Please use 'allowed_resources_query' instead. A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
-- **timeout_ms** (Number) Defaults to `60000`.
+- `allowed_entities` (List of String) The list of users who can run an action or notebook. Any user can run if left empty.
+- `allowed_resources_query` (String) The list of resources on which an action or notebook can run. No restriction, if left empty.
+- `approvers` (List of String)
+- `cells` (String) The data cells inside a notebook.
+- `communication_approval_notifications` (Boolean) Enables slack notifications for approvals operations. (Requires workspace and channel.) Defaults to `true`.
+- `communication_channel` (String) A string value denoting the slack channel where notifications related to the object should be sent to.
+- `communication_cud_notifications` (Boolean) Enables slack notifications for create/update/delete operations. (Requires workspace and channel.) Defaults to `true`.
+- `communication_execution_notifications` (Boolean) Enables slack notifications for the object executions. (Requires workspace and channel.) Defaults to `true`.
+- `communication_workspace` (String) A string value denoting the slack workspace where notifications related to the object should be sent to.
+- `data` (String) The downloaded (JSON) representation of a Notebook.
+- `description` (String) A user-friendly explanation of an object.
+- `editors` (List of String) List of users who can edit the object (with configure permission). Empty maps to all users.
+- `enabled` (Boolean) If the object is currently enabled or disabled. Defaults to `true`.
+- `external_params` (String)
+- `filter_resource_to_action` (Boolean) Determines whether parameters containing resources are exported to actions. Defaults to `true`.
+- `is_run_output_persisted` (Boolean) A boolean value denoting whether or not cell outputs should be persisted when running a notebook Defaults to `true`.
+- `labels` (List of String) A list of strings by which notebooks can be grouped.
+- `params` (String) Named variables to pass to an object (e.g. an Action).
+- `resource_query` (String, Deprecated) **Deprecated** Please use 'allowed_resources_query' instead. A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
+- `timeout_ms` (Number) Defaults to `60000`.
 
 ### Read-Only
 
-- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
-
-
+- `id` (String) The ID of this resource.
+- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
