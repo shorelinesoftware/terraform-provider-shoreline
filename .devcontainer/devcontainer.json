@@ -1,0 +1,17 @@
+{
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "waderyan.gitblame",
+                "golang.go",
+                "github.vscode-github-actions"
+            ],
+            "settings": {
+                "remote.autoForwardPorts": false
+            }
+        }
+    }
+}
