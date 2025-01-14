@@ -180,10 +180,19 @@ func runOpCommand(command string, checkResult bool) (string, error) {
 	//if !LoadAuthConfig(&GlobalOpts) {
 	//	return "", fmt.Errorf("Failed to load auth credentials")
 	//}
+
+	loggedCommand := "SENSITIVE"
+
+	if string(command[0]) != "*" {
+		loggedCommand = command
+	}
+
+	command = strings.TrimPrefix(command, "*")
+
 	result := ""
 	err := error(nil)
 	for r := 0; r <= RetryLimit; r += 1 {
-		appendActionLog(fmt.Sprintf("Running OpLang command (retries %d/%d)   ---   command:(( %s ))\n", r, RetryLimit, command))
+		appendActionLog(fmt.Sprintf("Running OpLang command (retries %d/%d)   ---   command:(( %s ))\n", r, RetryLimit, loggedCommand))
 		result, err = ExecuteOpCommand(&GlobalOpts, command)
 		if err == nil {
 			if !checkResult {
@@ -241,7 +250,8 @@ func CheckUpdateResult(result string) error {
 	}
 
 	actions := []string{"define", "delete", "update"}
-	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook", "configuration", "time_trigger", "circuit_breaker", "principal", "report_template", "dashboard"}
+	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook", "configuration", "time_trigger", "circuit_breaker", "principal", "secret", "report_template", "dashboard", "secret_mapping"}
+
 	for _, act := range actions {
 		for _, typ := range types {
 			key := act + "_" + typ
@@ -255,7 +265,7 @@ func CheckUpdateResult(result string) error {
 					errArray := []string{}
 					ve, isArray := GetNestedValueOrDefault(js, ToKeyPath(key+".error.validation_errors"), nil).([]interface{})
 					if isArray {
-						for i, _ := range ve {
+						for i := range ve {
 							errn, isStr := GetNestedValueOrDefault(js, ToKeyPath(fmt.Sprintf(key+".error.validation_errors.[%d].message", i)), nil).(string)
 							if isStr && errn != "" {
 								errArray = append(errArray, errn)
@@ -502,6 +512,8 @@ func New(version string) func() *schema.Provider {
 				"shoreline_system_settings": resourceShorelineObject(ObjectConfigJsonStr, "system_settings"),
 				"shoreline_report_template": resourceShorelineObject(ObjectConfigJsonStr, "report_template"),
 				"shoreline_dashboard":       resourceShorelineObject(ObjectConfigJsonStr, "dashboard"),
+				"shoreline_secret":          resourceShorelineObject(ObjectConfigJsonStr, "secret"),
+				"shoreline_secret_mapping":  resourceShorelineObject(ObjectConfigJsonStr, "secret_mapping"),
 			},
 			DataSourcesMap: map[string]*schema.Resource{
 				"shoreline_version": &schema.Resource{
@@ -678,7 +690,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		return nil
 	}
 	attributes := GetNestedValueOrDefault(object, ToKeyPath("attributes"), map[string]interface{}{}).(map[string]interface{})
-	for k, _ := range attributes {
+	for k := range attributes {
 		if strings.HasPrefix(k, "#") {
 			delete(attributes, k)
 		}
@@ -781,6 +793,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 						return string(conf) == nu
 					}
 				}
+
 				if key == "dashboard" {
 					if k == "groups" || k == "values" {
 						var conf string
@@ -791,6 +804,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 						return string(conf) == nu
 					}
 				}
+
 				return false
 			}
 			// TODO warn if "data.force_set[i]" fields are present
@@ -804,12 +818,17 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		case "string":
 			sch.Type = schema.TypeString
 
-			if key == "principal" && k == "idp_name" {
+			if key == "secret" && k == "value" {
+				sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
+					return diffSuppressSecretValues(old, nu)
+				}
+			} else if key == "principal" && k == "idp_name" {
 				sch.DiffSuppressFunc = func(diffKey, old, nu string, d *schema.ResourceData) bool {
 					// TODO: add a get_principal_class function in shoreline backend
 					// and return the appropriate idp_name using the idp_id from db
 					// otherwise it cannot be returned from symbol table manager
 					return diffKey == "idp_name"
+
 				}
 			}
 		case "string[]":
@@ -1360,6 +1379,7 @@ func setFieldViaOp(typ string, attrs map[string]interface{}, name string, key st
 	var diags diag.Diagnostics
 
 	valStr := attrValueString(typ, key, val, attrs)
+
 	op := fmt.Sprintf("%s.%s = %s", name, key, valStr)
 
 	if typ == "dashboard" {
@@ -1374,7 +1394,15 @@ func setFieldViaOp(typ string, attrs map[string]interface{}, name string, key st
 		}
 	}
 
-	appendActionLog(fmt.Sprintf("Setting %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
+	if typ == "secret" && key == "value" {
+		maskedOp := fmt.Sprintf("%s.%s = %s", name, key, maskValue(valStr))
+		op = fmt.Sprintf("*%s", op)
+		appendActionLog(fmt.Sprintf("Setting %s field: '%s'.'%s' :: %+v\n", typ, name, key, maskValue(valStr)))
+		appendActionLog(fmt.Sprintf("Setting with op statement... '%s'\n", maskedOp))
+	} else {
+		appendActionLog(fmt.Sprintf("Setting %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
+		appendActionLog(fmt.Sprintf("Setting with op statement... '%s'\n", op))
+	}
 
 	// TODO Let alias to be a list of fallbacks for versioning,
 	//   or have alternate ObjectConfigJsonStr based on backend version,
@@ -1385,7 +1413,6 @@ func setFieldViaOp(typ string, attrs map[string]interface{}, name string, key st
 		op = fmt.Sprintf("%s.%s = %s", name, alias, valStr)
 	}
 
-	appendActionLog(fmt.Sprintf("Setting with op statement... '%s'\n", op))
 	result, err := runOpCommand(op, true)
 	if err != nil {
 		diags = diag.Errorf("Failed to set %s %s.%s: %s", typ, name, key, err.Error())
@@ -1599,7 +1626,7 @@ func updateSystemSettings(attrs map[string]interface{}, objectDef map[string]int
 		"parallel_runs_fired_by_time_triggers":    "parallel_notebook_runs_fired_by_time_triggers",
 	}
 
-	for key, _ := range attrs {
+	for key := range attrs {
 		if skipSettings[key] {
 			continue
 		}
@@ -1715,7 +1742,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	forcedChangeKeys := map[string]bool{}
 	forcedChangeVals := map[string]interface{}{}
 
-	for key, _ := range attrs {
+	for key := range attrs {
 		proxy := GetNestedValueOrDefault(attrs, ToKeyPath(key+".proxy"), "").(string)
 		if proxy != "" {
 			proxyKeys := strings.Split(proxy, ",")
@@ -1886,7 +1913,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		}
 	}
 
-	for key, _ := range attrs {
+	for key := range attrs {
 		if skipKeys[key] != true {
 			orderedAttrs = append(orderedAttrs, key)
 		} else {
@@ -2177,7 +2204,7 @@ func resourceShorelineObjectReadSingleAttr(name string, typ string, key string, 
 				// "." has to be last, or it will wipe out other objects
 				omitPaths := []string{}
 				hasDot := false
-				for omitPath, _ := range omitMap {
+				for omitPath := range omitMap {
 					if omitPath != "." {
 						omitPaths = append(omitPaths, omitPath)
 					} else {
@@ -2207,7 +2234,7 @@ func resourceShorelineObjectReadSingleAttr(name string, typ string, key string, 
 						if (typ == "notebook" || typ == "runbook") && omitPath == "." {
 							// NOTE: The top-level object returned by get_notebook_class contains most/all of the object attributes.
 							// So remove them from the inner object
-							for akey, _ := range attrs {
+							for akey := range attrs {
 								if akey != "cells" && akey != "params" && akey != "external_params" {
 									omitList = append(omitList, akey)
 								}
@@ -2337,7 +2364,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 		// return early if "read_single_attr"
 		readSingleAttr, _ := GetNestedValueOrDefault(objectDef, ToKeyPath("internal.read_single_attr"), false).(bool)
 		if readSingleAttr {
-			for key, _ := range attrs {
+			for key := range attrs {
 				if key == "type" || key == "name" {
 					continue
 				}
@@ -2365,7 +2392,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 
 		stepsJs := map[string]interface{}{}
 
-		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" || typ == "runbook" || typ == "time_trigger" || typ == "circuit_breaker" || typ == "report_template" || typ == "dashboard" {
+		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" || typ == "runbook" || typ == "time_trigger" || typ == "circuit_breaker" || typ == "secret" || typ == "report_template" || typ == "dashboard" || typ == "secret_mapping" {
 			// extract fields from step objects
 			op := fmt.Sprintf("get_%s_class( %s_name = \"%s\" )", typ, typ, name)
 			extraJs, err := runOpCommandToJson(op)
@@ -2386,6 +2413,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 					}
 				}
 			}
+
 			if typ == "dashboard" {
 				confStr, hasConfStr := GetNestedValueOrDefault(stepsJs, ToKeyPath("configuration"), nil).(string)
 
@@ -2436,7 +2464,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 
 		if typ == "notebook" || typ == "runbook" {
 			// Normalizing the notebook removes some fields, so we have to read them first
-			for key, _ := range attrs {
+			for key := range attrs {
 				if readFirst[key] {
 					attrFirst = append(attrFirst, key)
 				} else {
@@ -2445,7 +2473,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 			}
 			attrList = append(attrFirst, attrList...)
 		} else {
-			for key, _ := range attrs {
+			for key := range attrs {
 				attrList = append(attrList, key)
 			}
 		}
@@ -2578,4 +2606,16 @@ func resourceShorelineObjectDelete(typ string, objectDef map[string]interface{})
 		}
 		return diags
 	}
+}
+
+func diffSuppressSecretValues(previousValue string, newValue string) bool {
+	previousValue = strings.Trim(previousValue, " ") // will have this form: ******XXXX
+	newValue = strings.Trim(newValue, " ")
+	nuMasked := maskValue(newValue)
+
+	return previousValue == nuMasked
+}
+
+func maskValue(value string) string {
+	return fmt.Sprintf("******%s", value[len(value)-4:])
 }

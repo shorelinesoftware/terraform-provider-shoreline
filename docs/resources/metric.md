@@ -66,7 +66,7 @@ for more info.
 ### Required
 
 - `name` (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
-- `value` (String) The Op statement that defines a Metric or Resource.
+- `value` (String) The Op statement that defines a Metric or Resource, or a string representing a secret value.
 
 ### Optional
 
