@@ -1,6 +1,6 @@
 
 resource "shoreline_report_template" "my_report_1" {
-  name   = "my_report_1"
+  name = "my_report_1"
   blocks = jsonencode([
     {
       "title" : "Block Name",
@@ -49,7 +49,7 @@ resource "shoreline_report_template" "my_report_1" {
 
 
 resource "shoreline_report_template" "my_report_2" {
-  name   = "my_report_2"
+  name = "my_report_2"
   blocks = jsonencode([
     {
       "title" : "Block Name",
