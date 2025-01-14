@@ -22,11 +22,11 @@ Shoreline dashboard. A platform for visualizing resources and their associated t
 
 ### Optional
 
-- **groups** (String) A JSON-encoded list of groups in the dashboard configuration. Each group is an object with `name` (the group's name) and `tags` (a list of tag names belonging to the group).
-- **identifiers** (List of String) A list of additional tags that will be used to identify certain resources. They will be displayed before the tags_sequence column.
-- **other_tags** (List of String) A list of additional tags that will be displayed for the resources.
-- **resource_query** (String) A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
-- **values** (String) A JSON-encoded list of objects defining the values and their associated colors in the dashboard configuration. Each object contains: `color` (the color associated with the values) and `values` (a list of values corresponding to specific tags).
+- `groups` (String) A JSON-encoded list of groups in the dashboard configuration. Each group is an object with 'name' (the group's name) and 'tags' (a list of tag names belonging to the group).
+- `identifiers` (List of String) A list of additional tags that will be used to identify certain resources. They will be displayed before the tags_sequence column.
+- `other_tags` (List of String) A list of additional tags that will be displayed for the resources.
+- `resource_query` (String) A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
+- `values` (String) A JSON-encoded list of objects defining the values and their associated colors in the dashboard configuration. Each object contains: 'color' (the color associated with the values) and 'values' (a list of values corresponding to specific tags).
 
 ### Read-Only
 
