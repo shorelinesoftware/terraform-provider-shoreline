@@ -17,16 +17,16 @@ Shoreline secret_mapping. A mapping associated with a secret available in Shorel
 
 ### Required
 
-- **name** (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
-- **public_alias** (String) The name used to reference the secret in the runbook's parameters.
+- `name` (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
+- `public_alias` (String) The name used to reference the secret in the runbook's parameters.
 
 ### Optional
 
-- **namespace** (String) Applicable only to remotely managed secrets. Defines the namespace where the secret is available.
-- **path** (String) Applicable only to remotely managed secrets. Specifies the path to the remote secret.
-- **secret_name** (String) The name of the existing secret linked to the mapping.
+- `namespace` (String) Applicable only to remotely managed secrets. Defines the namespace where the secret is available.
+- `path` (String) Applicable only to remotely managed secrets. Specifies the path to the remote secret.
+- `secret_name` (String) The name of the existing secret linked to the mapping.
 
 ### Read-Only
 
-- **id** (String) The ID of this resource.
-- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
+- `id` (String) The ID of this resource.
+- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
