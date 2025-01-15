@@ -19,24 +19,27 @@ Through Shoreline's web-based UI, [Notebooks](https://docs.shoreline.io/notebook
 Each Notebook uses a variety of properties to determine its behavior. The required properties when [creating a Notebook](https://docs.shoreline.io/notebooks#create-a-notebook) are:
 
 - `name`: string - A unique symbol name for the Notebook object.
-- `data`: string - A Notebook in JSON format.  Typically, this string should be generated using the Terraform [file](https://www.terraform.io/language/functions/file) function while referencing a local file `path`.
+- `cells`: list(object) - A list of cells represented by JSON objects. Cells may either be [Op statement cells](https://docs.shoreline.io/notebooks#op-statements) or [Markdown cells](https://docs.shoreline.io/notebooks#notes).
 
-### Download a Notebook
+### Download a Notebook as a Terraform resource
 
-You can download an entire Notebook in JSON format from the Shoreline Notebooks dashboard.
+You can download an entire Notebook directly as a Terraform resource. This will allow you to just plug in the TF code into your infrastructure and deploy the runbook immediately.
 
-1. Click the **Actions** button at the top-right of the active Notebook panel.
-2. Select the **Download Notebook** button to download the full configuration of the current Notebook to a local JSON file.
+1. Click the **Actions** button on the right side of the active Notebook panel.
+2. Select the **Download Notebook as Terraform** button to download the full configuration of the current Notebook as a Terraform resource.
 
-   You can also freely modify, share, and [upload](https://docs.shoreline.io/notebooks#upload-a-notebook) this Notebook at any time.
+## Defining a Notebook using the legacy `data` property
 
-## Usage
+You can also export the Notebook's configuration as a JSON file and then freely modify, share, and [upload](https://docs.shoreline.io/notebooks#upload-a-notebook) this Notebook at any time.
 
-The following example creates an [Notebook](https://docs.shoreline.io/notebooks) named `my_notebook`.
+Observation: this way of defining is **deprecated**. Please refer to the above instructions using the new format.
 
-1. [Download a Notebook](https://docs.shoreline.io#download-a-notebook) as JSON.
-2. Save the Notebook JSON to local path within your Terraform project.
-3. Define a new `shoreline_notebook` Terraform resource in your Terraform configuration that points the `data` property to the correct local module path.
+The following example creates a [Notebook](https://docs.shoreline.io/notebooks) named `my_notebook`.
+
+1. [Download a Notebook](https://docs.shoreline.io/notebooks#download-a-notebook) as JSON.
+2. Only keep the `cells`, `params`, `external_params`, and `enabled` fields fron the JSON file. Observation: `externalParams` needs to be renamed to `external_params` in the JSON file.
+3. Save the Notebook JSON to local path within your Terraform project.
+4. Define a new `shoreline_notebook` Terraform resource in your Terraform configuration that points the `data` property to the correct local module path.
 
    ```terraform
 resource "shoreline_notebook" "my_notebook" {
@@ -61,17 +64,17 @@ resource "shoreline_notebook" "my_notebook" {
 - `allowed_entities` (List of String) The list of users who can run an action or notebook. Any user can run if left empty.
 - `allowed_resources_query` (String) The list of resources on which an action or notebook can run. No restriction, if left empty.
 - `approvers` (List of String)
-- `cells` (String) The data cells inside a notebook.
+- `cells` (String) The data cells inside a notebook. Defined as a list of JSON objects. These may be either Markdown or Op commands.
 - `communication_approval_notifications` (Boolean) Enables slack notifications for approvals operations. (Requires workspace and channel.) Defaults to `true`.
 - `communication_channel` (String) A string value denoting the slack channel where notifications related to the object should be sent to.
 - `communication_cud_notifications` (Boolean) Enables slack notifications for create/update/delete operations. (Requires workspace and channel.) Defaults to `true`.
 - `communication_execution_notifications` (Boolean) Enables slack notifications for the object executions. (Requires workspace and channel.) Defaults to `true`.
 - `communication_workspace` (String) A string value denoting the slack workspace where notifications related to the object should be sent to.
-- `data` (String) The downloaded (JSON) representation of a Notebook.
+- `data` (String, Deprecated) **Deprecated** Please use 'cells' instead. The JSON representation of a Notebook. If this field is used, then the JSON should only contain these four fields: cells, params, external_params and enabled.
 - `description` (String) A user-friendly explanation of an object.
 - `editors` (List of String) List of users who can edit the object (with configure permission). Empty maps to all users.
 - `enabled` (Boolean) If the object is currently enabled or disabled. Defaults to `true`.
-- `external_params` (String)
+- `external_params` (String) Notebook parameters defined via with a JSON path used to extract the parameter's value from an external payload, such as an Alertmanager alert.
 - `filter_resource_to_action` (Boolean) Determines whether parameters containing resources are exported to actions. Defaults to `true`.
 - `is_run_output_persisted` (Boolean) A boolean value denoting whether or not cell outputs should be persisted when running a notebook Defaults to `true`.
 - `labels` (List of String) A list of strings by which notebooks can be grouped.
