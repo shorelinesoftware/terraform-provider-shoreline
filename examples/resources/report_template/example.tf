@@ -1,6 +1,6 @@
 
-resource "shoreline_report_template" "my_report_1" {
-  name = "my_report_1"
+resource "shoreline_report_template" "full_report_template" {
+  name = "full_report_template"
   blocks = jsonencode([
     {
       "title" : "Block Name",
@@ -39,17 +39,17 @@ resource "shoreline_report_template" "my_report_1" {
     }
   ])
   depends_on = [
-    shoreline_report_template.my_report_2
+    shoreline_report_template.minimal_report_template
   ]
   links = jsonencode([{
-    "label" : "second-report",
-    "report_template_name" : "my_report_2"
+    "label" : "minimal-report",
+    "report_template_name" : "minimal_report_template"
   }])
 }
 
 
-resource "shoreline_report_template" "my_report_2" {
-  name = "my_report_2"
+resource "shoreline_report_template" "minimal_report_template" {
+  name = "minimal_report_template"
   blocks = jsonencode([
     {
       "title" : "Block Name",
