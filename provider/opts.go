@@ -338,22 +338,22 @@ func UploadFileHttps(src string, dst string, token string) error {
 
 	stat, err := os.Stat(src)
 	if err != nil {
-		return fmt.Errorf("couldn't stat file to upload: " + err.Error())
+		return fmt.Errorf("couldn't stat file to upload: %s", err.Error())
 	}
 	fileSize := stat.Size()
 
 	reqOb, err := http.NewRequest(http.MethodPut, dst, file)
 	if err != nil {
-		fmt.Printf("couldn't create upload request object: " + err.Error())
-		return fmt.Errorf("couldn't create upload request object: " + err.Error())
+		fmt.Printf("couldn't create upload request object: %s", err.Error())
+		return fmt.Errorf("couldn't create upload request object: %s", err.Error())
 	}
 	reqOb.Header.Set("x-ms-blob-type", "BlockBlob") // only used by Azure, ignored by S3
 	reqOb.Header.Set("Content-Length", fmt.Sprintf("%d", fileSize))
 
 	response, err := http.DefaultClient.Do(reqOb)
 	if err != nil {
-		fmt.Printf("couldn't upload file: " + err.Error())
-		return fmt.Errorf("couldn't upload file: " + err.Error())
+		fmt.Printf("couldn't upload file: %s", err.Error())
+		return fmt.Errorf("couldn't upload file: %s", err.Error())
 	}
 	defer response.Body.Close()
 	if response.StatusCode != 201 && response.StatusCode != 200 {
@@ -365,6 +365,7 @@ func UploadFileHttps(src string, dst string, token string) error {
 
 	return nil
 }
+
 func UploadFileHttpsFromString(data string, dst string, token string) error {
 	f, err := os.CreateTemp("", "tmpfile-") // in Go version older than 1.17 you can use ioutil.TempFile
 	if err != nil {
