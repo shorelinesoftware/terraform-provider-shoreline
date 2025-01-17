@@ -32,12 +32,12 @@ You can download an entire Notebook directly as a Terraform resource. This will 
 
 You can also export the Notebook's configuration as a JSON file and then freely modify, share, and [upload](https://docs.shoreline.io/notebooks#upload-a-notebook) this Notebook at any time.
 
-Observation: this way of defining is **deprecated**. Please refer to the above instructions using the new format.
+Note: this way of defining is **deprecated**. Please refer to the above instructions using the new format.
 
 The following example creates a [Notebook](https://docs.shoreline.io/notebooks) named `my_notebook`.
 
 1. [Download a Notebook](https://docs.shoreline.io/notebooks#download-a-notebook) as JSON.
-2. Only keep the `cells`, `params`, `external_params`, and `enabled` fields fron the JSON file. Observation: `externalParams` needs to be renamed to `external_params` in the JSON file.
+2. Only keep the `cells`, `params`, `external_params`, and `enabled` fields fron the JSON file. Note: `externalParams` needs to be renamed to `external_params` in the JSON file.
 3. Save the Notebook JSON to local path within your Terraform project.
 4. Define a new `shoreline_notebook` Terraform resource in your Terraform configuration that points the `data` property to the correct local module path.
 
