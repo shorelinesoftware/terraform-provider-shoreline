@@ -332,35 +332,36 @@ func DownloadFileHttps(src string, dst string, token string) error {
 func UploadFileHttps(src string, dst string, token string) error {
 	file, err := os.Open(src)
 	if err != nil {
-		return fmt.Errorf("couldn't open local upload file '%s'\n", src)
+		return fmt.Errorf("couldn't open local upload file '%s'", src)
 	}
 	defer file.Close()
 
 	stat, err := os.Stat(src)
 	if err != nil {
-		return fmt.Errorf("Couldn't stat file to upload: " + err.Error())
+		return fmt.Errorf("couldn't stat file to upload: %s", err.Error())
 	}
 	fileSize := stat.Size()
 
-	reqOb, err := http.NewRequest("PUT", dst, file)
-	//reqOb, err := http.NewRequest("POST", dst, file)
-	//reqOb, err := http.NewRequest(http.MethodPut, dst, file)
+	reqOb, err := http.NewRequest(http.MethodPut, dst, file)
 	if err != nil {
-		fmt.Printf("Couldn't create upload request object: " + err.Error())
-		return fmt.Errorf("Couldn't create upload request object: " + err.Error())
+		fmt.Printf("couldn't create upload request object: %s", err.Error())
+		return fmt.Errorf("couldn't create upload request object: %s", err.Error())
 	}
-	//reqOb.Header.Set("Content-Type", "application/octet-stream")
-	//reqOb.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	reqOb.ContentLength = fileSize
+	reqOb.Header.Set("x-ms-blob-type", "BlockBlob") // only used by Azure, ignored by S3
+	reqOb.Header.Set("Content-Length", fmt.Sprintf("%d", fileSize))
 
 	response, err := http.DefaultClient.Do(reqOb)
 	if err != nil {
-		fmt.Printf("Couldn't upload file: " + err.Error())
-		return fmt.Errorf("Couldn't upload file: " + err.Error())
-	} else {
-		fmt.Printf("Uploaded file '%s' (%d bytes) status: %v - %v\n", src, fileSize, response.StatusCode, http.StatusText(response.StatusCode))
+		fmt.Printf("couldn't upload file: %s", err.Error())
+		return fmt.Errorf("couldn't upload file: %s", err.Error())
 	}
 	defer response.Body.Close()
+	if response.StatusCode != 201 && response.StatusCode != 200 {
+		var body []byte
+		response.Body.Read(body)
+		return fmt.Errorf("couldn't upload file, status: %s, message: %v", response.Status, string(body))
+	}
+	fmt.Printf("Uploaded file '%s' (%d bytes) status: %v - %v\n", src, fileSize, response.StatusCode, http.StatusText(response.StatusCode))
 
 	return nil
 }
