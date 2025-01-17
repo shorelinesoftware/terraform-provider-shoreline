@@ -27,17 +27,17 @@ See the Shoreline [Notebook Documentation](https://docs.shoreline.io/ui/notebook
 - `allowed_entities` (List of String) The list of users who can run an action or notebook. Any user can run if left empty.
 - `allowed_resources_query` (String) The list of resources on which an action or notebook can run. No restriction, if left empty.
 - `approvers` (List of String)
-- `cells` (String) The data cells inside a notebook.
+- `cells` (String) The data cells inside a notebook. Defined as a list of JSON objects. These may be either Markdown or Op commands.
 - `communication_approval_notifications` (Boolean) Enables slack notifications for approvals operations. (Requires workspace and channel.) Defaults to `true`.
 - `communication_channel` (String) A string value denoting the slack channel where notifications related to the object should be sent to.
 - `communication_cud_notifications` (Boolean) Enables slack notifications for create/update/delete operations. (Requires workspace and channel.) Defaults to `true`.
 - `communication_execution_notifications` (Boolean) Enables slack notifications for the object executions. (Requires workspace and channel.) Defaults to `true`.
 - `communication_workspace` (String) A string value denoting the slack workspace where notifications related to the object should be sent to.
-- `data` (String) The downloaded (JSON) representation of a Notebook.
+- `data` (String, Deprecated) **Deprecated** Please use 'cells' instead. The JSON representation of a Notebook. If this field is used, then the JSON should only contain these four fields: cells, params, external_params and enabled.
 - `description` (String) A user-friendly explanation of an object.
 - `editors` (List of String) List of users who can edit the object (with configure permission). Empty maps to all users.
 - `enabled` (Boolean) If the object is currently enabled or disabled. Defaults to `true`.
-- `external_params` (String)
+- `external_params` (String) Notebook parameters defined via with a JSON path used to extract the parameter's value from an external payload, such as an Alertmanager alert.
 - `filter_resource_to_action` (Boolean) Determines whether parameters containing resources are exported to actions. Defaults to `true`.
 - `is_run_output_persisted` (Boolean) A boolean value denoting whether or not cell outputs should be persisted when running a notebook Defaults to `true`.
 - `labels` (List of String) A list of strings by which notebooks can be grouped.
