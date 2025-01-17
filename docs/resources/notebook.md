@@ -78,6 +78,7 @@ resource "shoreline_notebook" "my_notebook" {
 - `params` (String) Named variables to pass to an object (e.g. an Action).
 - `resource_query` (String, Deprecated) **Deprecated** Please use 'allowed_resources_query' instead. A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
 - `timeout_ms` (Number) Defaults to `60000`.
+- `secret_aliases` (List of String) A list of strings that contains the public secret aliases of the secrets that are used in the runbook.
 
 ### Read-Only
 
