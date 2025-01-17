@@ -23,3 +23,11 @@ variable "full_time_trigger_name" {
 variable "minimal_time_trigger_name" {
   type = string
 }
+
+variable "full_runbook_name" {
+  type = string
+}
+
+variable "minimal_runbook_name" {
+  type = string
+}

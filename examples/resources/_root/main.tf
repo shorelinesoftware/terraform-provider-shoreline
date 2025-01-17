@@ -21,6 +21,8 @@ module "bot" {
   minimal_action_name       = module.action.minimal_action_name
   full_time_trigger_name    = module.time_trigger.full_time_trigger_name
   minimal_time_trigger_name = module.time_trigger.minimal_time_trigger_name
+  full_runbook_name         = module.runbook.full_runbook_name
+  minimal_runbook_name      = module.runbook.minimal_runbook_name
 }
 
 module "circuit_breaker" {
@@ -30,16 +32,16 @@ module "circuit_breaker" {
 }
 
 # module "file" {
-#   source    = "../file"
+#   source = "../file"
 # }
 
 module "metric" {
   source = "../metric"
 }
 
-# module "notebook" {
-#   source    = "../notebook"
-# }
+module "runbook" {
+  source = "../runbook"
+}
 
 module "principal" {
   source = "../principal"
@@ -63,7 +65,7 @@ module "dashboard" {
   source = "../dashboard"
 }
 
-# # This needs auth keys for each integration.
+# This needs auth keys for each integration.
 # module "integration" {
 #   source    = "../integration"
 # }

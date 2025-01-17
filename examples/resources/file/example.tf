@@ -12,7 +12,6 @@ resource "shoreline_file" "full_path_file" {
 }
 
 
-
 resource "shoreline_file" "full_inline_file" {
   name             = "full_inline_file"
   inline_data      = "<file_content>"
@@ -26,9 +25,17 @@ resource "shoreline_file" "full_inline_file" {
 }
 
 
-resource "shoreline_file" "minimal_file" {
-  name             = "minimal_file"
-  destination_path = "/tmp/minimal_file.txt"
+resource "shoreline_file" "minimal_path_file" {
+  name             = "minimal_path_file"
+  input_file       = "${path.module}/../../../data/opcp_example.sh"
+  destination_path = "/tmp/minimal_path_file.txt"
   resource_query   = "host"
 }
-# inline_data      = "<file_content>"
+
+
+resource "shoreline_file" "minimal_inline_file" {
+  name             = "minimal_inline_file"
+  inline_data      = "<file_content>"
+  destination_path = "/tmp/minimal_inline_file.txt"
+  resource_query   = "host"
+}
