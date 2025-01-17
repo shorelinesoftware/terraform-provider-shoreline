@@ -32,18 +32,3 @@ resource "shoreline_alarm" "minimal_alarm" {
   fire_query = "(cpu_usage > 1 | sum(5)) >= 2.75"
 }
 
-
-resource "shoreline_alarm" "cpu_threshold_alarm" {
-  fire_query = "${var.cpu_threshold_action_name}(cpu_threshold=75) == 1"
-  name       = "cpu_threshold_alarm"
-
-  clear_query        = "${var.cpu_threshold_action_name}(cpu_threshold=75) == 0"
-  description        = "High CPU usage alarm"
-  enabled            = true
-  resource_query     = "hosts"
-  check_interval_sec = 10
-
-  fire_short_template    = "High CPU Alarm fired"
-  resolve_short_template = "High CPU Alarm resolved"
-}
-
