@@ -25,12 +25,12 @@ resource "shoreline_dashboard" "full_dashboard" {
       ]
     }
   ])
-  other_tags     = ["<other_tag>"]
-  identifiers    = ["<identifier>"]
+  other_tags  = ["<other_tag>"]
+  identifiers = ["<identifier>"]
 }
 
 
-resource "shoreline_dashboard" "minimal_dashboard" { 
+resource "shoreline_dashboard" "minimal_dashboard" {
   name           = "minimal_dashboard"
   dashboard_type = "TAGS_SEQUENCE"
 }

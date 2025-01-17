@@ -9,7 +9,7 @@ resource "shoreline_metric" "full_metric" {
 
 
 resource "shoreline_metric" "minimal_metric" {
-  name          = "cpu_plus"
-  value         = "cpu_usage + 2"
+  name  = "cpu_plus"
+  value = "cpu_usage + 2"
 }
 

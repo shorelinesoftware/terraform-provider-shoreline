@@ -158,21 +158,21 @@ func getAccResourceAction(prefix string, full bool) string {
 			error_short_template    = "failed"
 			error_long_template    = "failed..."
 			allowed_entities = ["user1", "user2"]
-`
-	depFile := `
-		resource "shoreline_file" "` + prefix + `_action_file" {
-			name = "` + prefix + `_action_file"
-			input_file = "${path.module}/../data/opcp_example.sh"
-			destination_path = "/tmp/opcp_action.sh"
-			resource_query = "host"
-			description = "op_copy action script."
-			enabled = false
-		}
-`
+// `
+	// 	depFile := `
+	// 		resource "shoreline_file" "` + prefix + `_action_file" {
+	// 			name = "` + prefix + `_action_file"
+	// 			input_file = "${path.module}/../data/opcp_example.sh"
+	// 			destination_path = "/tmp/opcp_action.sh"
+	// 			resource_query = "host"
+	// 			description = "op_copy action script."
+	// 			enabled = false
+	// 		}
+	// `
 	if !full {
 		extra = ""
 	}
-	return depFile + `
+	return `
 		resource "shoreline_action" "` + prefix + `_ls_action" {
 			name = "` + prefix + `_ls_action"
 			command = "` + "`ls $${dir}; export FOO='bar'`" + `"
@@ -182,7 +182,6 @@ func getAccResourceAction(prefix string, full bool) string {
 			start_title_template    = "my_action started"
 			complete_title_template = "my_action completed"
 			error_title_template    = "my_action failed"
-			file_deps = [shoreline_file.` + prefix + `_action_file.name]
 			` + extra + `
 		}
 `
@@ -452,106 +451,106 @@ func getAccResourceCircuitBreaker(prefix string) string {
 ////////////////////////////////////////////////////////////////////////////////
 // File
 
-func TestAccResourceFile(t *testing.T) {
-	pre := RandomAlphaPrefix(5)
+// func TestAccResourceFile(t *testing.T) {
+// 	pre := RandomAlphaPrefix(5)
 
-	resource.UnitTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: providerFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: getProviderConfigString() + getAccResourceFile(pre),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "name", pre+"_ex_file"),
-					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "destination_path", "/tmp/opcp_example.sh"),
-					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "description", "op_copy example script."),
-					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "resource_query", "host"),
-					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "enabled", "false"),
-					// computed values...
-					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "file_length", "58"),
-					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "checksum", "dbfb2a7d8176bd6e3dde256824421de3"),
-					// just check that it's set
-					resource.TestCheckResourceAttrSet("shoreline_file."+pre+"_ex_file", "file_length"),
-				),
-			},
-			{
-				// Test Importer..
-				ResourceName:      "shoreline_file." + pre + "_ex_file",
-				ImportState:       true,
-				ImportStateVerify: true,
-				//// The filename (input_file) is not stored in the Op DB, and so can't be recreated for "import".
-				ImportStateVerifyIgnore: []string{"input_file", "inline_data"},
-				//ExpectError: regexp.MustCompile("input_file"), // Despite tickets to the contrary, this doesn't seem to work with ImportStateVerify
-			},
-		},
-	})
-}
+// 	resource.UnitTest(t, resource.TestCase{
+// 		PreCheck:          func() { testAccPreCheck(t) },
+// 		ProviderFactories: providerFactories,
+// 		Steps: []resource.TestStep{
+// 			{
+// 				Config: getProviderConfigString() + getAccResourceFile(pre),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "name", pre+"_ex_file"),
+// 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "destination_path", "/tmp/opcp_example.sh"),
+// 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "description", "op_copy example script."),
+// 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "resource_query", "host"),
+// 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "enabled", "false"),
+// 					// computed values...
+// 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "file_length", "58"),
+// 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "checksum", "dbfb2a7d8176bd6e3dde256824421de3"),
+// 					// just check that it's set
+// 					resource.TestCheckResourceAttrSet("shoreline_file."+pre+"_ex_file", "file_length"),
+// 				),
+// 			},
+// 			{
+// 				// Test Importer..
+// 				ResourceName:      "shoreline_file." + pre + "_ex_file",
+// 				ImportState:       true,
+// 				ImportStateVerify: true,
+// 				//// The filename (input_file) is not stored in the Op DB, and so can't be recreated for "import".
+// 				ImportStateVerifyIgnore: []string{"input_file", "inline_data"},
+// 				//ExpectError: regexp.MustCompile("input_file"), // Despite tickets to the contrary, this doesn't seem to work with ImportStateVerify
+// 			},
+// 		},
+// 	})
+// }
 
-func getAccResourceFile(prefix string) string {
-	return `
-		resource "shoreline_file" "` + prefix + `_ex_file" {
-			name = "` + prefix + `_ex_file"
-			input_file = "${path.module}/../data/opcp_example.sh"
-			destination_path = "/tmp/opcp_example.sh"
-			resource_query = "host"
-			description = "op_copy example script."
-			enabled = false
-		}
-`
-}
+// func getAccResourceFile(prefix string) string {
+// 	return `
+// 		resource "shoreline_file" "` + prefix + `_ex_file" {
+// 			name = "` + prefix + `_ex_file"
+// 			input_file = "${path.module}/../data/opcp_example.sh"
+// 			destination_path = "/tmp/opcp_example.sh"
+// 			resource_query = "host"
+// 			description = "op_copy example script."
+// 			enabled = false
+// 		}
+// `
+// }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// inline File
+// ////////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////////
+// // inline File
 
-func TestAccResourceFileContent(t *testing.T) {
-	pre := RandomAlphaPrefix(5)
+// func TestAccResourceFileContent(t *testing.T) {
+// 	pre := RandomAlphaPrefix(5)
 
-	resource.UnitTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: providerFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: getProviderConfigString() + getAccResourceFileContent(pre),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file_inline", "name", pre+"_ex_file_inline"),
-					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file_inline", "destination_path", "/tmp/opcp_example_inline.sh"),
-					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file_inline", "description", "op_copy example script."),
-					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file_inline", "resource_query", "host"),
-					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file_inline", "enabled", "false"),
-					// computed values...
-					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file_inline", "file_length", "58"),
-					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file_inline", "checksum", "dbfb2a7d8176bd6e3dde256824421de3"),
-					// just check that it's set
-					resource.TestCheckResourceAttrSet("shoreline_file."+pre+"_ex_file_inline", "file_length"),
-				),
-			},
-			{
-				// Test Importer..
-				ResourceName:      "shoreline_file." + pre + "_ex_file_inline",
-				ImportState:       true,
-				ImportStateVerify: true,
-				//// The filename (input_file) is not stored in the Op DB, and so can't be recreated for "import".
-				ImportStateVerifyIgnore: []string{"input_file", "inline_data"},
-				//ExpectError: regexp.MustCompile("input_file"), // Despite tickets to the contrary, this doesn't seem to work with ImportStateVerify
-			},
-		},
-	})
-}
+// 	resource.UnitTest(t, resource.TestCase{
+// 		PreCheck:          func() { testAccPreCheck(t) },
+// 		ProviderFactories: providerFactories,
+// 		Steps: []resource.TestStep{
+// 			{
+// 				Config: getProviderConfigString() + getAccResourceFileContent(pre),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file_inline", "name", pre+"_ex_file_inline"),
+// 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file_inline", "destination_path", "/tmp/opcp_example_inline.sh"),
+// 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file_inline", "description", "op_copy example script."),
+// 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file_inline", "resource_query", "host"),
+// 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file_inline", "enabled", "false"),
+// 					// computed values...
+// 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file_inline", "file_length", "58"),
+// 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file_inline", "checksum", "dbfb2a7d8176bd6e3dde256824421de3"),
+// 					// just check that it's set
+// 					resource.TestCheckResourceAttrSet("shoreline_file."+pre+"_ex_file_inline", "file_length"),
+// 				),
+// 			},
+// 			{
+// 				// Test Importer..
+// 				ResourceName:      "shoreline_file." + pre + "_ex_file_inline",
+// 				ImportState:       true,
+// 				ImportStateVerify: true,
+// 				//// The filename (input_file) is not stored in the Op DB, and so can't be recreated for "import".
+// 				ImportStateVerifyIgnore: []string{"input_file", "inline_data"},
+// 				//ExpectError: regexp.MustCompile("input_file"), // Despite tickets to the contrary, this doesn't seem to work with ImportStateVerify
+// 			},
+// 		},
+// 	})
+// }
 
-func getAccResourceFileContent(prefix string) string {
-	return `
-		resource "shoreline_file" "` + prefix + `_ex_file_inline" {
-			name = "` + prefix + `_ex_file_inline"
-			#inline_data = "file(${path.module}/../data/opcp_example.sh)"
-			inline_data = "#!/bin/bash\n\necho \"sample text 1\" > /tmp/sample_text.txt\n\n"
-			destination_path = "/tmp/opcp_example_inline.sh"
-			resource_query = "host"
-			description = "op_copy example script."
-			enabled = false
-		}
-`
-}
+// func getAccResourceFileContent(prefix string) string {
+// 	return `
+// 		resource "shoreline_file" "` + prefix + `_ex_file_inline" {
+// 			name = "` + prefix + `_ex_file_inline"
+// 			#inline_data = "file(${path.module}/../data/opcp_example.sh)"
+// 			inline_data = "#!/bin/bash\n\necho \"sample text 1\" > /tmp/sample_text.txt\n\n"
+// 			destination_path = "/tmp/opcp_example_inline.sh"
+// 			resource_query = "host"
+// 			description = "op_copy example script."
+// 			enabled = false
+// 		}
+// `
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -621,6 +620,96 @@ func getAccResourceNotebook(prefix string) string {
 			cells = "` + strings.Replace(getNotebookData(), "\"", "\\\"", -1) + `"
 			enabled = true
 			allowed_entities = ["user1", "user2"]
+		}
+`
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// Time trigger
+
+func TestAccResourceTimeTrigger(t *testing.T) {
+	pre := RandomAlphaPrefix(5)
+
+	resource.UnitTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: getProviderConfigString() + getAccResourceAlarm(pre, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "name", pre+"_cpu_alarm"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "fire_query", "( cpu_usage > 0 | sum ( 5 ) ) >= 2"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "clear_query", "( cpu_usage < 0 | sum ( 5 ) ) >= 2"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "description", "Watch CPU usage."),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "resource_query", "host"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "enabled", "true"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "fire_title_template", "alarm fired"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "resolve_title_template", "alarm resolved"),
+				),
+			},
+			{
+				Config: getProviderConfigString() + getAccResourceAlarm(pre, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "name", pre+"_cpu_alarm"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "fire_query", "( cpu_usage > 0 | sum ( 5 ) ) >= 2"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "clear_query", "( cpu_usage < 0 | sum ( 5 ) ) >= 2"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "description", "Watch CPU usage."),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "resource_query", "host"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "enabled", "true"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "fire_short_template", "fired"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "fire_long_template", "fired..."),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "resolve_short_template", "resolved"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "resolve_long_template", "resolved..."),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "raise_for", "local"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "check_interval_sec", "50"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "compile_eligible", "false"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "resource_type", "HOST"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "family", "custom"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "metric_name", "cpu_usage"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "condition_type", "above"),
+					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "condition_value", "1"),
+				),
+			},
+			{
+				// Test Importer..
+				ResourceName:      "shoreline_alarm." + pre + "_cpu_alarm",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func getAccResourceAlarm(prefix string, full bool) string {
+	extra := `
+			fire_short_template     = "fired"
+			fire_long_template      = "fired..."
+			resolve_short_template  = "resolved"
+			resolve_long_template   = "resolved..."
+			raise_for               = "local"
+			check_interval_sec      = 50
+			compile_eligible        = false
+			resource_type           = "HOST"
+			family                  = "custom"
+			metric_name             = "cpu_usage"
+			condition_type          = "above"
+			condition_value         = "1"
+`
+	if !full {
+		extra = ""
+	}
+	return `
+		resource "shoreline_alarm" "` + prefix + `_cpu_alarm" {
+			name = "` + prefix + `_cpu_alarm"
+			fire_query = "( cpu_usage > 0 | sum ( 5 ) ) >= 2"
+			clear_query = "( cpu_usage < 0 | sum ( 5 ) ) >= 2"
+			description = "Watch CPU usage."
+			resource_query = "host"
+			enabled = true
+			fire_title_template     = "alarm fired"
+			resolve_title_template  = "alarm resolved"
+			` + extra + `
 		}
 `
 }

@@ -56,11 +56,11 @@ module "system_settings" {
 
 
 module "report_template" {
-  source    = "../report_template"
+  source = "../report_template"
 }
 
 module "dashboard" {
-  source    = "../dashboard"
+  source = "../dashboard"
 }
 
 # # This needs auth keys for each integration.

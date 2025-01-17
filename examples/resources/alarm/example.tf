@@ -28,8 +28,8 @@ resource "shoreline_alarm" "full_alarm" {
 
 
 resource "shoreline_alarm" "minimal_alarm" {
-  name               = "minimal_alarm"
-  fire_query         = "(cpu_usage > 1 | sum(5)) >= 2.75"
+  name       = "minimal_alarm"
+  fire_query = "(cpu_usage > 1 | sum(5)) >= 2.75"
 }
 
 

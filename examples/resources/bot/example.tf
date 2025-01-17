@@ -14,7 +14,7 @@ resource "shoreline_bot" "full_bot" {
 
 
 resource "shoreline_bot" "minimal_bot" {
-  name                    = "minimal_bot"
-  command                 = "if ${var.minimal_alarm_name} then ${var.minimal_action_name} fi"
+  name    = "minimal_bot"
+  command = "if ${var.minimal_alarm_name} then ${var.minimal_action_name} fi"
 }
 

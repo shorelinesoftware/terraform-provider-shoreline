@@ -12,6 +12,6 @@ resource "shoreline_principal" "full_principal" {
 
 
 resource "shoreline_principal" "minimal_principal" {
-  name                  = "minimal_principal"
-  identity              = "<minimal_identity_name>"
+  name     = "minimal_principal"
+  identity = "<minimal_identity_name>"
 }
