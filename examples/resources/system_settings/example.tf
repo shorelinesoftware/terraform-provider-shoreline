@@ -6,7 +6,7 @@ resource "shoreline_system_settings" "system_settings" {
   administrator_grants_read_user_token       = true
   administrator_grants_regenerate_user_token = false
   administrator_grants_create_user           = true
-  # Notebooks
+  # Runbooks
   approval_feature_enabled                         = true
   runbook_ad_hoc_approval_request_enabled          = true
   runbook_approval_request_expiry_time             = 6
@@ -16,11 +16,11 @@ resource "shoreline_system_settings" "system_settings" {
   approval_optional_request_ticket_url             = false
   time_trigger_permissions_user                    = "Shoreline"
   parallel_runs_fired_by_time_triggers             = 5
-  #Audit
+  # Audit
   external_audit_storage_enabled          = false
   external_audit_storage_type             = "ELASTIC"
   external_audit_storage_batch_period_sec = 10
-  #General
+  # General
   environment_name            = "Env_Name via TF"
   environment_name_background = "#673ab7"
   param_value_max_length      = 10000

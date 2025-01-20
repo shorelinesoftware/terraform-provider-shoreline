@@ -31,6 +31,6 @@ resource "shoreline_bot" "full_time_trigger_bot" {
 
 
 resource "shoreline_bot" "minimal_time_trigger_bot" {
-  name                    = "minimal_time_trigger_bot"
-  command                 = "if ${var.minimal_time_trigger_name} then ${var.minimal_runbook_name} fi"
+  name    = "minimal_time_trigger_bot"
+  command = "if ${var.minimal_time_trigger_name} then ${var.minimal_runbook_name} fi"
 }

@@ -6,8 +6,8 @@ resource "shoreline_file" "full_path_file" {
   resource_query   = "host"
   description      = "op_copy example script."
   md5              = filemd5("${path.module}/../../../data/opcp_example.sh")
-  mode             = "778"
-  owner            = "<owner>"
+  mode             = "776"
+  owner            = "owner"
   enabled          = true
 }
 
@@ -20,8 +20,8 @@ resource "shoreline_file" "full_inline_file" {
   description      = "op_copy example script."
   enabled          = false
   md5              = md5("<file_content>")
-  mode             = "778"
-  owner            = "<owner>"
+  mode             = "776"
+  owner            = "owner"
 }
 
 
