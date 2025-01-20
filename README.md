@@ -81,7 +81,7 @@ and then rebuild the container, making sure the podman network was created by th
 
 ### Troubleshooting / FAQ
 
-###### `cp` / creating `shoreline_file`s via terraform does not work
+###### Creating `shoreline_file`s via terraform does not work
 Check backend container for error logs.
 
 Ensure you've set the `ENABLE_LOCAL_OP_COPY` flag (see above for more information).
