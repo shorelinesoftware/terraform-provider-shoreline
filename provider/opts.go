@@ -348,7 +348,7 @@ func UploadFileHttps(src string, dst string, token string) error {
 		return fmt.Errorf("couldn't create upload request object: %s", err.Error())
 	}
 	reqOb.Header.Set("x-ms-blob-type", "BlockBlob") // only used by Azure, ignored by S3
-	reqOb.Header.Set("Content-Length", fmt.Sprintf("%d", fileSize))
+	reqOb.ContentLength = fileSize
 
 	response, err := http.DefaultClient.Do(reqOb)
 	if err != nil {
