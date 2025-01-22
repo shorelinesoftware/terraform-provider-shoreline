@@ -48,7 +48,6 @@ resource "shoreline_runbook" "full_runbook" {
       "required" : false
     }
   ])
-  # TODO: maybe add a warning that this runbook is not linked and it should be so that this is actually set
   external_params = jsonencode([
     {
       "name" : "external_param_1",
@@ -75,15 +74,14 @@ resource "shoreline_runbook" "full_runbook" {
       "json_path" : "$.<path>"
     }
   ])
-  name                                  = "full_runbook"
-  description                           = "A sample runbook."
-  timeout_ms                            = 5000
-  allowed_entities                      = ["<user_1>", "<user_2>"]
-  approvers                             = ["<user_2>", "<user_3>"]
-  editors                               = ["<user_2>", "<user_4>"]
-  is_run_output_persisted               = true
-  # TODO: plugin breaks when using allowed_resources_query
-  # allowed_resources_query               = "host"
+  name                    = "full_runbook"
+  description             = "A sample runbook."
+  timeout_ms              = 5000
+  allowed_entities        = ["<user_1>", "<user_2>"]
+  approvers               = ["<user_2>", "<user_3>"]
+  editors                 = ["<user_2>", "<user_4>"]
+  is_run_output_persisted = true
+  allowed_resources_query               = "host"
   communication_workspace               = "<workspace_name>"
   communication_channel                 = "<channel_name>"
   labels                                = ["label1", "label2"]
@@ -96,6 +94,6 @@ resource "shoreline_runbook" "full_runbook" {
 
 
 resource "shoreline_runbook" "minimal_runbook" {
-  name = "minimal_runbook"
+  name  = "minimal_runbook"
   cells = jsonencode([])
 }

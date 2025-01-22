@@ -1,5 +1,4 @@
 
-
 module "action" {
   source = "../action"
 }
@@ -31,9 +30,9 @@ module "circuit_breaker" {
   minimal_action_name = module.action.minimal_action_name
 }
 
-# module "file" {
-#   source = "../file"
-# }
+module "file" {
+  source = "../file"
+}
 
 module "metric" {
   source = "../metric"
