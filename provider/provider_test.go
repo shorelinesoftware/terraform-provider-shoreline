@@ -280,6 +280,62 @@ func getAccResourceAlarm(prefix string, full bool) string {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+// Time Trigger
+
+func TestAccResourceTimeTrigger(t *testing.T) {
+	pre := RandomAlphaPrefix(5)
+
+	resource.UnitTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: getProviderConfigString() + getAccResourceTimeTrigger(pre, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("shoreline_time_trigger."+pre+"_time_trigger", "name", pre+"_time_trigger"),
+					resource.TestCheckResourceAttr("shoreline_time_trigger."+pre+"_time_trigger", "fire_query", "every 5m"),
+				),
+			},
+			{
+				Config: getProviderConfigString() + getAccResourceTimeTrigger(pre, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("shoreline_time_trigger."+pre+"_time_trigger", "name", pre+"_time_trigger"),
+					resource.TestCheckResourceAttr("shoreline_time_trigger."+pre+"_time_trigger", "fire_query", "every 5m"),
+					resource.TestCheckResourceAttr("shoreline_time_trigger."+pre+"_time_trigger", "start_date", "2024-02-29T08:00:00"),
+					resource.TestCheckResourceAttr("shoreline_time_trigger."+pre+"_time_trigger", "end_date", "2100-02-28T08:00:00"),
+					resource.TestCheckResourceAttr("shoreline_time_trigger."+pre+"_time_trigger", "enabled", "true"),
+				),
+			},
+			{
+				// Test Importer..
+				ResourceName:      "shoreline_time_trigger." + pre + "_time_trigger",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func getAccResourceTimeTrigger(prefix string, full bool) string {
+	extra := `
+			start_date = "2024-02-29T08:00:00"
+			end_date   = "2100-02-28T08:00:00"
+			enabled    = true
+`
+	if !full {
+		extra = ""
+	}
+	return `
+		resource "shoreline_time_trigger" "` + prefix + `_time_trigger" {
+			name = "` + prefix + `_time_trigger"
+			fire_query = "every 5m"
+			` + extra + `
+		}
+`
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // Bot
 
 func TestAccResourceBot(t *testing.T) {
@@ -402,6 +458,10 @@ func getAccResourceResource(prefix string) string {
 		}
 `
 }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// Circuit Breaker
 
 func TestAccResourceCircuitBreaker(t *testing.T) {
 	pre := RandomAlphaPrefix(5)
@@ -549,6 +609,340 @@ func getAccResourceFileContent(prefix string) string {
 			resource_query = "host"
 			description = "op_copy example script."
 			enabled = false
+		}
+`
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// Principal
+
+func TestAccResourcePrincipal(t *testing.T) {
+	pre := RandomAlphaPrefix(5)
+
+	resource.UnitTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: getProviderConfigString() + getAccResourcePrincipal(pre, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("shoreline_principal."+pre+"_principal", "name", pre+"_principal"),
+					resource.TestCheckResourceAttr("shoreline_principal."+pre+"_principal", "identity", "azure"),
+				),
+			},
+			{
+				Config: getProviderConfigString() + getAccResourcePrincipal(pre, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("shoreline_principal."+pre+"_principal", "name", pre+"_principal"),
+					resource.TestCheckResourceAttr("shoreline_principal."+pre+"_principal", "identity", "group_identity"),
+					resource.TestCheckResourceAttr("shoreline_principal."+pre+"_principal", "idp_name", "azure"),
+					resource.TestCheckResourceAttr("shoreline_principal."+pre+"_principal", "action_limit", "100"),
+					resource.TestCheckResourceAttr("shoreline_principal."+pre+"_principal", "execute_limit", "50"),
+					resource.TestCheckResourceAttr("shoreline_principal."+pre+"_principal", "view_limit", "200"),
+					resource.TestCheckResourceAttr("shoreline_principal."+pre+"_principal", "administer_permission", "false"),
+					resource.TestCheckResourceAttr("shoreline_principal."+pre+"_principal", "configure_permission", "false"),
+				),
+			},
+			{
+				// Test Importer..
+				ResourceName:      "shoreline_principal." + pre + "_principal",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func getAccResourcePrincipal(prefix string, full bool) string {
+	extra := `
+			idp_name              = "azure"
+			action_limit          = 100
+			execute_limit         = 50
+			view_limit            = 200
+			administer_permission = false
+			configure_permission  = false
+`
+	if !full {
+		extra = ""
+	}
+	return `
+		resource "shoreline_principal" "` + prefix + `_principal" {
+			name = "` + prefix + `_principal"
+			identity = "group_identity"
+			` + extra + `
+		}
+`
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// System Settings
+
+func TestAccResourceSystemSettings(t *testing.T) {
+	pre := RandomAlphaPrefix(5)
+
+	resource.UnitTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: getProviderConfigString() + getAccResourceSystemSettings(pre),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "name", "system_settings"),
+					// Access Control
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "administrator_grants_create_user_token", "true"),
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "administrator_grants_read_user_token", "true"),
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "administrator_grants_regenerate_user_token", "false"),
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "administrator_grants_create_user", "true"),
+					// Runbooks
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "approval_feature_enabled", "true"),
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "runbook_ad_hoc_approval_request_enabled", "true"),
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "runbook_approval_request_expiry_time", "6"),
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "run_approval_expiry_time", "5"),
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "approval_editable_allowed_resource_query_enabled", "true"),
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "approval_allow_individual_notification", "true"),
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "approval_optional_request_ticket_url", "false"),
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "time_trigger_permissions_user", "Shoreline"),
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "parallel_runs_fired_by_time_triggers", "5"),
+					// Audit
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "external_audit_storage_enabled", "false"),
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "external_audit_storage_type", "ELASTIC"),
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "external_audit_storage_batch_period_sec", "10"),
+					// General
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "environment_name", "Env_Name via TF"),
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "environment_name_background", "#673ab7"),
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "param_value_max_length", "10000"),
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "maintenance_mode_enabled", "false"),
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "allowed_tags", "[\".*\"]"),
+					resource.TestCheckResourceAttr("shoreline_system_settings."+pre+"_system_settings", "skipped_tags", "[]"),
+				),
+			},
+			{
+				// Test Importer..
+				ResourceName:      "shoreline_system_settings.system_settings",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func getAccResourceSystemSettings(prefix string) string {
+	return `
+		resource "shoreline_system_settings" "system_settings" {
+			name = "system_settings"
+			# Access Control
+			administrator_grants_create_user_token     = true
+			administrator_grants_read_user_token       = true
+			administrator_grants_regenerate_user_token = false
+			administrator_grants_create_user           = true
+			# Runbooks
+			approval_feature_enabled                         = true
+			runbook_ad_hoc_approval_request_enabled          = true
+			runbook_approval_request_expiry_time             = 6
+			run_approval_expiry_time                         = 5
+			approval_editable_allowed_resource_query_enabled = true
+			approval_allow_individual_notification           = true
+			approval_optional_request_ticket_url             = false
+			time_trigger_permissions_user                    = "Shoreline"
+			parallel_runs_fired_by_time_triggers             = 5
+			# Audit
+			external_audit_storage_enabled          = false
+			external_audit_storage_type             = "ELASTIC"
+			external_audit_storage_batch_period_sec = 10
+			# General
+			environment_name            = "Env_Name via TF"
+			environment_name_background = "#673ab7"
+			param_value_max_length      = 10000
+			maintenance_mode_enabled    = false
+			allowed_tags                = [".*"]
+			skipped_tags                = []
+		}
+`
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// Report Template
+
+func TestAccResourceReportTemplate(t *testing.T) {
+	pre := RandomAlphaPrefix(5)
+
+	resource.UnitTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: getProviderConfigString() + getAccResourceReportTemplate(pre, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("shoreline_report_template."+pre+"_report_template", "name", pre+"_report_template"),
+					resource.TestCheckResourceAttr("shoreline_report_template."+pre+"_report_template", "blocks", getReportTemplateBlocks()),
+				),
+			},
+			{
+				Config: getProviderConfigString() + getAccResourceReportTemplate(pre, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("shoreline_report_template."+pre+"_report_template", "name", pre+"_report_template"),
+					resource.TestCheckResourceAttr("shoreline_report_template."+pre+"_report_template", "blocks", getReportTemplateBlocks()),
+					resource.TestCheckResourceAttr("shoreline_report_template."+pre+"_report_template", "links", `jsonencode([{"label" : "minimal-report", "report_template_name" : "minimal_report_template"}])`),
+				),
+			},
+			{
+				// Test Importer..
+				ResourceName:      "shoreline_report_template." + pre + "_report_template",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func getReportTemplateBlocks() string {
+	return `jsonencode([
+    {
+      "title" : "Block Name",
+      "resource_query" : "host",
+      "group_by_tag" : "tag_0",
+      "breakdown_by_tag" : "tag_1",
+      "breakdown_tags_values" : [
+        {
+          "color" : "#AAAAAA",
+          "values" : [
+            "passed",
+            "skipped"
+          ],
+          "label" : "label_0"
+        }
+      ],
+      "view_mode" : "PERCENTAGE",
+      "include_other_breakdown_tag_values" : true,
+      "other_tags_to_export" : ["other_tag_1", "other_tag_2"],
+      "include_resources_without_group_tag" : false,
+      "group_by_tag_order" : {
+        "type" : "DEFAULT",
+        "values" : []
+      },
+      "resources_breakdown" : [
+        {
+          "group_by_value" : "tag_0",
+          "breakdown_values" : [
+            {
+              "value" : "value",
+              "count" : 1
+            }
+          ]
+        }
+      ]
+    }
+  ])	
+`
+}
+
+func getAccResourceReportTemplate(prefix string, full bool) string {
+	extra := `
+  			links = jsonencode([{
+    			"label" : "minimal-report",
+    			"report_template_name" : "minimal_report_template"
+ 			}])
+`
+	if !full {
+		extra = ""
+	}
+	return `
+		resource "shoreline_report_template" "` + prefix + `_report_template" {
+			name = "` + prefix + `_report_template"
+			blocks = ` + getReportTemplateBlocks() + extra + `
+		}
+`
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+// Dashboard
+
+func TestAccResourceDashboard(t *testing.T) {
+	pre := RandomAlphaPrefix(5)
+
+	resource.UnitTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: getProviderConfigString() + getAccResourceDashboard(pre, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "name", pre+"_dashboard"),
+					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "dashboard_type", "TAGS_SEQUENCE"),
+				),
+			},
+			{
+				Config: getProviderConfigString() + getAccResourceDashboard(pre, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "name", pre+"_dashboard"),
+					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "dashboard_type", "TAGS_SEQUENCE"),
+					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "resource_query", "host"),
+					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "groups", getDashboardGroups()),
+					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "values", getDashboardValues()),
+					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "other_tags", "[\"<other_tag>\"]"),
+					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "identifiers", "[\"<identifier>\"]"),
+				),
+			},
+			{
+				// Test Importer..
+				ResourceName:      "shoreline_dashboard." + pre + "_dashboard",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func getDashboardGroups() string {
+	return `jsonencode([
+				{
+				"name" : "g1",
+				"tags" : [
+					"cloud_provider",
+					"release_tag"
+				]
+				}
+			])
+`
+}
+
+func getDashboardValues() string {
+	return `jsonencode([
+				{
+				"color" : "#78909c",
+				"values" : [
+					"aws"
+				]
+				},
+				{
+				"color" : "#ffa726",
+				"values" : [
+					"release-X"
+				]
+				}
+				])
+`
+}
+
+func getAccResourceDashboard(prefix string, full bool) string {
+	extra := `
+  			resource_query = "host"
+			groups = ` + getDashboardGroups() + `
+			values = ` + getDashboardValues() + `
+			other_tags  = ["<other_tag>"]
+			identifiers = ["<identifier>"]
+`
+	if !full {
+		extra = ""
+	}
+	return `
+		resource "shoreline_dashboard" "` + prefix + `_dashboard" {
+			name = "` + prefix + `_dashboard"
+			dashboard_type = "TAGS_SEQUENCE"` + extra + `
 		}
 `
 }
