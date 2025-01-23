@@ -1,6 +1,6 @@
 resource "shoreline_runbook" "data_runbook" {
   name        = "data_runbook"
-  description = "A sample runbook."
+  description = "A sample runbook defined using the data field, which loads the runbook configuration from a separate JSON file."
   data        = file("${path.module}/data.json")
 }
 
@@ -74,13 +74,13 @@ resource "shoreline_runbook" "full_runbook" {
       "json_path" : "$.<path>"
     }
   ])
-  name                    = "full_runbook"
-  description             = "A sample runbook."
-  timeout_ms              = 5000
-  allowed_entities        = ["<user_1>", "<user_2>"]
-  approvers               = ["<user_2>", "<user_3>"]
-  editors                 = ["<user_2>", "<user_4>"]
-  is_run_output_persisted = true
+  name                                  = "full_runbook"
+  description                           = "A sample runbook."
+  timeout_ms                            = 5000
+  allowed_entities                      = ["<user_1>", "<user_2>"]
+  approvers                             = ["<user_2>", "<user_3>"]
+  editors                               = ["<user_2>", "<user_4>"]
+  is_run_output_persisted               = true
   allowed_resources_query               = "host"
   communication_workspace               = "<workspace_name>"
   communication_channel                 = "<channel_name>"
