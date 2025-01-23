@@ -38,7 +38,7 @@ The following example creates an [Notebook](/t/notebook) named `my_notebook`.
 2. Save the Notebook JSON to local path within your Terraform project.
 3. Define a new `shoreline_notebook` Terraform resource in your Terraform configuration that points the `data` property to the correct local module path.
 
-   {{tffile "examples/resources/notebook/resource.tf"}}
+   {{tffile "examples/resources/runbook/example.tf"}}
 
 -> See the Shoreline [Notebooks Documentation](/t/notebook) for more info on creating and using Notebooks.
 
