@@ -215,7 +215,7 @@ var ObjectConfigJsonStr = `
 		"attributes": {
 			"type":                    { "type": "string",     "computed": true, "value": "NOTEBOOK" },
 			"name":                    { "type": "label",      "required": true, "forcenew": true, "skip": true },
-			"data":                    { "type": "b64json",    "optional": true, "step": ".", "primary": true, "deprecated_for": "cells",
+			"data":                    { "type": "b64json",    "optional": true, "step": ".", "primary": true, "deprecated": true,
 																	 "omit":       { "cells": "dynamic_cell_fields", ".": "dynamic_fields" },
 																	 "omit_items": { "external_params": "dynamic_params" },
 																	 "cast":       { "params": "string[]", "params_values": "string[]" },

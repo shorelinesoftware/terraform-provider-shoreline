@@ -33,7 +33,7 @@ See the Shoreline [Notebook Documentation](https://docs.shoreline.io/ui/notebook
 - `communication_cud_notifications` (Boolean) Enables slack notifications for create/update/delete operations. (Requires workspace and channel.) Defaults to `true`.
 - `communication_execution_notifications` (Boolean) Enables slack notifications for the object executions. (Requires workspace and channel.) Defaults to `true`.
 - `communication_workspace` (String) A string value denoting the slack workspace where notifications related to the object should be sent to.
-- `data` (String, Deprecated) **Deprecated** Please use 'cells' instead. The JSON representation of a Notebook. If this field is used, then the JSON should only contain these four fields: cells, params, external_params and enabled.
+- `data` (String, Deprecated) **Deprecated** Field 'data' is obsolete. The JSON representation of a Notebook. If this field is used, then the JSON should only contain these four fields: cells, params, external_params and enabled.
 - `description` (String) A user-friendly explanation of an object.
 - `editors` (List of String) List of users who can edit the object (with configure permission). Empty maps to all users.
 - `enabled` (Boolean) If the object is currently enabled or disabled. Defaults to `true`.
