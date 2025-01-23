@@ -91,4 +91,4 @@ resource "shoreline_bot" "cpu_bot" {
 - `min_version` (String) Minimum version required on the Shoreline backend (API server).
 - `retries` (Number) Number of retries for API calls, in case of e.g. transient network failures.
 - `token` (String, Sensitive) Customer/user-specific authorization token for the Shoreline API server. May be provided via `SHORELINE_TOKEN` env variable.
-- `url` (String) Customer-specific URL for the Shoreline API server. It should be of the form ```https://<path>``` .
+- `url` (String) Customer-specific URL for the Shoreline API server. It should be of the form ```https://(<backend_node>.)?<customer>.<region>.api.shoreline-<cluster>.io``` .
