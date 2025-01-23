@@ -1010,7 +1010,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 						return true
 					}
 				default:
-					if nu == defowlt.(string) && (preferredSettingNewValue.(string) != defowlt.(string)) {
+					if defowlt != nil && nu == defowlt.(string) && (preferredSettingNewValue.(string) != defowlt.(string)) {
 						return true
 					}
 				}
@@ -1036,7 +1036,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 						return true
 					}
 				default:
-					if nu == defowlt.(string) && deprecatedSettingNewValue.(string) != defowlt.(string) {
+					if defowlt != nil && nu == defowlt.(string) && deprecatedSettingNewValue.(string) != defowlt.(string) {
 						return true
 					}
 				}
