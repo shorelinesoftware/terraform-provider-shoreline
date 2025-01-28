@@ -942,7 +942,7 @@ func TestAccResourceRunbook(t *testing.T) {
 					resource.TestCheckResourceAttr("shoreline_runbook."+pre+"_runbook", "name", pre+"_runbook"),
 					resource.TestCheckResourceAttr("shoreline_runbook."+pre+"_runbook", "cells", expectedRunbookCells()),
 					resource.TestCheckResourceAttr("shoreline_runbook."+pre+"_runbook", "params", expectedRunbookParams()),
-					// until we fix the external_params diff on second update (because there is no external alarm linked) we can't enable this
+					// TODO: until we fix the external_params diff on second update (because there is no external alarm linked) we can't enable this
 					// resource.TestCheckResourceAttr("shoreline_runbook."+pre+"_runbook", "external_params", expectedRunbookExternalParams()),
 					resource.TestCheckResourceAttr("shoreline_runbook."+pre+"_runbook", "description", "A sample runbook."),
 					resource.TestCheckResourceAttr("shoreline_runbook."+pre+"_runbook", "timeout_ms", "5000"),
@@ -1076,7 +1076,7 @@ func getRunbookData() string {
 }
 
 func expectedRunbookData() string {
-	return "{\"cells\":[{\"content\":\"CREATE\",\"enabled\":true,\"name\":\"unnamed\",\"type\":\"MARKDOWN\"},{\"content\":\"action success = `echo SUCCESS`\",\"enabled\":true,\"name\":\"unnamed\",\"type\":\"OP_LANG\"},{\"content\":\"enable success\",\"enabled\":true,\"name\":\"unnamed\",\"type\":\"OP_LANG\"},{\"content\":\"success\",\"enabled\":false,\"name\":\"unnamed\",\"type\":\"OP_LANG\"},{\"content\":\"CLEANUP\",\"enabled\":true,\"name\":\"unnamed\",\"type\":\"MARKDOWN\"},{\"content\":\"delete success\",\"enabled\":true,\"name\":\"unnamed\",\"type\":\"OP_LANG\"}],\"external_params\":[],\"interactive_state\":{\"param_1\":\"\\u003cdefault_value\\u003e\",\"param_2\":\"\\u003cdefault_value\\u003e\",\"param_3\":\"\\u003cdefault_value\\u003e\",\"param_4\":\"\"},\"params\":[{\"export\":false,\"name\":\"param_1\",\"required\":true,\"value\":\"\\u003cdefault_value\\u003e\"},{\"export\":true,\"name\":\"param_2\",\"required\":false,\"value\":\"\\u003cdefault_value\\u003e\"},{\"export\":true,\"name\":\"param_3\",\"required\":true,\"value\":\"\\u003cdefault_value\\u003e\"},{\"export\":false,\"name\":\"param_4\",\"required\":false,\"value\":\"\"}],\"secret_aliases\":[]}"
+	return "{\"cells\":[{\"content\":\"CREATE\",\"enabled\":true,\"name\":\"unnamed\",\"type\":\"MARKDOWN\"},{\"content\":\"action success = `echo SUCCESS`\",\"enabled\":true,\"name\":\"unnamed\",\"type\":\"OP_LANG\"},{\"content\":\"enable success\",\"enabled\":true,\"name\":\"unnamed\",\"type\":\"OP_LANG\"},{\"content\":\"success\",\"enabled\":false,\"name\":\"unnamed\",\"type\":\"OP_LANG\"},{\"content\":\"CLEANUP\",\"enabled\":true,\"name\":\"unnamed\",\"type\":\"MARKDOWN\"},{\"content\":\"delete success\",\"enabled\":true,\"name\":\"unnamed\",\"type\":\"OP_LANG\"}],\"external_params\":[],\"interactive_state\":{\"param_1\":\"default_value\",\"param_2\":\"default_value\",\"param_3\":\"default_value\",\"param_4\":\"\"},\"params\":[{\"export\":false,\"name\":\"param_1\",\"required\":true,\"value\":\"default_value\"},{\"export\":true,\"name\":\"param_2\",\"required\":false,\"value\":\"default_value\"},{\"export\":true,\"name\":\"param_3\",\"required\":true,\"value\":\"default_value\"},{\"export\":false,\"name\":\"param_4\",\"required\":false,\"value\":\"\"}],\"secret_aliases\":[]}"
 }
 
 func getAccResourceRunbook(prefix string, extraType string) string {
