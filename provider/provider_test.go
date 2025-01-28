@@ -84,7 +84,7 @@ func TestAccResourceAction(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getProviderConfigString() + getAccResourceAction(pre, false),
+				Config: getProviderConfigString() + buildMockAccResourceAction(pre, false),
 				Check: resource.ComposeTestCheckFunc(
 					//resource.TestMatchResourceAttr( "shoreline_action.ls_action", "name", regexp.MustCompile("^ba")),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "name", pre+"_ls_action"),
@@ -100,7 +100,7 @@ func TestAccResourceAction(t *testing.T) {
 				),
 			},
 			{
-				Config: getProviderConfigString() + getAccResourceAction(pre, true),
+				Config: getProviderConfigString() + buildMockAccResourceAction(pre, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "name", pre+"_ls_action"),
 					resource.TestCheckResourceAttr("shoreline_action."+pre+"_ls_action", "command", "`ls ${dir}; export FOO='bar'`"),
@@ -141,7 +141,7 @@ func TestAccResourceAction(t *testing.T) {
 	//})
 }
 
-func getAccResourceAction(prefix string, full bool) string {
+func buildMockAccResourceAction(prefix string, full bool) string {
 	extra := `
 			resource_query = "host"
 			timeout = 20
@@ -197,7 +197,7 @@ func TestAccResourceAlarm(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getProviderConfigString() + getAccResourceAlarm(pre, false),
+				Config: getProviderConfigString() + buildMockAccResourceAlarm(pre, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "name", pre+"_cpu_alarm"),
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "fire_query", "( cpu_usage > 0 | sum ( 5 ) ) >= 2"),
@@ -210,7 +210,7 @@ func TestAccResourceAlarm(t *testing.T) {
 				),
 			},
 			{
-				Config: getProviderConfigString() + getAccResourceAlarm(pre, true),
+				Config: getProviderConfigString() + buildMockAccResourceAlarm(pre, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "name", pre+"_cpu_alarm"),
 					resource.TestCheckResourceAttr("shoreline_alarm."+pre+"_cpu_alarm", "fire_query", "( cpu_usage > 0 | sum ( 5 ) ) >= 2"),
@@ -242,7 +242,7 @@ func TestAccResourceAlarm(t *testing.T) {
 	})
 }
 
-func getAccResourceAlarm(prefix string, full bool) string {
+func buildMockAccResourceAlarm(prefix string, full bool) string {
 	extra := `
 			fire_short_template     = "fired"
 			fire_long_template      = "fired..."
@@ -287,14 +287,14 @@ func TestAccResourceTimeTrigger(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getProviderConfigString() + getAccResourceTimeTrigger(pre, false),
+				Config: getProviderConfigString() + buildMockAccResourceTimeTrigger(pre, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_time_trigger."+pre+"_time_trigger", "name", pre+"_time_trigger"),
 					resource.TestCheckResourceAttr("shoreline_time_trigger."+pre+"_time_trigger", "fire_query", "every 5m"),
 				),
 			},
 			{
-				Config: getProviderConfigString() + getAccResourceTimeTrigger(pre, true),
+				Config: getProviderConfigString() + buildMockAccResourceTimeTrigger(pre, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_time_trigger."+pre+"_time_trigger", "name", pre+"_time_trigger"),
 					resource.TestCheckResourceAttr("shoreline_time_trigger."+pre+"_time_trigger", "fire_query", "every 5m"),
@@ -313,7 +313,7 @@ func TestAccResourceTimeTrigger(t *testing.T) {
 	})
 }
 
-func getAccResourceTimeTrigger(prefix string, full bool) string {
+func buildMockAccResourceTimeTrigger(prefix string, full bool) string {
 	extra := `
 			start_date = "2024-02-29T08:00:00"
 			end_date   = "2100-02-28T08:00:00"
@@ -343,7 +343,7 @@ func TestAccResourceBot(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getProviderConfigString() + getAccResourceAction(pre, false) + getAccResourceAlarm(pre, false) + getAccResourceBot(pre),
+				Config: getProviderConfigString() + buildMockAccResourceAction(pre, false) + buildMockAccResourceAlarm(pre, false) + buildMockAccResourceBot(pre),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_bot."+pre+"_cpu_bot", "name", pre+"_cpu_bot"),
 					resource.TestCheckResourceAttr("shoreline_bot."+pre+"_cpu_bot", "command", "if "+pre+"_cpu_alarm then "+pre+"_ls_action(dir=\"/tmp\") fi"),
@@ -362,7 +362,7 @@ func TestAccResourceBot(t *testing.T) {
 	})
 }
 
-func getAccResourceBot(prefix string) string {
+func buildMockAccResourceBot(prefix string) string {
 	return `
 		resource "shoreline_bot" "` + prefix + `_cpu_bot" {
 			name        = "` + prefix + `_cpu_bot"
@@ -386,7 +386,7 @@ func TestAccResourceMetric(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getProviderConfigString() + getAccResourceMetric(pre),
+				Config: getProviderConfigString() + buildMockAccResourceMetric(pre),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "name", pre+"_cpu_plus_one"),
 					resource.TestCheckResourceAttr("shoreline_metric."+pre+"_cpu_plus_one", "value", "cpu_usage + 2"),
@@ -405,7 +405,7 @@ func TestAccResourceMetric(t *testing.T) {
 	})
 }
 
-func getAccResourceMetric(prefix string) string {
+func buildMockAccResourceMetric(prefix string) string {
 	return `
 		resource "shoreline_metric" "` + prefix + `_cpu_plus_one" {
 			name = "` + prefix + `_cpu_plus_one"
@@ -429,7 +429,7 @@ func TestAccResourceResource(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getProviderConfigString() + getAccResourceResource(pre),
+				Config: getProviderConfigString() + buildMockAccResourceResource(pre),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "name", pre+"_books"),
 					resource.TestCheckResourceAttr("shoreline_resource."+pre+"_books", "description", "Pods with books app."),
@@ -446,7 +446,7 @@ func TestAccResourceResource(t *testing.T) {
 	})
 }
 
-func getAccResourceResource(prefix string) string {
+func buildMockAccResourceResource(prefix string) string {
 	return `
 		resource "shoreline_resource" "` + prefix + `_books" {
 			name = "` + prefix + `_books"
@@ -470,7 +470,7 @@ func TestAccResourceCircuitBreaker(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getProviderConfigString() + getAccResourceAction(pre, false) + getAccResourceCircuitBreaker(pre),
+				Config: getProviderConfigString() + buildMockAccResourceAction(pre, false) + buildMockAccResourceCircuitBreaker(pre),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(fullName, "name", name),
 					resource.TestCheckResourceAttr(fullName, "command", "hosts | id=[1,2] | "+pre+"_ls_action"),
@@ -490,7 +490,7 @@ func TestAccResourceCircuitBreaker(t *testing.T) {
 	})
 }
 
-func getAccResourceCircuitBreaker(prefix string) string {
+func buildMockAccResourceCircuitBreaker(prefix string) string {
 	name := prefix + "_circuit_breaker"
 	return `
 		resource "shoreline_circuit_breaker" "` + name + `" {
@@ -517,7 +517,7 @@ func TestAccResourceFile(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getProviderConfigString() + getAccResourceFile(pre),
+				Config: getProviderConfigString() + buildMockAccResourceFile(pre),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "name", pre+"_ex_file"),
 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file", "destination_path", "/tmp/opcp_example.sh"),
@@ -544,7 +544,7 @@ func TestAccResourceFile(t *testing.T) {
 	})
 }
 
-func getAccResourceFile(prefix string) string {
+func buildMockAccResourceFile(prefix string) string {
 	return `
 		resource "shoreline_file" "` + prefix + `_ex_file" {
 			name = "` + prefix + `_ex_file"
@@ -569,7 +569,7 @@ func TestAccResourceFileContent(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getProviderConfigString() + getAccResourceFileContent(pre),
+				Config: getProviderConfigString() + buildMockAccResourceFileContent(pre),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file_inline", "name", pre+"_ex_file_inline"),
 					resource.TestCheckResourceAttr("shoreline_file."+pre+"_ex_file_inline", "destination_path", "/tmp/opcp_example_inline.sh"),
@@ -596,7 +596,7 @@ func TestAccResourceFileContent(t *testing.T) {
 	})
 }
 
-func getAccResourceFileContent(prefix string) string {
+func buildMockAccResourceFileContent(prefix string) string {
 	return `
 		resource "shoreline_file" "` + prefix + `_ex_file_inline" {
 			name = "` + prefix + `_ex_file_inline"
@@ -622,14 +622,14 @@ func TestAccResourcePrincipal(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getProviderConfigString() + getAccResourcePrincipal(pre, false),
+				Config: getProviderConfigString() + buildMockAccResourcePrincipal(pre, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_principal."+pre+"_principal", "name", pre+"_principal"),
 					resource.TestCheckResourceAttr("shoreline_principal."+pre+"_principal", "identity", "group_identity"),
 				),
 			},
 			{
-				Config: getProviderConfigString() + getAccResourcePrincipal(pre, true),
+				Config: getProviderConfigString() + buildMockAccResourcePrincipal(pre, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_principal."+pre+"_principal", "name", pre+"_principal"),
 					resource.TestCheckResourceAttr("shoreline_principal."+pre+"_principal", "identity", "group_identity"),
@@ -654,7 +654,7 @@ func TestAccResourcePrincipal(t *testing.T) {
 	})
 }
 
-func getAccResourcePrincipal(prefix string, full bool) string {
+func buildMockAccResourcePrincipal(prefix string, full bool) string {
 	extra := `
 			idp_name              = "azure"
 			action_limit          = 100
@@ -687,7 +687,7 @@ func TestAccResourceSystemSettings(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getProviderConfigString() + getAccResourceSystemSettings(pre),
+				Config: getProviderConfigString() + buildMockAccResourceSystemSettings(pre),
 				Check: resource.ComposeTestCheckFunc(
 					// resource.TestCheckResourceAttr("shoreline_system_settings.system_settings", "name", "system_settings"),
 					// Access Control
@@ -731,7 +731,7 @@ func TestAccResourceSystemSettings(t *testing.T) {
 	})
 }
 
-func getAccResourceSystemSettings(prefix string) string {
+func buildMockAccResourceSystemSettings(prefix string) string {
 	return `
 		resource "shoreline_system_settings" "system_settings" {
 			name = "system_settings"
@@ -777,17 +777,17 @@ func TestAccResourceReportTemplate(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getProviderConfigString() + getAccResourceReportTemplate(pre, false),
+				Config: getProviderConfigString() + buildMockAccResourceReportTemplate(pre, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_report_template."+pre+"_report_template", "name", pre+"_report_template"),
-					resource.TestCheckResourceAttr("shoreline_report_template."+pre+"_report_template", "blocks", getReportTemplateBlocks()),
+					resource.TestCheckResourceAttr("shoreline_report_template."+pre+"_report_template", "blocks", buildMockReportTemplateBlocks()),
 				),
 			},
 			{
-				Config: getProviderConfigString() + getAccResourceReportTemplate(pre, true),
+				Config: getProviderConfigString() + buildMockAccResourceReportTemplate(pre, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_report_template."+pre+"_report_template", "name", pre+"_report_template"),
-					resource.TestCheckResourceAttr("shoreline_report_template."+pre+"_report_template", "blocks", getReportTemplateBlocks()),
+					resource.TestCheckResourceAttr("shoreline_report_template."+pre+"_report_template", "blocks", buildMockReportTemplateBlocks()),
 					resource.TestCheckResourceAttr("shoreline_report_template."+pre+"_report_template", "links", "\"[{\\\"label\\\":\\\"linked_report_template\\\",\\\"report_template_name\\\":\\\"linked_report_template\\\"}]\""),
 				),
 			},
@@ -805,20 +805,20 @@ func wrapJsonEncode(data string) string {
 	return "jsonencode(" + data + ")"
 }
 
-func getReportTemplateBlocks() string {
+func buildMockReportTemplateBlocks() string {
 	return `[{"breakdown_by_tag":"tag_1","breakdown_tags_values":[{"color":"#AAAAAA","label":"label_0","values":["passed","skipped"]}],"group_by_tag":"tag_0","group_by_tag_order":{"type":"DEFAULT","values":[]},"include_other_breakdown_tag_values":true,"include_resources_without_group_tag":false,"other_tags_to_export":["other_tag_1","other_tag_2"],"resource_query":"host","resources_breakdown":[{"breakdown_values":[{"count":1,"value":"value"}],"group_by_value":"tag_0"}],"title":"Block Name","view_mode":"PERCENTAGE"}]`
 }
 
-func getReportTemplateLinks() string {
+func buildMockReportTemplateLinks() string {
 	return `[{"label":"linked_report_template","report_template_name":"linked_report_template"}]`
 }
 
-func getAccResourceReportTemplate(prefix string, full bool) string {
+func buildMockAccResourceReportTemplate(prefix string, full bool) string {
 
 	report_name := prefix + "_report_template"
 
 	extra := `
-			links = ` + wrapJsonEncode(getReportTemplateLinks()) + `
+			links = ` + wrapJsonEncode(buildMockReportTemplateLinks()) + `
 			  depends_on = [
 					shoreline_report_template.` + report_name + `
 				]
@@ -838,7 +838,7 @@ func getAccResourceReportTemplate(prefix string, full bool) string {
 	return `
 		resource "shoreline_report_template" "` + prefix + `_report_template" {
 			name = "` + report_name + `"
-			blocks = ` + wrapJsonEncode(getReportTemplateBlocks()) + extra
+			blocks = ` + wrapJsonEncode(buildMockReportTemplateBlocks()) + extra
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -853,20 +853,20 @@ func TestAccResourceDashboard(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getProviderConfigString() + getAccResourceDashboard(pre, false),
+				Config: getProviderConfigString() + buildMockAccResourceDashboard(pre, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "name", pre+"_dashboard"),
 					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "dashboard_type", "TAGS_SEQUENCE"),
 				),
 			},
 			{
-				Config: getProviderConfigString() + getAccResourceDashboard(pre, true),
+				Config: getProviderConfigString() + buildMockAccResourceDashboard(pre, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "name", pre+"_dashboard"),
 					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "dashboard_type", "TAGS_SEQUENCE"),
 					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "resource_query", "host"),
-					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "groups", getDashboardGroups()),
-					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "values", getDashboardValues()),
+					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "groups", buildMockDashboardGroups()),
+					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "values", buildMockDashboardValues()),
 					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "other_tags.#", "2"),
 					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "other_tags.0", "other_tag1"),
 					resource.TestCheckResourceAttr("shoreline_dashboard."+pre+"_dashboard", "other_tags.1", "other_tag2"),
@@ -885,19 +885,19 @@ func TestAccResourceDashboard(t *testing.T) {
 	})
 }
 
-func getDashboardGroups() string {
+func buildMockDashboardGroups() string {
 	return `[{"name":"g1","tags":["cloud_provider","release_tag"]}]`
 }
 
-func getDashboardValues() string {
+func buildMockDashboardValues() string {
 	return `[{"color":"#78909c","values":["aws"]},{"color":"#ffa726","values":["release-X"]}]`
 }
 
-func getAccResourceDashboard(prefix string, full bool) string {
+func buildMockAccResourceDashboard(prefix string, full bool) string {
 	extra := `
   			resource_query = "host"
-			groups = ` + wrapJsonEncode(getDashboardGroups()) + `
-			values = ` + wrapJsonEncode(getDashboardValues()) + `
+			groups = ` + wrapJsonEncode(buildMockDashboardGroups()) + `
+			values = ` + wrapJsonEncode(buildMockDashboardValues()) + `
 			other_tags  = ["other_tag1", "other_tag2"]
 			identifiers = ["identifier1", "identifier2"]
 `
@@ -923,25 +923,25 @@ func TestAccResourceRunbook(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: getProviderConfigString() + getAccResourceRunbook(pre, "data"),
+				Config: getProviderConfigString() + buildMockAccResourceRunbook(pre, "data"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_runbook."+pre+"_runbook", "name", pre+"_runbook"),
-					resource.TestCheckResourceAttr("shoreline_runbook."+pre+"_runbook", "data", expectedRunbookData()),
+					resource.TestCheckResourceAttr("shoreline_runbook."+pre+"_runbook", "data", buildExpectedRunbookData()),
 				),
 			},
 			{
-				Config: getProviderConfigString() + getAccResourceRunbook(pre, "minimal"),
+				Config: getProviderConfigString() + buildMockAccResourceRunbook(pre, "minimal"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_runbook."+pre+"_runbook", "name", pre+"_runbook"),
 					resource.TestCheckResourceAttr("shoreline_runbook."+pre+"_runbook", "cells", "[]"),
 				),
 			},
 			{
-				Config: getProviderConfigString() + getAccResourceRunbook(pre, "full"),
+				Config: getProviderConfigString() + buildMockAccResourceRunbook(pre, "full"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("shoreline_runbook."+pre+"_runbook", "name", pre+"_runbook"),
-					resource.TestCheckResourceAttr("shoreline_runbook."+pre+"_runbook", "cells", expectedRunbookCells()),
-					resource.TestCheckResourceAttr("shoreline_runbook."+pre+"_runbook", "params", expectedRunbookParams()),
+					resource.TestCheckResourceAttr("shoreline_runbook."+pre+"_runbook", "cells", buildExpectedRunbookCells()),
+					resource.TestCheckResourceAttr("shoreline_runbook."+pre+"_runbook", "params", buildExpectedRunbookParams()),
 					// TODO: until we fix the external_params diff on second update (because there is no external alarm linked) we can't enable this
 					// resource.TestCheckResourceAttr("shoreline_runbook."+pre+"_runbook", "external_params", expectedRunbookExternalParams()),
 					resource.TestCheckResourceAttr("shoreline_runbook."+pre+"_runbook", "description", "A sample runbook."),
@@ -980,31 +980,31 @@ func TestAccResourceRunbook(t *testing.T) {
 	})
 }
 
-func getRunbookCells() string {
+func buildMockRunbookCells() string {
 	return "[{\"md\":\"CREATE\"},{\"op\":\"action success = `echo SUCCESS`\"},{\"op\":\"enable success\"},{\"op\":\"success\",\"enabled\":false},{\"md\":\"CLEANUP\"},{\"op\":\"delete success\"}]"
 }
 
-func expectedRunbookCells() string {
+func buildExpectedRunbookCells() string {
 	return "[\n  {\n    \"enabled\": true,\n    \"md\": \"CREATE\",\n    \"name\": \"unnamed\"\n  },\n  {\n    \"enabled\": true,\n    \"name\": \"unnamed\",\n    \"op\": \"action success = `echo SUCCESS`\"\n  },\n  {\n    \"enabled\": true,\n    \"name\": \"unnamed\",\n    \"op\": \"enable success\"\n  },\n  {\n    \"enabled\": false,\n    \"name\": \"unnamed\",\n    \"op\": \"success\"\n  },\n  {\n    \"enabled\": true,\n    \"md\": \"CLEANUP\",\n    \"name\": \"unnamed\"\n  },\n  {\n    \"enabled\": true,\n    \"name\": \"unnamed\",\n    \"op\": \"delete success\"\n  }\n]"
 }
 
-func getRunbookParams() string {
+func buildMockRunbookParams() string {
 	return `[{"name":"param_1","value":"default_value"},{"name":"param_2","value":"default_value","required":false,"export":true},{"name":"param_3","value":"default_value","export":true},{"name":"param_4","required":false}]`
 }
 
-func expectedRunbookParams() string {
+func buildExpectedRunbookParams() string {
 	return "[{\"value\":\"default_value\",\"required\":true,\"name\":\"param_1\",\"export\":false},{\"value\":\"default_value\",\"required\":false,\"name\":\"param_2\",\"export\":true},{\"value\":\"default_value\",\"required\":true,\"name\":\"param_3\",\"export\":true},{\"value\":\"\",\"required\":false,\"name\":\"param_4\",\"export\":false}]"
 }
 
-func getRunbookExternalParams() string {
+func buildMockRunbookExternalParams() string {
 	return `[{"name":"external_param_1","source":"alertmanager","json_path":"$.<path>","export":true,"value":"default_value"},{"name":"external_param_2","source":"alertmanager","json_path":"$.<path>","value":"default_value"},{"name":"external_param_3","source":"alertmanager","json_path":"$.<path>","export":true},{"name":"external_param_4","source":"alertmanager","json_path":"$.<path>"}]`
 }
 
-func expectedRunbookExternalParams() string {
+func buildExpectedRunbookExternalParams() string {
 	return "[{\"value\":\"default_value\",\"source\":\"alertmanager\",\"name\":\"external_param_1\",\"json_path\":\"$.<path>\"},{\"value\":\"default_value\",\"source\":\"alertmanager\",\"name\":\"external_param_2\",\"json_path\":\"$.<path>\"},{\"value\":\"\",\"source\":\"alertmanager\",\"name\":\"external_param_3\",\"json_path\":\"$.<path>\"},{\"value\":\"\",\"source\":\"alertmanager\",\"name\":\"external_param_4\",\"json_path\":\"$.<path>\"}]"
 }
 
-func getRunbookData() string {
+func buildMockRunbookData() string {
 	return `
 		{
 			"cells": [
@@ -1075,11 +1075,11 @@ func getRunbookData() string {
 	`
 }
 
-func expectedRunbookData() string {
+func buildExpectedRunbookData() string {
 	return "{\"cells\":[{\"content\":\"CREATE\",\"enabled\":true,\"name\":\"unnamed\",\"type\":\"MARKDOWN\"},{\"content\":\"action success = `echo SUCCESS`\",\"enabled\":true,\"name\":\"unnamed\",\"type\":\"OP_LANG\"},{\"content\":\"enable success\",\"enabled\":true,\"name\":\"unnamed\",\"type\":\"OP_LANG\"},{\"content\":\"success\",\"enabled\":false,\"name\":\"unnamed\",\"type\":\"OP_LANG\"},{\"content\":\"CLEANUP\",\"enabled\":true,\"name\":\"unnamed\",\"type\":\"MARKDOWN\"},{\"content\":\"delete success\",\"enabled\":true,\"name\":\"unnamed\",\"type\":\"OP_LANG\"}],\"external_params\":[],\"interactive_state\":{\"param_1\":\"default_value\",\"param_2\":\"default_value\",\"param_3\":\"default_value\",\"param_4\":\"\"},\"params\":[{\"export\":false,\"name\":\"param_1\",\"required\":true,\"value\":\"default_value\"},{\"export\":true,\"name\":\"param_2\",\"required\":false,\"value\":\"default_value\"},{\"export\":true,\"name\":\"param_3\",\"required\":true,\"value\":\"default_value\"},{\"export\":false,\"name\":\"param_4\",\"required\":false,\"value\":\"\"}],\"secret_aliases\":[]}"
 }
 
-func getAccResourceRunbook(prefix string, extraType string) string {
+func buildMockAccResourceRunbook(prefix string, extraType string) string {
 
 	extra := ""
 	switch extraType {
@@ -1087,8 +1087,8 @@ func getAccResourceRunbook(prefix string, extraType string) string {
 		extra = "cells = jsonencode([])"
 	case "full":
 		extra = `
-			cells = ` + wrapJsonEncode(getRunbookCells()) + `
-			params = ` + wrapJsonEncode(getRunbookParams()) + `
+			cells = ` + wrapJsonEncode(buildMockRunbookCells()) + `
+			params = ` + wrapJsonEncode(buildMockRunbookParams()) + `
 			description                           = "A sample runbook."
 			timeout_ms                            = 5000
 			allowed_entities                      = ["user_1", "user_2"]
@@ -1106,7 +1106,7 @@ func getAccResourceRunbook(prefix string, extraType string) string {
 			enabled                               = true
 		`
 	case "data":
-		extra = "data = " + wrapJsonEncode(getRunbookData())
+		extra = "data = " + wrapJsonEncode(buildMockRunbookData())
 	}
 
 	return `
