@@ -26,22 +26,6 @@ import (
 // # go:embed provider_conf.json
 // # var ObjectConfigJsonStr
 
-func CanonicalizeUrl(url string) (urlOut string, err error) {
-	urlRegexStr := `^(http(s)?://)?(?P<backend_node>([^\\.]*)\.)?(?P<customer>[^\\.]*)\.(?P<region>[^\\.]*)\.ap[ip]\.shoreline-(?P<cluster>[^\\.]*)\.io(/)?$`
-	urlBaseStr := "https://${backend_node}${customer}.${region}.api.shoreline-${cluster}.io"
-	urlRegex := regexp.MustCompile(urlRegexStr)
-	match := urlRegex.FindStringSubmatch(url)
-	if len(match) < 4 {
-		return "", fmt.Errorf("URL -- %s -- couldn't be mapped to canonical form -- %s -- (%d)\n", url, CanonicalUrl, len(match))
-	}
-	for i, name := range urlRegex.SubexpNames() {
-		if i > 0 && i <= len(match) {
-			urlBaseStr = strings.Replace(urlBaseStr, "${"+name+"}", match[i], 1)
-		}
-	}
-	return urlBaseStr, nil
-}
-
 func StringToJsonArray(data string) ([]interface{}, error) {
 	//jsObj := map[string]interface{}{}
 	jsObj := []interface{}{}
@@ -536,12 +520,12 @@ func New(version string) func() *schema.Provider {
 					Required: true,
 					ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
 						if !ValidateApiUrl(val.(string)) {
-							errs = append(errs, fmt.Errorf("%q must be of the form %s,\n but got: %s", key, CanonicalUrl, val.(string)))
+							errs = append(errs, fmt.Errorf("%q must be a valid URL,\n but got: %s", key, val.(string)))
 						}
 						return
 					},
 					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_URL", nil),
-					Description: "Customer-specific URL for the Shoreline API server. It should be of the form ```" + CanonicalUrl + "``` .",
+					Description: "Customer-specific URL for the Shoreline API server.",
 				},
 				"token": {
 					Type:        schema.TypeString,
@@ -589,26 +573,15 @@ func configure(version string, p *schema.Provider) func(ctx context.Context, d *
 
 		var diags diag.Diagnostics = nil
 
-		canonUrl, err := CanonicalizeUrl(AuthUrl)
-		if err != nil {
-			//return nil, diag.Errorf("Couldn't map URL to canonical form.\n" + err.Error())
-			diags = diag.FromErr(err)
-			diags[0].Severity = diag.Warning
-			canonUrl = AuthUrl
-			appendActionLog(fmt.Sprintf("Non-standard url: %s -- to -- %s\n", AuthUrl, canonUrl))
-		} else {
-			appendActionLog(fmt.Sprintf("Mapped url: %s -- to -- %s\n", AuthUrl, canonUrl))
-		}
-
 		if hasToken {
-			SetAuth(&GlobalOpts, canonUrl, token.(string))
+			SetAuth(&GlobalOpts, AuthUrl, token.(string))
 		} else {
-			GlobalOpts.Url = canonUrl
+			GlobalOpts.Url = AuthUrl
 			if !LoadAuthConfig(&GlobalOpts) {
 				return nil, diag.Errorf("Failed to load auth credentials file.\n" + GetManualAuthMessage(&GlobalOpts))
 			}
-			if !selectAuth(&GlobalOpts, canonUrl) {
-				return nil, diag.Errorf("Failed to load auth credentials for %s\n"+GetManualAuthMessage(&GlobalOpts), canonUrl)
+			if !selectAuth(&GlobalOpts, AuthUrl) {
+				return nil, diag.Errorf("Failed to load auth credentials for %s\n"+GetManualAuthMessage(&GlobalOpts), AuthUrl)
 			}
 		}
 
