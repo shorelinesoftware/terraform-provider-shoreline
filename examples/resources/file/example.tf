@@ -1,11 +1,11 @@
 
 resource "shoreline_file" "full_path_file" {
   name             = "full_path_file"
-  input_file       = "${path.module}/data/opcp_example.sh"
+  input_file       = "${path.module}/../../../data/opcp_example.sh"
   destination_path = "/tmp/opcp_example.sh"
   resource_query   = "host"
   description      = "op_copy example script."
-  md5              = filemd5("${path.module}/data/opcp_example.sh")
+  md5              = filemd5("${path.module}/../../../data/opcp_example.sh")
   mode             = "776"
   owner            = "owner"
   enabled          = true
@@ -27,7 +27,7 @@ resource "shoreline_file" "full_inline_file" {
 
 resource "shoreline_file" "minimal_path_file" {
   name             = "minimal_path_file"
-  input_file       = "${path.module}/data/opcp_example.sh"
+  input_file       = "${path.module}/../../../data/opcp_example.sh"
   destination_path = "/tmp/minimal_path_file.txt"
   resource_query   = "host"
 }
