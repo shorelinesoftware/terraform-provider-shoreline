@@ -87,7 +87,7 @@ resource "shoreline_bot" "cpu_bot" {
 
 ### Required
 
-- `url` (String) Customer-specific URL for the Shoreline API server.
+- `url` (String) Customer-specific URL for the Shoreline API server. It should be of the form ```https://(<backend_node>.)?<customer>.<region>.api.shoreline-<cluster>.io``` .
 
 ### Optional
 
