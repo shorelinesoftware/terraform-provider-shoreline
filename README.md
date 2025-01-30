@@ -6,10 +6,10 @@ This repository contains the terraform provider implementation and docs for the 
 
 Documentation located in the `/docs` directory is compiled and generated from a handful of disparate sources:
 
-- The [Terraform docs plugin](https://github.com/hashicorp/terraform-plugin-docs) uses local `templates/**/*.md.tmpl` files to compile Terraform resource files.
+- The Terraform docs plugin uses local `templates/**/*.md.tmpl` files to compile Terraform resource files.
 - `content/**/*.md` files are the base templates used by the `tfdocsplugin`, but they optionally use terminology and/or relative path URLs based on the docs.shoreline.io content system.
 
-  The `content/terms.json` file defines a series of terminology patterns that map to Docs URLs. These same terminology paths are usable within `content/**/*.md` files using the same `/t/<term>` URL syntax. See [Docs: Terminology Links](https://docs.shoreline.io/internal/writing#terminology-links) for more details.
+  The `content/terms.json` file defines a series of terminology patterns that map to Docs URLs. These same terminology paths are usable within `content/**/*.md` files using the same `/t/<term>` URL syntax.
 
   For example, consider the following template Markdown:
 
@@ -22,9 +22,9 @@ Documentation located in the `/docs` directory is compiled and generated from a 
   The final Markdown is converted to the following, automatically mapping terminology links to the appropriate external docs.shoreline.io Article link.
 
   ```md
-  Actions execute shell commands on associated [Resources](https://docs.shoreline.io/platform/resources). Whenever an [Alarm](https://docs.shoreline.io/alarms) fires the associated [Bot](https://docs.shoreline.io/bots) triggers the corresponding [Action](https://docs.shoreline.io/actions), closing the basic auto-remediation loop of Shoreline.
+  Actions execute shell commands on associated Resources. Whenever an Alarm fires the associated Bot triggers the corresponding Action, closing the basic auto-remediation loop of Shoreline.
 
-  - [name](https://docs.shoreline.io/actions/properties#name) - The name of the Action.
+  - name - The name of the Action.
   ```
 
 ### Build the Documentation

@@ -6,7 +6,7 @@ description: |-
 
 # shoreline_version (Data Source)
 
-The [shoreline_version](https://docs.shoreline.io/op/packs#shoreline_version) [data source](https://www.terraform.io/language/data-sources) uses Shoreline Op's [backend_version](https://docs.shoreline.io/op/commands/backend_version) functionality to get the current Shoreline version.
+The shoreline_version data source uses Shoreline Op's backend_version functionality to get the current Shoreline version.
 
 ## Usage
 
@@ -19,7 +19,7 @@ The [shoreline_version](https://docs.shoreline.io/op/packs#shoreline_version) [d
 
    -> You can set the `shoreline_version` data name to anything you'd like, but `version` is the recommended best practice.
 
-2. Define a `backend_version` [output](https://www.terraform.io/language/values/outputs) block.
+2. Define a `backend_version` output block.
 
    ```hcl
    output "backend_version" {
@@ -27,7 +27,7 @@ The [shoreline_version](https://docs.shoreline.io/op/packs#shoreline_version) [d
    }
    ```
 
-   Set the `value` to the previously-defined [data source](https://www.terraform.io/language/data-sources) name.  The Shoreline backend automatically retrieves version from the `shoreline_version` data source block and passes the value to the `backend_version` output value.
+   Set the `value` to the previously-defined data source name.  The Shoreline backend automatically retrieves version from the `shoreline_version` data source block and passes the value to the `backend_version` output value.
 
    Executing `terraform apply` will now include a `backend_version` block output:
    
@@ -49,9 +49,9 @@ The [shoreline_version](https://docs.shoreline.io/op/packs#shoreline_version) [d
    ```
 ### Conditionally creating objects
 
-You can use the [shoreline_version](https://docs.shoreline.io/op/packs#shoreline_version) [data source](https://www.terraform.io/language/data-sources) definition to conditionally create objects.
+You can use the shoreline_version data source definition to conditionally create objects.
 
-For example, here we're only creating the `example_notebook` [Notebook](https://docs.shoreline.io/notebooks) object if the current major version is `5` or greater:
+For example, here we're only creating the `example_notebook` Notebook object if the current major version is `5` or greater:
 
 ```hcl
 data "shoreline_version" "version" {

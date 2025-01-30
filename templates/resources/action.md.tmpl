@@ -6,37 +6,37 @@ description: |-
 
 # shoreline_action (Resource)
 
-Actions execute shell commands on associated [Resources](https://docs.shoreline.io/platform/resources). Whenever an [Alarm](https://docs.shoreline.io/alarms) fires the associated [Bot](https://docs.shoreline.io/bots) triggers the corresponding [Action](https://docs.shoreline.io/actions), closing the basic auto-remediation loop of
+Actions execute shell commands on associated Resources. Whenever an Alarm fires the associated Bot triggers the corresponding Action, closing the basic auto-remediation loop of
 Shoreline.
 
 ## Required Properties
 
 Each Action has many properties that determine its behavior. The required properties are:
 
-- [name](https://docs.shoreline.io/actions/properties#name) - The name of the Action.
-- [command](https://docs.shoreline.io/actions/properties#command) - The shell command executed when the Action triggers.
+- name - The name of the Action.
+- command - The shell command executed when the Action triggers.
 
--> Check out [Action Properties](https://docs.shoreline.io/actions/properties) for details on all available properties and how to use them.
+-> Check out Action Properties for details on all available properties and how to use them.
 
 ## Usage
 
-The following [Action](https://docs.shoreline.io/actions) definition creates a `cpu_threshold_action` that compares host CPU usage against a `cpu_threshold` parameter value.
+The following Action definition creates a `cpu_threshold_action` that compares host CPU usage against a `cpu_threshold` parameter value.
 
 {{tffile "examples/resources/action/cpu_threshold_action.tf"}}
 
-This Action can be executed via an [Alarm's](https://docs.shoreline.io/alarms) [clear_query](https://docs.shoreline.io/alarms/properties#clear_query)
-/ [fire_query](https://docs.shoreline.io/alarms/properties#fire_query), or directly via an [Op](https://docs.shoreline.io/op) command.
+This Action can be executed via an Alarm's clear_query
+/ fire_query, or directly via an Op command.
 
-For example, the following [Alarm](https://docs.shoreline.io/alarms) fires and clears based on the result of the previously-generated `cpu_threshold_action`:
+For example, the following Alarm fires and clears based on the result of the previously-generated `cpu_threshold_action`:
 
 {{tffile "examples/resources/alarm/cpu_threshold_alarm.tf"}}
 
-You can also define [Terraform Input Variables](https://www.terraform.io/docs/language/values/variables.html) and use them within your [Action](https://docs.shoreline.io/actions) definitions:
+You can also define Terraform Input Variables and use them within your Action definitions:
 
 {{tffile "examples/op_packs/jvm_trace/variables.tf"}}
 
 {{tffile "examples/op_packs/jvm_trace/actions.tf"}}
 
--> See the Shoreline [Actions Documentation](https://docs.shoreline.io/actions) for more info.
+-> See the Shoreline Actions Documentation for more info.
 
 {{ .SchemaMarkdown | trimspace }}

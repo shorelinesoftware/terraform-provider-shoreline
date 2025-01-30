@@ -6,7 +6,7 @@ description: |-
 
 # Importing Existing Shoreline Objects
 
-Import existing Shoreline objects into your local Terraform state using the standard [terraform import](https://www.terraform.io/docs/cli/import/index.html) command.
+Import existing Shoreline objects into your local Terraform state using the standard terraform import command.
 
 ## How to Import Existing Objects
 
@@ -18,7 +18,7 @@ Import existing Shoreline objects into your local Terraform state using the stan
     }
     ```
 
-    For example, to import an existing [Alarm](https://docs.shoreline.io/alarms) named `heap_alarm`:
+    For example, to import an existing Alarm named `heap_alarm`:
 
     ```tf
     resource "shoreline_alarm" "heap_alarm" {
@@ -26,7 +26,7 @@ Import existing Shoreline objects into your local Terraform state using the stan
     }
     ```
 
-    This resource block can be empty but it is [required](https://www.terraform.io/docs/cli/import/index.html#currently-state-only) by Terraform to correctly map your local configuration to the remote resource.
+    This resource block can be empty but it is required by Terraform to correctly map your local configuration to the remote resource.
 
 2. Execute the `terraform import` command with the appropriate `resource_type`, `resource_name`, and `shoreline_object_name`.
 
@@ -34,7 +34,7 @@ Import existing Shoreline objects into your local Terraform state using the stan
     terraform import <resource_type>.<resource_name> <shoreline_object_name>
     ```
 
-    In this case, we're importing a `shoreline_alarm` named `heap_alarm` in the local configuration.  The existing Shoreline [Alarm](https://docs.shoreline.io/alarms) object is also named `heap_alarm`.
+    In this case, we're importing a `shoreline_alarm` named `heap_alarm` in the local configuration.  The existing Shoreline Alarm object is also named `heap_alarm`.
 
     ```
     $ terraform import shoreline_alarm.heap_alarm heap_alarm
@@ -50,7 +50,7 @@ Import existing Shoreline objects into your local Terraform state using the stan
     your Terraform state and will henceforth be managed by Terraform.
     ```
 
-    The `heap_alarm` [Alarm](https://docs.shoreline.io/alarms) is now mapped to the local `shoreline_alarm.heap_alarm` configuration block and you're free to adjust it as needed.
+    The `heap_alarm` Alarm is now mapped to the local `shoreline_alarm.heap_alarm` configuration block and you're free to adjust it as needed.
 
 ## Always Pre-define the Configuration
 

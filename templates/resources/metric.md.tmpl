@@ -6,21 +6,21 @@ description: |- Shoreline metric. A periodic measurement of a system property.
 
 # shoreline_metric (Resource)
 
-Shoreline [Metrics](https://docs.shoreline.io/metrics) are time-series data obtained through tools such as [Prometheus](https://prometheus.io/)
-and the [Shoreline Metric Scraper](https://docs.shoreline.io/installation/kubernetes/metric-scraper). In addition to
-Shoreline's [standard Metrics](https://docs.shoreline.io/metrics/standard) you can define your own custom metrics using the `shoreline_metric`
+Shoreline Metrics are time-series data obtained through tools such as Prometheus
+and the Shoreline Metric Scraper. In addition to
+Shoreline's standard Metrics you can define your own custom metrics using the `shoreline_metric`
 resource.
 
 ## Required Properties
 
-A [Metric](https://docs.shoreline.io/metrics) has only a few required properties:
+A Metric has only a few required properties:
 
 - name - A unique name for the metric resource.
-- value - A valid [Op](https://docs.shoreline.io/op) statement that defines a valid [Metric query](https://docs.shoreline.io/metrics#creating-new-metrics).
+- value - A valid Op statement that defines a valid Metric query.
 
 ## Usage
 
-The following example creates a [Metric](https://docs.shoreline.io/metrics) named `avg_cpu_usage_prev_min` that gets the average CPU usage over
+The following example creates a Metric named `avg_cpu_usage_prev_min` that gets the average CPU usage over
 the last minute:
 
 ```tf
@@ -32,9 +32,9 @@ resource "shoreline_metric" "avg_cpu_usage_prev_min" {
 
 ### Advanced Usage
 
-You can also create your own [Metric queries](https://docs.shoreline.io/metrics#metric-queries) using any ingested metric known to the
-associated [Shoreline Agent](https://docs.shoreline.io/platform/agents). In the following example we're using Elasticsearch's cluster health status to
-create a custom `elasticsearch_red_status` [Metric](https://docs.shoreline.io/metrics):
+You can also create your own Metric queries using any ingested metric known to the
+associated Shoreline Agent. In the following example we're using Elasticsearch's cluster health status to
+create a custom `elasticsearch_red_status` Metric:
 
 ```tf
 resource "shoreline_metric" "elasticsearch_red_status" {
@@ -44,7 +44,7 @@ resource "shoreline_metric" "elasticsearch_red_status" {
 }
 ```
 
-The `elasticsearch_red_status` [Metric](https://docs.shoreline.io/metrics) can now be used as the basis for an [Alarm](https://docs.shoreline.io/alarms):
+The `elasticsearch_red_status` Metric can now be used as the basis for an Alarm:
 
 ```tf
 resource "shoreline_alarm" "elasticsearch_status_alarm" {
@@ -57,7 +57,7 @@ resource "shoreline_alarm" "elasticsearch_status_alarm" {
 }
 ```
 
--> See the Shoreline [Metrics](https://docs.shoreline.io/metrics) and [Metric Scraper](https://docs.shoreline.io/installation/kubernetes/metric-scraper) documentation
+-> See the Shoreline Metrics and Metric Scraper documentation
 for more info.
 
 {{ .SchemaMarkdown | trimspace }}

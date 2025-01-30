@@ -7,20 +7,20 @@ description: |-
 
 # shoreline_resource (Resource)
 
-[Resources](https://docs.shoreline.io/platform/resources) are the infrastructure objects managed by Shoreline.  A [Resources](https://docs.shoreline.io/platform/resources) refers to a specific host, pod, or container throughout the Shoreline platform. It may also refer to a more distinct entity, such as a virtual machine or a database instance.
+Resources are the infrastructure objects managed by Shoreline.  A Resources refers to a specific host, pod, or container throughout the Shoreline platform. It may also refer to a more distinct entity, such as a virtual machine or a database instance.
 
-[Resources](https://docs.shoreline.io/platform/resources) types are platform and provider agnostic. So whether it's a fleet of pods and containers in Kubernetes, stand-alone hosts, or many virtual machines, Shoreline can control those [Resourcess](https://docs.shoreline.io/platform/resources) within AWS, GCP, or Azure.
+Resources types are platform and provider agnostic. So whether it's a fleet of pods and containers in Kubernetes, stand-alone hosts, or many virtual machines, Shoreline can control those Resourcess within AWS, GCP, or Azure.
 
--> Shoreline [Resources](https://docs.shoreline.io/platform/resources) are not to be confused with [Terraform resources](https://www.terraform.io/docs/language/resources/index.html).
+-> Shoreline Resources are not to be confused with Terraform resources.
 
 ## Required Properties
 
-- name - A unique name for the [Resource](https://docs.shoreline.io/platform/resources) resource.
-- value - A valid [Op](https://docs.shoreline.io/op) statement that defines a valid [Resource query](https://docs.shoreline.io/platform/resources).
+- name - A unique name for the Resource resource.
+- value - A valid Op statement that defines a valid Resource query.
 
 ## Usage
 
-Shoreline [Resources](https://docs.shoreline.io/platform/resources) are effectively aliases for more complex [Resource queries](https://docs.shoreline.io/platform/resources).  For example, the following definition creates a custom [Resource](https://docs.shoreline.io/platform/resources) called `az_k8s` as an alias for the full query to target Kubernetes pods on Azure:
+Shoreline Resources are effectively aliases for more complex Resource queries.  For example, the following definition creates a custom Resource called `az_k8s` as an alias for the full query to target Kubernetes pods on Azure:
 
 ```tf
 resource "shoreline_resource" "az_k8s" {
@@ -30,6 +30,6 @@ resource "shoreline_resource" "az_k8s" {
 }
 ```
 
--> See the Shoreline [Resources documentation](https://docs.shoreline.io/platform/resources) for more info.
+-> See the Shoreline Resources documentation for more info.
 
 {{ .SchemaMarkdown | trimspace }}
