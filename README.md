@@ -1,6 +1,6 @@
 # terraform-provider-shoreline
 
-This repository contains the terraform provider implementation and docs for the Shoreline Software APIs.
+This repository contains the terraform provider implementation and docs for the {{ .RenderedProviderName }} APIs.
 
 ## Documentation
 
@@ -14,7 +14,7 @@ Documentation located in the `/docs` directory is compiled and generated from a 
   For example, consider the following template Markdown:
 
   ```md
-  Actions execute shell commands on associated [Resources](/t/resource). Whenever an [Alarm](/t/alarm) fires the associated [Bot](/t/bot) triggers the corresponding [Action](/t/action), closing the basic auto-remediation loop of Shoreline.
+  Actions execute shell commands on associated [Resources](/t/resource). Whenever an [Alarm](/t/alarm) fires the associated [Bot](/t/bot) triggers the corresponding [Action](/t/action), closing the basic auto-remediation loop of {{ .RenderedProviderName }}.
 
   - [name](/actions/properties#name) - The name of the Action.
   ```
@@ -22,7 +22,7 @@ Documentation located in the `/docs` directory is compiled and generated from a 
   The final Markdown is converted to the following, automatically mapping terminology links to the appropriate external docs.shoreline.io Article link.
 
   ```md
-  Actions execute shell commands on associated Resources. Whenever an Alarm fires the associated Bot triggers the corresponding Action, closing the basic auto-remediation loop of Shoreline.
+  Actions execute shell commands on associated Resources. Whenever an Alarm fires the associated Bot triggers the corresponding Action, closing the basic auto-remediation loop of {{ .RenderedProviderName }}.
 
   - name - The name of the Action.
   ```
@@ -70,7 +70,7 @@ Documentation located in the `/docs` directory is compiled and generated from a 
 
 ### Running acceptance tests
 
-Acceptance tests may be run against a local deployment of shoreline. In order for these tests to work, the provider devcontainer needs to run in the same `shoreline-net` podman network as the other podman containers related to Shoreline. This will allow the provider to have access to the ceph gateway in order to upload `shoreline_file`s resources to the local S3 deployment.
+Acceptance tests may be run against a local deployment of shoreline. In order for these tests to work, the provider devcontainer needs to run in the same `shoreline-net` podman network as the other podman containers related to {{ .RenderedProviderName }}. This will allow the provider to have access to the ceph gateway in order to upload `shoreline_file`s resources to the local S3 deployment.
 
 To do that, simply uncomment this line in `devcontainer.json`:
 ```

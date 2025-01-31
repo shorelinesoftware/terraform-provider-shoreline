@@ -1,17 +1,17 @@
 ---
-page_title: "shoreline_resource Resource - terraform-provider-shoreline"
+page_title: "{{ .ProviderShortName | trimspace }}_resource Resource - {{ .ProviderName | trimspace }}"
 subcategory: ""
 description: |-
-  Shoreline resource. A server or compute resource in the system (e.g. host, pod, container).
+  {{ .RenderedProviderName | trimspace }} resource. A server or compute resource in the system (e.g. host, pod, container).
 ---
 
-# shoreline_resource (Resource)
+# {{ .ProviderShortName | trimspace }}_resource (Resource)
 
-Resources are the infrastructure objects managed by Shoreline.  A Resources refers to a specific host, pod, or container throughout the Shoreline platform. It may also refer to a more distinct entity, such as a virtual machine or a database instance.
+Resources are the infrastructure objects managed by {{ .RenderedProviderName | trimspace }}.  A Resources refers to a specific host, pod, or container throughout the {{ .RenderedProviderName | trimspace }} platform. It may also refer to a more distinct entity, such as a virtual machine or a database instance.
 
-Resources types are platform and provider agnostic. So whether it's a fleet of pods and containers in Kubernetes, stand-alone hosts, or many virtual machines, Shoreline can control those Resourcess within AWS, GCP, or Azure.
+Resources types are platform and provider agnostic. So whether it's a fleet of pods and containers in Kubernetes, stand-alone hosts, or many virtual machines, {{ .RenderedProviderName | trimspace }} can control those Resourcess within AWS, GCP, or Azure.
 
--> Shoreline Resources are not to be confused with Terraform resources.
+-> {{ .RenderedProviderName | trimspace }} Resources are not to be confused with Terraform resources.
 
 ## Required Properties
 
@@ -20,16 +20,16 @@ Resources types are platform and provider agnostic. So whether it's a fleet of p
 
 ## Usage
 
-Shoreline Resources are effectively aliases for more complex Resource queries.  For example, the following definition creates a custom Resource called `az_k8s` as an alias for the full query to target Kubernetes pods on Azure:
+{{ .RenderedProviderName | trimspace }} Resources are effectively aliases for more complex Resource queries.  For example, the following definition creates a custom Resource called `az_k8s` as an alias for the full query to target Kubernetes pods on Azure:
 
 ```tf
-resource "shoreline_resource" "az_k8s" {
+resource "{{ .ProviderShortName | trimspace }}_resource" "az_k8s" {
   name        = "${var.namespace}_az_k8s"
   value       = "hosts | k8s=true | cloud_provider='azure' | pods | namespace=[\"${var.namespace}\"]"
-  description = "All Shoreline Kubernetes pods on Azure"
+  description = "All {{ .RenderedProviderName | trimspace }} Kubernetes pods on Azure"
 }
 ```
 
--> See the Shoreline Resources documentation for more info.
+-> See the {{ .RenderedProviderName | trimspace }} Resources documentation for more info.
 
 {{ .SchemaMarkdown | trimspace }}

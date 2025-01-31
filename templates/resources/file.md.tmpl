@@ -1,11 +1,11 @@
 ---
-page_title: "shoreline_file Resource - terraform-provider-shoreline"
+page_title: "{{ .ProviderShortName | trimspace }}_file Resource - {{ .ProviderName | trimspace }}"
 subcategory: ""
 description: |-
-  Automatically distribute artifacts across your Shoreline Resources.
+  Automatically distribute artifacts across your {{ .RenderedProviderName | trimspace }} Resources.
 ---
 
-# shoreline_file (Resource)
+# {{ .ProviderShortName | trimspace }}_file (Resource)
 
 The File allows you to easily transmit critical files throughout your fleet, even to ephemeral Resources such as Kubernetes (k8s) containers. This technique is potent when you need to distribute and execute custom bash scripts or other critical files without the need for manual intervention.
 
@@ -16,11 +16,11 @@ A File must know where to copy from and where to distribute to.  The required pr
 - name - A unique object name.
 - destination_path - The relative, destination file path.
 - input_file - The relative, local file path of the source artifact.
-- resource_query - The target Shoreline Resources to distribute the artifact to.
+- resource_query - The target {{ .RenderedProviderName | trimspace }} Resources to distribute the artifact to.
 
 ## Usage
 
-The following example distributes the local `<terraform_module_directory>/data/jvm_dumps.sh` file to the target Shoreline Resources defined by the `resource_query` Terraform variable:
+The following example distributes the local `<terraform_module_directory>/data/jvm_dumps.sh` file to the target {{ .RenderedProviderName | trimspace }} Resources defined by the `resource_query` Terraform variable:
 
 -> Note the use of the `md5` property to auto update file-objects on `terraform apply`.
 
