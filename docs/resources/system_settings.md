@@ -4,14 +4,11 @@ page_title: "shoreline_system_settings Resource - terraform-provider-shoreline"
 subcategory: ""
 description: |-
   Shoreline system_settings. System-level settings. Note: there must only be one instance of this terraform resource named 'system_settings'.
-  See the Shoreline Settings Documentation https://docs.shoreline.io/platform/settings for more info.
 ---
 
 # shoreline_system_settings (Resource)
 
 Shoreline system_settings. System-level settings. Note: there must only be one instance of this terraform resource named 'system_settings'.
-
-See the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/settings) for more info.
 
 
 

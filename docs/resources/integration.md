@@ -4,14 +4,11 @@ page_title: "shoreline_integration Resource - terraform-provider-shoreline"
 subcategory: ""
 description: |-
   Shoreline integration. A third-party integration (e.g. DataDog, NewRelic, etc) .
-  See the Shoreline Metrics Documentation https://docs.shoreline.io/integrations for more info.
 ---
 
 # shoreline_integration (Resource)
 
 Shoreline integration. A third-party integration (e.g. DataDog, NewRelic, etc) .
-
-See the Shoreline [Metrics Documentation](https://docs.shoreline.io/integrations) for more info.
 
 
 

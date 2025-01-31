@@ -1,10 +1,10 @@
 ---
-page_title: 'shoreline_report_template Resource - terraform-provider-shoreline'
+page_title: '{{ .ProviderShortName | trimspace }}_report_template Resource - {{ .ProviderName | trimspace }}'
 subcategory: ''
 description: |-
 ---
 
-# shoreline_report_template (Resource)
+# {{ .ProviderShortName | trimspace }}_report_template (Resource)
 
 
 ## Properties
@@ -14,7 +14,7 @@ description: |-
 - <b>links</b> (List of Object) References to other related Report Templates. A list of objects with the following attributes:
     - <b>label</b> (String) A label for the link.
     - <b>report_template_name</b> (String) The name of the linked Report Template.
-- <b>blocks</b> (String) A list of Report Template blocks in JSON format. Typically, this string should be set using the [jsonencode](https://developer.hashicorp.com/terraform/language/functions/jsonencode) function with a [Terraform Input Variable](https://developer.hashicorp.com/terraform/language/values/variables). All it's properties must be present to avoid Terraform diffs. It has the following properties:
+- <b>blocks</b> (String) A list of Report Template blocks in JSON format. Typically, this string should be set using the jsonencode function with a Terraform Input Variable. All it's properties must be present to avoid Terraform diffs. It has the following properties:
     - <i><b>title</b></i> (String) The name of the report block.
     - <i><b>resource_query</b></i> (String) Specifies which resources to include in the chart.
     - <i><b>group_by_tag</b></i> (String) The resource tag used to group resources in the chart.

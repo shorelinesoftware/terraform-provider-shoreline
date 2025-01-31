@@ -4,14 +4,11 @@ page_title: "shoreline_circuit_breaker Resource - terraform-provider-shoreline"
 subcategory: ""
 description: |-
   Shoreline circuit_breaker. An automatic rate limit on actions.
-  See the Shoreline CircuitBreakers Documentation https://docs.shoreline.io/circuit_breakers for more info.
 ---
 
 # shoreline_circuit_breaker (Resource)
 
 Shoreline circuit_breaker. An automatic rate limit on actions.
-
-See the Shoreline [CircuitBreakers Documentation](https://docs.shoreline.io/circuit_breakers) for more info.
 
 
 

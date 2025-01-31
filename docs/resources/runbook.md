@@ -4,14 +4,11 @@ page_title: "shoreline_runbook Resource - terraform-provider-shoreline"
 subcategory: ""
 description: |-
   Shoreline notebook. An interactive notebook of Op commands and user documentation .
-  See the Shoreline Notebook Documentation https://docs.shoreline.io/ui/notebooks for more info.
 ---
 
 # shoreline_runbook (Resource)
 
 Shoreline notebook. An interactive notebook of Op commands and user documentation .
-
-See the Shoreline [Notebook Documentation](https://docs.shoreline.io/ui/notebooks) for more info.
 
 
 
