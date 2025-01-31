@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	_ "embed"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -21,10 +22,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// XXX when we move to go 1.20.X, convert the config to a json file...
-// # import _ "embed"
-// # go:embed provider_conf.json
-// # var ObjectConfigJsonStr
+//go:embed provider_conf.json
+var ObjectConfigJsonStr string
 
 func CanonicalizeUrl(url string) (urlOut string, err error) {
 	urlRegexStr := `^(http(s)?://)?(?P<backend_node>([^\\.]*)\.)?(?P<customer>[^\\.]*)\.(?P<region>[^\\.]*)\.ap[ip]\.shoreline-(?P<cluster>[^\\.]*)\.io(/)?$`
