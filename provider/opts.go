@@ -172,7 +172,6 @@ func GetManualAuthMessage(GlobalOpts *CliOpts) string {
 }
 
 func ValidateApiUrl(url string) bool {
-	// NOTE: However, users can have custom backends with arbitrary URLs
 	urlRegex := regexp.MustCompile(`^https?://[\.\:a-z0-9-]+$`)
 	if !urlRegex.MatchString(url) {
 		WriteMsg("ERROR: Invalid URL to auth! (%s)\n", url)
