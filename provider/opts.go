@@ -37,8 +37,6 @@ type CliOpts struct {
 	Token       string
 }
 
-const CanonicalUrl = "https://(<backend_node>.)?<customer>.<region>.api.shoreline-<cluster>.io"
-
 var AuthUrl string
 var AuthToken string
 var RetryLimit int
@@ -166,13 +164,6 @@ func selectAuth(GlobalOpts *CliOpts, toUrl string) bool {
 	return false
 }
 
-func PrintAuthWarning() {
-	//WriteMsg("Make sure URL and TOKEN are set in the config file: " + "~/.ops_auth.yaml\n")
-	WriteMsg("Missing URL and Authorization Token!\n")
-	WriteMsg("Get your customer URL from an administrator and enter the command:\n")
-	WriteMsg("   'auth " + CanonicalUrl + "' \n")
-}
-
 func GetManualAuthMessage(GlobalOpts *CliOpts) string {
 	// handle failure with manual copy/paste message (with URL)
 	return fmt.Sprintf("ERROR: Automatic authentication token retrieval failed.\n") +
@@ -181,13 +172,9 @@ func GetManualAuthMessage(GlobalOpts *CliOpts) string {
 }
 
 func ValidateApiUrl(url string) bool {
-	// NOTE: standard URLs are in the form -- "https://<customer>.<region>.api.shoreline-<cluster>.io"
-	//   However, users can have custom backends with arbitrary URLs
-	//urlRegex := regexp.MustCompile(`^https://\w+\.\w+\.api\.shoreline-\w+\.io$`)
 	urlRegex := regexp.MustCompile(`^https?://[\.\:a-z0-9-]+$`)
 	if !urlRegex.MatchString(url) {
 		WriteMsg("ERROR: Invalid URL to auth! (%s)\n", url)
-		WriteMsg("It should be of the form: '" + CanonicalUrl + "' \n")
 		return false
 	}
 	return true
