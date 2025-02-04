@@ -248,7 +248,7 @@ var ObjectConfigJsonStr = `
 			"communication_approval_notifications":  { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_approval_notifications" },
 			"communication_execution_notifications": { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_execution_notifications" },
 			"filter_resource_to_action": { "type": "bool", "default": true, "optional": true, "min_ver": "27.2.0" },
-			"secret_aliases": { "type": "string_set", "optional": true, "min_ver": "28.0.0" }
+			"secret_names": { "type": "string_set", "optional": true, "min_ver": "28.1.0" }
 		}
 	},
 
@@ -486,7 +486,7 @@ var ObjectConfigJsonStr = `
 			"blocks":           	   "The JSON encoded blocks of the report template.",
 			"links":           	   	   "The JSON encoded links of a report template with other report templates.",
 			"dashboard_type":          "Specifies the type of the dashboard configuration. Currently, only 'TAGS_SEQUENCE' is supported.",
-			"secret_aliases":          "A list of strings that contains the public secret aliases of the secrets that are used in the runbook."
+			"secret_names":            "A list of strings that contains the name of the secrets that are used in the runbook.",
 			"groups":                  "A JSON-encoded list of groups in the dashboard configuration. Each group is an object with 'name' (the group's name) and 'tags' (a list of tag names belonging to the group).",
 			"values":                  "A JSON-encoded list of objects defining the values and their associated colors in the dashboard configuration. Each object contains: 'color' (the color associated with the values) and 'values' (a list of values corresponding to specific tags).",
 			"other_tags":              "A list of additional tags that will be displayed for the resources."
