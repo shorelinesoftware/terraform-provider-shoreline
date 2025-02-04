@@ -318,7 +318,7 @@ var ObjectConfigJsonStr = `
 			"maintenance_mode_enabled":                         { "type": "bool",     "optional": true, "min_ver": "25.1.0", "default": false },
 			"allowed_tags":                                     { "type": "string_set", "optional": true, "min_ver": "27.2.0" },
 			"skipped_tags":                                     { "type": "string_set", "optional": true, "min_ver": "27.2.0" },
-			"managed_secrets": 									{ "type": "string", "optional": true, "min_ver": "28.0.0", "default": "LOCAL" }
+			"managed_secrets": 									{ "type": "string", "optional": true, "min_ver": "28.1.0", "default": "LOCAL" }
 		}
 	},
 
