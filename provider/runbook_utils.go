@@ -23,7 +23,10 @@ func buildRunbookDataObject(d *schema.ResourceData, cells interface{}) (interfac
 	// TODO this should be passed in, it might not always come from ResourceData
 	params, exists := d.GetOk("params")
 	appendActionLog(fmt.Sprintf("calling buildParametersData (exists:%v) from: %v\n", exists, params))
-	paramsData, err := buildParametersData(CastToObject(params), exists)
+	if exists {
+		params = CastToObject(params)
+	}
+	paramsData, err := buildParametersData(params, exists)
 	if err != nil {
 		return nil, err
 	}

@@ -32,5 +32,9 @@ RUN /bin/bash -c "source $HOME/.asdf/asdf.sh && \
     asdf global terraform 1.5.7"
 
 
+RUN /bin/bash -c "source $HOME/.asdf/asdf.sh && \
+    go install -v github.com/go-delve/delve/cmd/dlv@v1.24.0"
+
+
 ENTRYPOINT [ "/usr/local/share/docker-init.sh" ]
 CMD [ "sleep", "infinity" ]

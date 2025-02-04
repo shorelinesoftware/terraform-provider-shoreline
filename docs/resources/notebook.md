@@ -78,14 +78,14 @@ resource "shoreline_runbook" "full_runbook" {
     },
     {
       "name" : "param_2",
-      "value" : "<default_value>"
+      "value" : "<default_value>",
       "required" : false,
-      "export" : true,
+      "export" : true
     },
     {
       "name" : "param_3",
-      "value" : "<default_value>"
-      "export" : true,
+      "value" : "<default_value>",
+      "export" : true
     },
     {
       "name" : "param_4",
