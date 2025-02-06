@@ -22,8 +22,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-//go:embed provider_conf.json
+//go:embed conf/provider_conf.json
 var ObjectConfigJsonStr string
+
+var (
+	RenderedProviderName string = os.Getenv("RENDERED_PROVIDER_NAME")
+	ProviderShortName    string = os.Getenv("PROVIDER_SHORT_NAME")
+	EnvVarsNamePrefix    string = os.Getenv("ENV_VARS_NAME_PREFIX")
+	TfLogFile            string = os.Getenv("TF_LOG_FILE")
+	DefaultUserName      string = os.Getenv("DEFAULT_USER_NAME")
+)
 
 func StringToJsonArray(data string) ([]interface{}, error) {
 	//jsObj := map[string]interface{}{}
@@ -137,8 +145,7 @@ func timeSuffixToIntSec(tv string) int {
 }
 
 func appendActionLogInner(msg string) {
-	filename := "/tmp/tf-shoreline.log"
-	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	f, err := os.OpenFile(TfLogFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		//panic(err)
 		return
@@ -467,27 +474,27 @@ func New(version string) func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
 			//DataSourcesMap: map[string]*schema.Resource{
-			//	"shoreline_datasource": dataSourceShoreline(),
+			//	ProviderShortName + "_datasource": dataSourceObject(),
 			//},
 			ResourcesMap: map[string]*schema.Resource{
-				"shoreline_action":          resourceShorelineObject(ObjectConfigJsonStr, "action"),
-				"shoreline_alarm":           resourceShorelineObject(ObjectConfigJsonStr, "alarm"),
-				"shoreline_time_trigger":    resourceShorelineObject(ObjectConfigJsonStr, "time_trigger"),
-				"shoreline_bot":             resourceShorelineObject(ObjectConfigJsonStr, "bot"),
-				"shoreline_circuit_breaker": resourceShorelineObject(ObjectConfigJsonStr, "circuit_breaker"),
-				"shoreline_file":            resourceShorelineObject(ObjectConfigJsonStr, "file"),
-				"shoreline_integration":     resourceShorelineObject(ObjectConfigJsonStr, "integration"),
-				"shoreline_metric":          resourceShorelineObject(ObjectConfigJsonStr, "metric"),
-				"shoreline_notebook":        resourceShorelineObject(ObjectConfigJsonStr, "notebook"),
-				"shoreline_runbook":         resourceShorelineObject(ObjectConfigJsonStr, "notebook"), // alias shoreline_runbook to shoreline_notebook
-				"shoreline_principal":       resourceShorelineObject(ObjectConfigJsonStr, "principal"),
-				"shoreline_resource":        resourceShorelineObject(ObjectConfigJsonStr, "resource"),
-				"shoreline_system_settings": resourceShorelineObject(ObjectConfigJsonStr, "system_settings"),
-				"shoreline_report_template": resourceShorelineObject(ObjectConfigJsonStr, "report_template"),
-				"shoreline_dashboard":       resourceShorelineObject(ObjectConfigJsonStr, "dashboard"),
+				ProviderShortName + "_action":          resourceObject(ObjectConfigJsonStr, "action"),
+				ProviderShortName + "_alarm":           resourceObject(ObjectConfigJsonStr, "alarm"),
+				ProviderShortName + "_time_trigger":    resourceObject(ObjectConfigJsonStr, "time_trigger"),
+				ProviderShortName + "_bot":             resourceObject(ObjectConfigJsonStr, "bot"),
+				ProviderShortName + "_circuit_breaker": resourceObject(ObjectConfigJsonStr, "circuit_breaker"),
+				ProviderShortName + "_file":            resourceObject(ObjectConfigJsonStr, "file"),
+				ProviderShortName + "_integration":     resourceObject(ObjectConfigJsonStr, "integration"),
+				ProviderShortName + "_metric":          resourceObject(ObjectConfigJsonStr, "metric"),
+				ProviderShortName + "_notebook":        resourceObject(ObjectConfigJsonStr, "notebook"),
+				ProviderShortName + "_runbook":         resourceObject(ObjectConfigJsonStr, "notebook"), // alias <name>_runbook to <name>_notebook
+				ProviderShortName + "_principal":       resourceObject(ObjectConfigJsonStr, "principal"),
+				ProviderShortName + "_resource":        resourceObject(ObjectConfigJsonStr, "resource"),
+				ProviderShortName + "_system_settings": resourceObject(ObjectConfigJsonStr, "system_settings"),
+				ProviderShortName + "_report_template": resourceObject(ObjectConfigJsonStr, "report_template"),
+				ProviderShortName + "_dashboard":       resourceObject(ObjectConfigJsonStr, "dashboard"),
 			},
 			DataSourcesMap: map[string]*schema.Resource{
-				"shoreline_version": &schema.Resource{
+				ProviderShortName + "_version": &schema.Resource{
 					ReadContext: dataSourceVersionRead,
 					Schema: map[string]*schema.Schema{
 						"build_info": &schema.Schema{
@@ -523,32 +530,32 @@ func New(version string) func() *schema.Provider {
 						}
 						return
 					},
-					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_URL", nil),
-					Description: "Customer-specific URL for the Shoreline API server.",
+					DefaultFunc: schema.EnvDefaultFunc(EnvVarsNamePrefix+"_URL", nil),
+					Description: "Customer-specific URL for the " + RenderedProviderName + " API server.",
 				},
 				"token": {
 					Type:        schema.TypeString,
 					Optional:    true,
 					Sensitive:   true,
-					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_TOKEN", nil),
-					Description: "Customer/user-specific authorization token for the Shoreline API server. May be provided via `SHORELINE_TOKEN` env variable.",
+					DefaultFunc: schema.EnvDefaultFunc(EnvVarsNamePrefix+"_TOKEN", nil),
+					Description: "Customer/user-specific authorization token for the " + RenderedProviderName + " API server. May be provided via `" + EnvVarsNamePrefix + "_TOKEN` env variable.",
 				},
 				"retries": {
 					Type:        schema.TypeInt,
 					Optional:    true,
-					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_RETRIES", nil),
+					DefaultFunc: schema.EnvDefaultFunc(EnvVarsNamePrefix+"_RETRIES", nil),
 					Description: "Number of retries for API calls, in case of e.g. transient network failures.",
 				},
 				"debug": {
 					Type:        schema.TypeBool,
 					Optional:    true,
-					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_DEBUG", nil),
-					Description: "Debug logging to `/tmp/tf-shoreline.log`.",
+					DefaultFunc: schema.EnvDefaultFunc(EnvVarsNamePrefix+"_DEBUG", nil),
+					Description: "Debug logging to `" + TfLogFile + "`.",
 				},
 				"min_version": {
 					Type:        schema.TypeString,
 					Optional:    true,
-					Description: "Minimum version required on the Shoreline backend (API server).",
+					Description: "Minimum version required on the " + RenderedProviderName + " backend (API server).",
 				},
 			},
 		}
@@ -634,19 +641,19 @@ func configure(version string, p *schema.Provider) func(ctx context.Context, d *
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
+func resourceObject(configJsStr string, key string) *schema.Resource {
 	params := map[string]*schema.Schema{}
 
 	objects := map[string]interface{}{}
 	// Parsing/Unmarshalling JSON encoding/json
 	err := json.Unmarshal([]byte(configJsStr), &objects)
 	if err != nil {
-		WriteMsg("WARNING: Failed to parse JSON config from resourceShorelineObject().\n")
+		WriteMsg("WARNING: Failed to parse JSON config from resourceObject().\n")
 		return nil
 	}
 	object := GetNestedValueOrDefault(objects, ToKeyPath(key), nil)
 	if object == nil {
-		WriteMsg("WARNING: Failed to parse JSON config from resourceShorelineObject(%s).\n", key)
+		WriteMsg("WARNING: Failed to parse JSON config from resourceObject(%s).\n", key)
 		return nil
 	}
 	attributes := GetNestedValueOrDefault(object, ToKeyPath("attributes"), map[string]interface{}{}).(map[string]interface{})
@@ -889,13 +896,13 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		if replacesField != "" {
 			sch.ConflictsWith = []string{replacesField}
 		}
-		//WriteMsg("WARNING: JSON config from resourceShorelineObject(%s) %s.Optional = %+v.\n", key, k, sch.Optional)
-		//WriteMsg("WARNING: JSON config from resourceShorelineObject(%s) %s.Required = %+v.\n", key, k, sch.Required)
-		//WriteMsg("WARNING: JSON config from resourceShorelineObject(%s) %s.Computed = %+v.\n", key, k, sch.Computed)
+		//WriteMsg("WARNING: JSON config from resourceObject(%s) %s.Optional = %+v.\n", key, k, sch.Optional)
+		//WriteMsg("WARNING: JSON config from resourceObject(%s) %s.Required = %+v.\n", key, k, sch.Required)
+		//WriteMsg("WARNING: JSON config from resourceObject(%s) %s.Computed = %+v.\n", key, k, sch.Computed)
 		//defowlt := GetNestedValueOrDefault(attrMap, ToKeyPath("value"), nil)
 		defowlt := GetNestedValueOrDefault(attrMap, ToKeyPath("default"), nil)
 		if defowlt != nil {
-			//appendActionLogInner(fmt.Sprintf("NOTE: DEFAULT resourceShorelineObject(%s) %s.Default = %+v.\n", key, k, defowlt))
+			//appendActionLogInner(fmt.Sprintf("NOTE: DEFAULT resourceObject(%s) %s.Default = %+v.\n", key, k, defowlt))
 			sch.Default = defowlt
 		}
 		suppressNullDiffRegex, isStr := GetNestedValueOrDefault(attrMap, ToKeyPath("suppress_null_regex"), nil).(string)
@@ -1039,12 +1046,12 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 	objectDef, _ := object.(map[string]interface{})
 
 	return &schema.Resource{
-		Description: "Shoreline " + key + ". " + objDescription,
+		Description: RenderedProviderName + " " + key + ". " + objDescription,
 
-		CreateContext: resourceShorelineObjectCreate(key, primary, attributes, objectDef),
-		ReadContext:   resourceShorelineObjectRead(key, attributes, objectDef),
-		UpdateContext: resourceShorelineObjectUpdate(key, attributes, objectDef),
-		DeleteContext: resourceShorelineObjectDelete(key, objectDef),
+		CreateContext: resourceObjectCreate(key, primary, attributes, objectDef),
+		ReadContext:   resourceObjectRead(key, attributes, objectDef),
+		UpdateContext: resourceObjectUpdate(key, attributes, objectDef),
+		DeleteContext: resourceObjectDelete(key, objectDef),
 		Importer:      &schema.ResourceImporter{State: schema.ImportStatePassthrough},
 
 		Schema: params,
@@ -1649,11 +1656,11 @@ func updateSystemSettings(attrs map[string]interface{}, objectDef map[string]int
 	return nil
 }
 
-func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, objectDef map[string]interface{}, ctx context.Context, d *schema.ResourceData, meta interface{}, doDiff bool, isCreate bool) diag.Diagnostics {
+func resourceObjectSetFields(typ string, attrs map[string]interface{}, objectDef map[string]interface{}, ctx context.Context, d *schema.ResourceData, meta interface{}, doDiff bool, isCreate bool) diag.Diagnostics {
 	var diags diag.Diagnostics
 	name := d.Get("name").(string)
 	// valid-variable-name check (and non-null)
-	appendActionLog(fmt.Sprintf("RESOURCE TYPE IS: %s (resourceShorelineObjectSetFields)\n", typ))
+	appendActionLog(fmt.Sprintf("RESOURCE TYPE IS: %s (resourceObjectSetFields)\n", typ))
 
 	specialSkipFields := map[string]bool{}
 	if typ == "notebook" || typ == "runbook" {
@@ -2008,7 +2015,7 @@ func notebookIsInline(typ string, attrs map[string]interface{}, objectDef map[st
 	return false
 }
 
-func resourceShorelineObjectCreate(typ string, primary string, attrs map[string]interface{}, objectDef map[string]interface{}) func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceObjectCreate(typ string, primary string, attrs map[string]interface{}, objectDef map[string]interface{}) func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 		// use the meta value to retrieve your client from the provider configure method
 		// client := meta.(*apiClient)
@@ -2033,7 +2040,7 @@ func resourceShorelineObjectCreate(typ string, primary string, attrs map[string]
 			// once the object is ok, set the ID to tell terraform it's valid...
 			d.SetId(name)
 			// update the data in terraform
-			return resourceShorelineObjectUpdate(typ, attrs, objectDef)(ctx, d, meta)
+			return resourceObjectUpdate(typ, attrs, objectDef)(ctx, d, meta)
 		}
 
 		primaryValStr := attrValueString(typ, primary, primaryVal, attrs)
@@ -2066,22 +2073,22 @@ func resourceShorelineObjectCreate(typ string, primary string, attrs map[string]
 			return diags
 		}
 
-		diags = resourceShorelineObjectSetFields(typ, attrs, objectDef, ctx, d, meta, false, true)
+		diags = resourceObjectSetFields(typ, attrs, objectDef, ctx, d, meta, false, true)
 		if diags != nil {
 			// delete incomplete object
-			resourceShorelineObjectDelete(typ, objectDef)(ctx, d, meta)
+			resourceObjectDelete(typ, objectDef)(ctx, d, meta)
 			return diags
 		}
 
 		// once the object is ok, set the ID to tell terraform it's valid...
 		d.SetId(name)
 		// update the data in terraform
-		return resourceShorelineObjectRead(typ, attrs, objectDef)(ctx, d, meta)
+		return resourceObjectRead(typ, attrs, objectDef)(ctx, d, meta)
 	}
 }
 
 // returns skip, value, diagnostics
-func resourceShorelineObjectReadSingleAttr(name string, typ string, key string, attrs map[string]interface{}, record map[string]interface{}, stepsJs map[string]interface{}, d *schema.ResourceData, alias string, aliasMap map[string]interface{}) (bool, interface{}, diag.Diagnostics) {
+func resourceObjectReadSingleAttr(name string, typ string, key string, attrs map[string]interface{}, record map[string]interface{}, stepsJs map[string]interface{}, d *schema.ResourceData, alias string, aliasMap map[string]interface{}) (bool, interface{}, diag.Diagnostics) {
 	var val interface{}
 	attr := GetNestedValueOrDefault(attrs, ToKeyPath(key), map[string]interface{}{})
 	if alias != "" {
@@ -2269,7 +2276,7 @@ func SetSingleAttrFromRead(typ string, name string, key string, val interface{},
 	}
 }
 
-func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objectDef map[string]interface{}) func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceObjectRead(typ string, attrs map[string]interface{}, objectDef map[string]interface{}) func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 		// use the meta value to retrieve your client from the provider configure method
 		// client := meta.(*apiClient)
@@ -2394,7 +2401,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 		aliasKeyVal := ""
 		aliasMap := map[string]interface{}{}
 		if aliasKey != "" {
-			_, aliasKeyValIfc, diags := resourceShorelineObjectReadSingleAttr(name, typ, aliasKey, attrs, record, stepsJs, d, "", nil)
+			_, aliasKeyValIfc, diags := resourceObjectReadSingleAttr(name, typ, aliasKey, attrs, record, stepsJs, d, "", nil)
 			if diags != nil {
 				return diags
 			}
@@ -2431,7 +2438,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 			}
 
 			curAlias, _ := GetNestedValueOrDefault(aliasMap, ToKeyPath(key+".alias_out"), "").(string)
-			skip, val, diags := resourceShorelineObjectReadSingleAttr(name, typ, key, attrs, record, stepsJs, d, curAlias, aliasMap)
+			skip, val, diags := resourceObjectReadSingleAttr(name, typ, key, attrs, record, stepsJs, d, curAlias, aliasMap)
 
 			if diags != nil {
 				return diags
@@ -2457,7 +2464,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 				appendActionLog(fmt.Sprintf("Reading deprecated/renamed field : %s: '%s'.'%s'->'%s'  '%v'\n", typ, name, key, deprecatedFor, val))
 				_, isSet := d.GetOk(key)
 				if isSet {
-					_, val, diags = resourceShorelineObjectReadSingleAttr(name, typ, key, attrs, record, stepsJs, d, curAlias, aliasMap)
+					_, val, diags = resourceObjectReadSingleAttr(name, typ, key, attrs, record, stepsJs, d, curAlias, aliasMap)
 				}
 			}
 			if val == nil {
@@ -2498,7 +2505,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 	}
 }
 
-func resourceShorelineObjectUpdate(typ string, attrs map[string]interface{}, objectDef map[string]interface{}) func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceObjectUpdate(typ string, attrs map[string]interface{}, objectDef map[string]interface{}) func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 		// use the meta value to retrieve your client from the provider configure method
 		// client := meta.(*apiClient)
@@ -2510,7 +2517,7 @@ func resourceShorelineObjectUpdate(typ string, attrs map[string]interface{}, obj
 		if typ == "system_settings" {
 			diags = updateSystemSettings(attrs, objectDef, ctx, d, meta)
 		} else {
-			diags = resourceShorelineObjectSetFields(typ, attrs, objectDef, ctx, d, meta, true, false)
+			diags = resourceObjectSetFields(typ, attrs, objectDef, ctx, d, meta, true, false)
 		}
 		if diags != nil {
 			// TODO delete incomplete object?
@@ -2518,11 +2525,11 @@ func resourceShorelineObjectUpdate(typ string, attrs map[string]interface{}, obj
 		}
 
 		// update the data in terraform
-		return resourceShorelineObjectRead(typ, attrs, objectDef)(ctx, d, meta)
+		return resourceObjectRead(typ, attrs, objectDef)(ctx, d, meta)
 	}
 }
 
-func resourceShorelineObjectDelete(typ string, objectDef map[string]interface{}) func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceObjectDelete(typ string, objectDef map[string]interface{}) func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 		// use the meta value to retrieve your client from the provider configure method
 		// client := meta.(*apiClient)

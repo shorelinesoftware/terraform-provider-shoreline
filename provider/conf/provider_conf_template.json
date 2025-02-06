@@ -349,7 +349,7 @@
 				"optional": true,
 				"step": "event_type",
 				"alias": "trigger_source",
-				"match_null": "shoreline"
+				"match_null": "{{ .DEFAULT_TRIGGER_SOURCE }}"
 			},
 			"monitor_id": {
 				"type": "string",
@@ -366,7 +366,7 @@
 				"optional": true,
 				"preferred_alias": "event_type",
 				"step": "trigger_source",
-				"default": "shoreline"
+				"default": "{{ .DEFAULT_TRIGGER_SOURCE }}"
 			},
 			"#external_trigger_id": {
 				"type": "string",
@@ -637,7 +637,7 @@
 			"permissions_user": {
 				"type": "string",
 				"optional": true,
-				"match_null": "Shoreline"
+				"match_null": "{{ .DEFAULT_USER_NAME }}"
 			},
 			"api_url": {
 				"type": "string",
@@ -1199,7 +1199,7 @@
 				"type": "string",
 				"optional": true,
 				"min_ver": "19.1.0",
-				"default": "Shoreline"
+				"default": "{{ .DEFAULT_USER_NAME }}"
 			},
 			"external_audit_storage_enabled": {
 				"type": "bool",
@@ -1359,14 +1359,14 @@
 			"integration": "A third-party integration (e.g. DataDog, NewRelic, etc) .",
 			"metric": "A periodic measurement of a system property.",
 			"notebook": "An interactive notebook of Op commands and user documentation .",
-			"principal": "An authorization group (e.g. Okta groups). Note: Admin privilege (in Shoreline) to create principal objects.",
+			"principal": "An authorization group (e.g. Okta groups). Note: Admin privilege (in {{ .RENDERED_PROVIDER_NAME }}) to create principal objects.",
 			"resource": "A server or compute resource in the system (e.g. host, pod, container).",
 			"system_settings": "System-level settings. Note: there must only be one instance of this terraform resource named 'system_settings'.",
-			"report_template": "A resource report template. Note: Configure privilege (in Shoreline) to create report template objects.",
+			"report_template": "A resource report template. Note: Configure privilege (in {{ .RENDERED_PROVIDER_NAME }}) to create report template objects.",
 			"dashboard": "A platform for visualizing resources and their associated tags."
 		},
 		"attributes": {
-			"name": "The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).",
+			"name": "The name/symbol for the object within {{ .RENDERED_PROVIDER_NAME }} and the op language (must be unique, only alphanumeric/underscore).",
 			"type": "The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).",
 			"action_limit": "The number of simultaneous actions allowed for a permissions group.",
 			"administer_permission": "If a permissions group is allowed to perform \"administer\" actions.",
@@ -1392,7 +1392,7 @@
 			"error_long_template": "The long description of the Action's error condition.",
 			"error_short_template": "The short description of the Action's error condition.",
 			"error_title_template": "UI title of the Action's error condition.",
-			"event_type": "Used to tag 'datadog' monitor triggers vs 'shoreline' alarms (default).",
+			"event_type": "Used to tag external triggers vs '{{ .DEFAULT_TRIGGER_SOURCE }}' alarms (default).",
 			"execute_limit": "The number of simultaneous linux (shell) commands allowed for a permissions group.",
 			"family": "General class for an Action or Bot (e.g., custom, standard, metric, or system check).",
 			"file_data": "Internal representation of a distributed File object's data (computed).",
@@ -1407,7 +1407,6 @@
 			"idp_name": "The Identity Provider's name.",
 			"input_file": "The local source of a distributed File object. (conflicts with inline_data)",
 			"inline_data": "The inline file data of a distributed File object. (conflicts with input_file)",
-			"is_run_output_persisted": "A boolean value denoting whether or not cell outputs should be persisted when running a notebook",
 			"labels": "A list of strings by which notebooks can be grouped.",
 			"md5": "The md5 checksum of a file, e.g. filemd5(\"${path.module}/data/example-file.txt\")",
 			"metric_name": "The Alarm's triggering Metric.",
@@ -1443,7 +1442,7 @@
 			"app_key": "Application key for a 3rd-party service integration.",
 			"insights_collector_url": "Insights url for a 3rd-party service integration.",
 			"insights_collector_api_key": "Insights key for a 3rd-party service integration.",
-			"permissions_user": "The user which 3rd-party service integration remediations run as (default 'Shoreline').",
+			"permissions_user": "The user which 3rd-party service integration remediations run as (default '{{ .DEFAULT_USER_NAME }}').",
 			"dashboard_name": "The name of a dashboard for 3rd-party service integration (datadog).",
 			"webhook_name": "The name of a webhook for 3rd-party service integration (datadog).",
 			"cache_ttl": "The amount of time group memberships will be cached (in milliseconds).",
@@ -1472,7 +1471,7 @@
 			"maintenance_mode_enabled": "System setting that when enabled, rejects new runs, allowing ongoing tasks to complete before stopping.",
 			"allowed_tags": "Defines a list of tags that are allowed on agent tag ingestion",
 			"skipped_tags": "Defines a list of tags that are skipped on agent tag ingestion",
-			"integration_name": "The name/symbol of a Shoreline integration involved in triggering the bot.",
+			"integration_name": "The name/symbol of a {{ .RENDERED_PROVIDER_NAME }} integration involved in triggering the bot.",
 			"editors": "List of users who can edit the object (with configure permission). Empty maps to all users.",
 			"communication_cud_notifications": "Enables slack notifications for create/update/delete operations. (Requires workspace and channel.)",
 			"communication_approval_notifications": "Enables slack notifications for approvals operations. (Requires workspace and channel.)",

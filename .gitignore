@@ -1,6 +1,7 @@
 
 # generated executable
 terraform-provider-shoreline
+terraform-provider-ngg
 
 # vim swap files
 .*.swp
@@ -20,3 +21,7 @@ terraform.tfstate.backup
 
 # node
 node_modules
+
+/env/dev/local.env
+
+/provider/conf/provider_conf.json

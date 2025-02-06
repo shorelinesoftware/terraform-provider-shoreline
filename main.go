@@ -5,8 +5,9 @@ package main
 
 import (
 	"flag"
+	"os"
 
-	"shoreline.io/terraform/terraform-provider-shoreline/provider"
+	"terraform/terraform-provider/provider"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 	//"github.com/hashicorp/terraform-provider-scaffolding/internal/provider"
@@ -29,6 +30,8 @@ var (
 
 	// goreleaser can also pass the specific commit if you want
 	// commit  string = ""
+
+	ProviderPath string = os.Getenv("PROVIDER_PATH")
 )
 
 func main() {
@@ -40,7 +43,7 @@ func main() {
 	opts := &plugin.ServeOpts{
 		Debug:        debugMode,
 		ProviderFunc: provider.New(version),
-		ProviderAddr: "shorelinesoftware/shoreline",
+		ProviderAddr: ProviderPath,
 	}
 
 	plugin.Serve(opts)

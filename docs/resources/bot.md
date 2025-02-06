@@ -163,7 +163,7 @@ Now, anytime JVM memory exceeds our defined threshold the JVM is automatically r
 - `communication_workspace` (String) A string value denoting the slack workspace where notifications related to the object should be sent to.
 - `description` (String) A user-friendly explanation of an object.
 - `enabled` (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
-- `event_type` (String) Used to tag 'datadog' monitor triggers vs 'shoreline' alarms (default).
+- `event_type` (String) Used to tag external triggers vs 'shoreline' alarms (default).
 - `family` (String) General class for an Action or Bot (e.g., custom, standard, metric, or system check). Defaults to `custom`.
 - `integration_name` (String) The name/symbol of a Shoreline integration involved in triggering the bot.
 - `monitor_id` (String) For 'datadog' monitor triggered bots, the DD monitor identifier.

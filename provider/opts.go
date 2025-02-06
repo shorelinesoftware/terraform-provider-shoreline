@@ -62,8 +62,8 @@ func GetDotfilePath() string {
 
 	// default to "~/"
 	thePath := home
-	// check if '~/.shoreline/' exists
-	shorePath := filepath.Join(home, ".shoreline")
+	// check if '~/.<ProviderShortName>/' exists
+	shorePath := filepath.Join(home, "."+ProviderShortName)
 	if _, err := os.Stat(shorePath); !os.IsNotExist(err) {
 		thePath = shorePath
 	}

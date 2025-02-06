@@ -1,4 +1,4 @@
-module shoreline.io/terraform/terraform-provider-shoreline
+module terraform/terraform-provider
 
 go 1.23.4
 
@@ -51,6 +51,7 @@ require (
 	github.com/hashicorp/yamux v0.1.1 // indirect
 	github.com/huandu/xstrings v1.3.3 // indirect
 	github.com/imdario/mergo v0.3.15 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/magiconair/properties v1.8.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -97,4 +98,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace shoreline.io/terraform/terraform-provider-shoreline/provider => ./provider
+replace terraform/terraform-provider/provider => ./provider

@@ -1,7 +1,7 @@
 # Debugging with VS Code
 
 1. Start the Backend app on a local box.
-2. Set the `SHORELINE_TOKEN` in the `private.env` file.
+2. Set the `{{ .ENV_VARS_NAME_PREFIX }}_TOKEN` in the `private.env` file.
 3. Open `Run and Debug` panel (`shift+cmd+d`).
 4. Press the green arrow (`Start Debugging`) or press `F5`.
 5. Open `DEBUG CONSOLE` (`shift+cmd+y`).
