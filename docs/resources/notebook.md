@@ -134,6 +134,7 @@ resource "shoreline_runbook" "full_runbook" {
   communication_execution_notifications = true
   filter_resource_to_action             = true
   enabled                               = true
+  secret_names                          = ["<secret_name_1>", "<secret_name_2>"]
 }
 
 
@@ -173,6 +174,7 @@ resource "shoreline_runbook" "minimal_runbook" {
 - `labels` (List of String) A list of strings by which notebooks can be grouped.
 - `params` (String) Named variables to pass to an object (e.g. an Action).
 - `resource_query` (String, Deprecated) **Deprecated** Please use 'allowed_resources_query' instead. A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
+- `secret_names` (List of String) A list of strings that contains the name of the secrets that are used in the runbook.
 - `timeout_ms` (Number) Defaults to `60000`.
 
 ### Read-Only
