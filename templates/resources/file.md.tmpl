@@ -14,7 +14,7 @@ The [File](https://docs.shoreline.io/op/commands/cp) allows you to easily transm
 A [File](https://docs.shoreline.io/op/commands/cp) must know where to copy from and where to distribute to.  The required properties are:
 
 - name - A unique object name.
-- destination_path - The relative, destination file path.
+- destination_path - The absolute destination file path.
 - input_file - The relative, local file path of the source artifact.
 - [resource_query](https://docs.shoreline.io/platform/resources) - The target Shoreline [Resources](https://docs.shoreline.io/platform/resources) to distribute the artifact to.
 
