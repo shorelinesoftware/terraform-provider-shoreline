@@ -12,7 +12,7 @@
             "args": [
                 "-debug",
             ],
-            "envFile": "${workspaceFolder}/.vscode/private.env"
+            "envFile": "${workspaceFolder}/variables.env"
         }
     ]
 }
