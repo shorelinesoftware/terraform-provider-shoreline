@@ -1860,6 +1860,11 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	}
 
 	for key, _ := range attrs {
+		forceUpdate := GetNestedValueOrDefault(attrs, ToKeyPath(key+".force_update"), false).(bool)
+		if forceUpdate {
+			forcedUpdate[CastToString(key)] = forceUpdate
+		}
+
 		if skipKeys[key] != true {
 			orderedAttrs = append(orderedAttrs, key)
 		} else {

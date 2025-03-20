@@ -247,7 +247,7 @@ var ObjectConfigJsonStr = `
 			"communication_cud_notifications":       { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_cud_notifications" },
 			"communication_approval_notifications":  { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_approval_notifications" },
 			"communication_execution_notifications": { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_execution_notifications" },
-			"filter_resource_to_action": { "type": "bool", "default": false, "optional": true, "min_ver": "28.0.0" },
+			"filter_resource_to_action": { "type": "bool", "default": false, "optional": true, "min_ver": "28.0.0", "force_update": true },
 			"secret_names": { "type": "string_set", "optional": true, "min_ver": "28.1.0" }
 		}
 	},
