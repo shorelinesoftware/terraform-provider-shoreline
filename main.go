@@ -4,9 +4,8 @@
 package main
 
 import (
-	"context"
 	"flag"
-	"log"
+
 	"shoreline.io/terraform/terraform-provider-shoreline/provider"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
@@ -38,14 +37,10 @@ func main() {
 	flag.BoolVar(&debugMode, "debug", false, "set to true to run the provider with support for debuggers like delve")
 	flag.Parse()
 
-	opts := &plugin.ServeOpts{ProviderFunc: provider.New(version)}
-
-	if debugMode {
-		err := plugin.Debug(context.Background(), "shoreline.io/terraform/terraform-provider-shoreline", opts)
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-		return
+	opts := &plugin.ServeOpts{
+		Debug:        debugMode,
+		ProviderFunc: provider.New(version),
+		ProviderAddr: "shorelinesoftware/shoreline",
 	}
 
 	plugin.Serve(opts)

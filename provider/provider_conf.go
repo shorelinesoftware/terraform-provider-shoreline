@@ -110,7 +110,7 @@ var ObjectConfigJsonStr = `
 			"hard_limit":              { "type": "int",     "required": true },
 			"soft_limit":              { "type": "int",     "optional": true, "default": -1 },
 			"duration":                { "type": "time_s",  "required": true },
-			"fail_over":               { "type": "string",  "optional": true },
+			"fail_over":               { "type": "string",  "optional": true, "default": "safe"},
 			"enabled":                 { "type": "bool",    "optional": true, "default": false },
 			"action_name":             { "type": "command", "internal": true },
 			"resource_query":          { "type": "command", "internal": true },
@@ -215,7 +215,7 @@ var ObjectConfigJsonStr = `
 		"attributes": {
 			"type":                    { "type": "string",     "computed": true, "value": "NOTEBOOK" },
 			"name":                    { "type": "label",      "required": true, "forcenew": true, "skip": true },
-			"data":                    { "type": "b64json",    "optional": true, "step": ".", "primary": true,
+			"data":                    { "type": "b64json",    "optional": true, "step": ".", "primary": true, "deprecated": true,
 																	 "omit":       { "cells": "dynamic_cell_fields", ".": "dynamic_fields" },
 																	 "omit_items": { "external_params": "dynamic_params" },
 																	 "cast":       { "params": "string[]", "params_values": "string[]" },
@@ -246,7 +246,9 @@ var ObjectConfigJsonStr = `
 			"editors":                 { "type": "string_set", "optional": true, "min_ver": "15.1.0" },
 			"communication_cud_notifications":       { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_cud_notifications" },
 			"communication_approval_notifications":  { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_approval_notifications" },
-			"communication_execution_notifications": { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_execution_notifications" }
+			"communication_execution_notifications": { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_execution_notifications" },
+			"filter_resource_to_action": { "type": "bool", "default": false, "optional": true, "min_ver": "28.0.0", "force_update": true },
+			"secret_names": { "type": "string_set", "optional": true, "min_ver": "28.1.0" }
 		}
 	},
 
@@ -274,7 +276,7 @@ var ObjectConfigJsonStr = `
 			"execute_limit":         { "type": "int",      "optional": true },
 			"configure_permission":  { "type": "intbool",  "optional": true },
 			"administer_permission": { "type": "intbool",  "optional": true },
-			"idp_name":              { "type": "string",   "optional": true, "default": "default", "min_ver": "22.0.0" }
+			"idp_name":              { "type": "string",   "optional": true, "min_ver": "22.0.0" }
 		}
 	},
 
@@ -293,9 +295,12 @@ var ObjectConfigJsonStr = `
 			"administrator_grants_regenerate_user_token":       { "type": "bool",     "optional": true, "default": true },
 			"administrator_grants_read_user_token":             { "type": "bool",     "optional": true, "default": true },
 			"approval_feature_enabled":                         { "type": "bool",     "optional": true, "default": true },
-			"notebook_ad_hoc_approval_request_enabled":         { "type": "bool",     "optional": true, "default": true },
-			"notebook_approval_request_expiry_time":            { "type": "int",      "optional": true, "default": 60 },
-			"notebook_run_approval_expiry_time":                { "type": "int",      "optional": true, "default": 60 },
+			"notebook_ad_hoc_approval_request_enabled":         { "type": "bool",     "optional": true, "default": true, "deprecated_for": "runbook_ad_hoc_approval_request_enabled" },
+			"runbook_ad_hoc_approval_request_enabled":          { "type": "bool",     "optional": true, "default": true, "min_ver": "25.0.0", "replaces": "notebook_ad_hoc_approval_request_enabled" },
+			"notebook_approval_request_expiry_time":            { "type": "int",      "optional": true, "default": 60, "deprecated_for": "runbook_approval_request_expiry_time"  },
+			"runbook_approval_request_expiry_time":             { "type": "int",      "optional": true, "default": 60, "min_ver": "25.0.0", "replaces": "notebook_approval_request_expiry_time" },
+			"notebook_run_approval_expiry_time":                { "type": "int",      "optional": true, "default": 60, "deprecated_for": "run_approval_expiry_time"  },
+			"run_approval_expiry_time":                         { "type": "int",      "optional": true, "default": 60, "min_ver": "25.0.0", "replaces": "notebook_run_approval_expiry_time" },
 			"approval_editable_allowed_resource_query_enabled": { "type": "bool",     "optional": true, "default": true },
 			"approval_allow_individual_notification":           { "type": "bool",     "optional": true, "min_ver": "17.0.0", "default": true },
 			"approval_optional_request_ticket_url":             { "type": "bool",     "optional": true, "min_ver": "17.0.0", "default": false },
@@ -308,11 +313,36 @@ var ObjectConfigJsonStr = `
 			"environment_name":                                 { "type": "string",   "optional": true, "default": "" },
 			"environment_name_background":                      { "type": "string",   "optional": true, "min_ver": "18.0.0", "default": "#EF5350" },
 			"param_value_max_length":                           { "type": "int",      "optional": true, "min_ver": "19.0.0", "default": 10000 },
-			"parallel_notebook_runs_fired_by_time_triggers":    { "type": "int",      "optional": true, "min_ver": "20.0.2", "default": 10 },
-			"maintenance_mode_enabled":                         { "type": "bool",     "optional": true, "min_ver": "25.1.0", "default": false }
+			"parallel_notebook_runs_fired_by_time_triggers":    { "type": "int",      "optional": true, "default": 10, "min_ver": "20.0.2", "deprecated_for": "parallel_runs_fired_by_time_triggers"  },
+			"parallel_runs_fired_by_time_triggers":             { "type": "int",      "optional": true, "default": 10, "min_ver": "25.0.0", "replaces": "parallel_notebook_runs_fired_by_time_triggers" },
+			"maintenance_mode_enabled":                         { "type": "bool",     "optional": true, "min_ver": "25.1.0", "default": false },
+			"allowed_tags":                                     { "type": "string_set", "optional": true, "min_ver": "27.2.0" },
+			"skipped_tags":                                     { "type": "string_set", "optional": true, "min_ver": "27.2.0" },
+			"managed_secrets": 									{ "type": "string", "optional": true, "min_ver": "28.1.0", "default": "LOCAL" }
 		}
 	},
 
+	"report_template": {
+       "attributes": {
+           "type":            { "type": "string",   "computed": true, "value": "REPORT_TEMPLATE" },
+           "name":            { "type": "label",    "required": true, "forcenew": true, "skip": true},
+           "blocks":          { "type": "b64json",  "required": true, "outtype": "json", "primary": true},
+		   "links":           { "type": "b64json",  "optional": true, "outtype": "json", "default": "[]", "step": "links"}
+       }
+    },
+
+	"dashboard": {
+       "attributes": {
+           "type":               { "type": "string",     "computed": true, "value": "DASHBOARD" },
+           "name":               { "type": "label",      "required": true, "forcenew": true, "skip": true},
+           "dashboard_type":     { "type": "string",     "required": true, "primary": true },
+           "resource_query":     { "type": "string",     "optional": true, "step": "dashboard_configuration.resource_query" },
+           "groups":             { "type": "b64json",    "optional": true, "step": "dashboard_configuration.groups", "outtype": "json" },
+           "values":             { "type": "b64json",    "optional": true, "step": "dashboard_configuration.values", "outtype": "json" },
+           "other_tags":         { "type": "string_set", "optional": true, "step": "dashboard_configuration.other_tags" },
+           "identifiers":        { "type": "string_set", "optional": true, "step": "dashboard_configuration.identifiers" }
+       }
+    },
 
 	"docs": {
 		"objects": {
@@ -327,7 +357,9 @@ var ObjectConfigJsonStr = `
 			"notebook":  "An interactive notebook of Op commands and user documentation .\n\nSee the Shoreline [Notebook Documentation](https://docs.shoreline.io/ui/notebooks) for more info.",
 			"principal": "An authorization group (e.g. Okta groups). Note: Admin privilege (in Shoreline) to create principal objects.",
 			"resource":  "A server or compute resource in the system (e.g. host, pod, container).\n\nSee the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info.",
-			"system_settings":  "System-level settings. Note: there must only be one instance of this terraform resource named 'system_settings'.\n\nSee the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/settings) for more info."
+			"system_settings":  "System-level settings. Note: there must only be one instance of this terraform resource named 'system_settings'.\n\nSee the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/settings) for more info.",
+			"report_template":  "A resource report template. Note: Configure privilege (in Shoreline) to create report template objects.",
+			"dashboard": "A platform for visualizing resources and their associated tags."
 		},
 
 		"attributes": {
@@ -337,7 +369,7 @@ var ObjectConfigJsonStr = `
 			"administer_permission":   "If a permissions group is allowed to perform \"administer\" actions.",
 			"allowed_entities":        "The list of users who can run an action or notebook. Any user can run if left empty.",
 			"allowed_resources_query": "The list of resources on which an action or notebook can run. No restriction, if left empty.",
-			"cells":                   "The data cells inside a notebook.",
+			"cells":                   "The data cells inside a notebook. Defined as a list of JSON objects. These may be either Markdown or Op commands.",
 			"check_interval":          "Interval (in seconds) between Alarm evaluations.",
 			"checksum":                "Cryptographic hash (e.g. md5) of a File Resource.",
 			"clear_query":             "The Alarm's resolution condition.",
@@ -349,7 +381,7 @@ var ObjectConfigJsonStr = `
 			"condition_type":          "Kind of check in an Alarm (e.g. above or below) vs a threshold for a Metric.",
 			"condition_value":         "Switching value (threshold) for a Metric in an Alarm.",
 			"configure_permission":    "If a permissions group is allowed to perform \"configure\" actions.",
-			"data":                    "The downloaded (JSON) representation of a Notebook.",
+			"data":                    "The JSON representation of a Notebook. If this field is used, then the JSON should only contain these four fields: cells, params, external_params and enabled.",
 			"description":             "A user-friendly explanation of an object.",
 			"destination_path":        "Target location for a copied distributed File object.  See [Op: cp](https://docs.shoreline.io/op/commands/cp).",
 			"enabled":                 "If the object is currently enabled or disabled.",
@@ -368,6 +400,7 @@ var ObjectConfigJsonStr = `
 			"fire_short_template":     "The short description of the Alarm's triggering condition.",
 			"fire_title_template":     "UI title of the Alarm's triggering condition.",
 			"identity":                "The email address or provider's (e.g. Okta) group-name for a permissions group.",
+			"identifiers":             "A list of additional tags that will be used to identify certain resources. They will be displayed before the tags_sequence column.",
 			"idp_name":                "The Identity Provider's name.",
 			"input_file":              "The local source of a distributed File object. (conflicts with inline_data)",
 			"inline_data":             "The inline file data of a distributed File object. (conflicts with input_file)",
@@ -380,6 +413,7 @@ var ObjectConfigJsonStr = `
 			"monitor_id":              "For 'datadog' monitor triggered bots, the DD monitor identifier.",
 			"mute_query":              "The Alarm's mute condition.",
 			"params":                  "Named variables to pass to an object (e.g. an Action).",
+			"external_params":         "Notebook parameters defined via with a JSON path used to extract the parameter's value from an external payload, such as an Alertmanager alert.",
 			"raise_for":               "Where an Alarm is raised (e.g., local to a resource, or global to the system).",
 			"res_env_var":             "Result environment variable ... an environment variable used to output values through.",
 			"resolve_long_template":   "The long description of the Alarm's resolution.",
@@ -432,19 +466,30 @@ var ObjectConfigJsonStr = `
 			"environment_name_background":                      "System setting for the background colour of the environment name. The format is #<6-digit hex>",
 			"param_value_max_length":                           "System setting controlling the maximum allowable length for a notebook's parameter",
 			"parallel_notebook_runs_fired_by_time_triggers":    "System setting controlling the maximum number of different parallel notebook runs initiated via time triggers",
-			"maintenance_mode_enabled":                         "System setting that when enabled, rejects new runs, allowing ongoing tasks to complete before stopping.",
+			"maintenance_mode_enabled":                        	"System setting that when enabled, rejects new runs, allowing ongoing tasks to complete before stopping.",
+			"allowed_tags":                                     "Defines a list of tags that are allowed on agent tag ingestion",
+			"skipped_tags":                                     "Defines a list of tags that are skipped on agent tag ingestion",
+			"managed_secrets": 									"System setting that discriminates between usage of external vaults and the built in one.",
 			"integration_name":                                 "The name/symbol of a Shoreline integration involved in triggering the bot.",
 			"editors":                                          "List of users who can edit the object (with configure permission). Empty maps to all users.",
 			"communication_cud_notifications":                  "Enables slack notifications for create/update/delete operations. (Requires workspace and channel.)",
 			"communication_approval_notifications":             "Enables slack notifications for approvals operations. (Requires workspace and channel.)",
 			"communication_execution_notifications":            "Enables slack notifications for the object executions. (Requires workspace and channel.)",
+			"filter_resource_to_action":                        "Determines whether parameters containing resources are exported to actions.",
 			"external_url": 									"External url for a 3rd-party service integration.",
 			"cache_ttl_ms":            "The amount of time group memberships will be cached (in milliseconds).",
 			"subject":                 "The subject whose authentication details is used for a 3rd-party service integration (google cloud identity).",
 			"credentials":             "The credentials used for a 3rd-party service integration (google cloud identity), encoded in base64.",
 			"tenant_id":               "Tenant id for a 3rd-party service integration (Microsoft Entra ID).",
 			"client_id":               "Application id for a 3rd-party service integration (Microsoft Entra ID).",
-			"client_secret":           "Client secret for a 3rd-party service integration (Microsoft Entra ID)."
+			"client_secret":           "Client secret for a 3rd-party service integration (Microsoft Entra ID).",
+			"blocks":           	   "The JSON encoded blocks of the report template.",
+			"links":           	   	   "The JSON encoded links of a report template with other report templates.",
+			"dashboard_type":          "Specifies the type of the dashboard configuration. Currently, only 'TAGS_SEQUENCE' is supported.",
+			"secret_names":            "A list of strings that contains the name of the secrets that are used in the runbook.",
+			"groups":                  "A JSON-encoded list of groups in the dashboard configuration. Each group is an object with 'name' (the group's name) and 'tags' (a list of tag names belonging to the group).",
+			"values":                  "A JSON-encoded list of objects defining the values and their associated colors in the dashboard configuration. Each object contains: 'color' (the color associated with the values) and 'values' (a list of values corresponding to specific tags).",
+			"other_tags":              "A list of additional tags that will be displayed for the resources."
 		}
 	}
 }

@@ -9,9 +9,11 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"io"
+
 	zstd "github.com/klauspost/compress/zstd"
 	"github.com/spf13/viper"
-	"io"
+
 	//"io/ioutil"
 	prand "math/rand"
 	"net/http"
@@ -34,8 +36,6 @@ type CliOpts struct {
 	Url         string
 	Token       string
 }
-
-const CanonicalUrl = "https://(<backend_node>.)?<customer>.<region>.api.shoreline-<cluster>.io"
 
 var AuthUrl string
 var AuthToken string
@@ -164,13 +164,6 @@ func selectAuth(GlobalOpts *CliOpts, toUrl string) bool {
 	return false
 }
 
-func PrintAuthWarning() {
-	//WriteMsg("Make sure URL and TOKEN are set in the config file: " + "~/.ops_auth.yaml\n")
-	WriteMsg("Missing URL and Authorization Token!\n")
-	WriteMsg("Get your customer URL from an administrator and enter the command:\n")
-	WriteMsg("   'auth " + CanonicalUrl + "' \n")
-}
-
 func GetManualAuthMessage(GlobalOpts *CliOpts) string {
 	// handle failure with manual copy/paste message (with URL)
 	return fmt.Sprintf("ERROR: Automatic authentication token retrieval failed.\n") +
@@ -179,13 +172,9 @@ func GetManualAuthMessage(GlobalOpts *CliOpts) string {
 }
 
 func ValidateApiUrl(url string) bool {
-	// NOTE: standard URLs are in the form -- "https://<customer>.<region>.api.shoreline-<cluster>.io"
-	//   However, users can have custom backends with arbitrary URLs
-	//urlRegex := regexp.MustCompile(`^https://\w+\.\w+\.api\.shoreline-\w+\.io$`)
-	urlRegex := regexp.MustCompile(`^https://[\.a-z0-9-]+$`)
+	urlRegex := regexp.MustCompile(`^https?://[\.\:a-z0-9-]+$`)
 	if !urlRegex.MatchString(url) {
 		WriteMsg("ERROR: Invalid URL to auth! (%s)\n", url)
-		WriteMsg("It should be of the form: '" + CanonicalUrl + "' \n")
 		return false
 	}
 	return true
@@ -302,8 +291,8 @@ func FileMd5AndSize(filename string) (error, string, int64) {
 	return nil, md5Sum, fileLen
 }
 
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////
 func DownloadFileHttps(src string, dst string, token string) error {
 	out, err := os.Create(dst)
 	if err != nil {
@@ -330,35 +319,37 @@ func DownloadFileHttps(src string, dst string, token string) error {
 func UploadFileHttps(src string, dst string, token string) error {
 	file, err := os.Open(src)
 	if err != nil {
-		return fmt.Errorf("couldn't open local upload file '%s'\n", src)
+		return fmt.Errorf("couldn't open local upload file '%s'", src)
 	}
 	defer file.Close()
 
 	stat, err := os.Stat(src)
 	if err != nil {
-		return fmt.Errorf("Couldn't stat file to upload: " + err.Error())
+		return fmt.Errorf("couldn't stat file to upload: %s", err.Error())
 	}
 	fileSize := stat.Size()
 
-	reqOb, err := http.NewRequest("PUT", dst, file)
-	//reqOb, err := http.NewRequest("POST", dst, file)
-	//reqOb, err := http.NewRequest(http.MethodPut, dst, file)
+	reqOb, err := http.NewRequest(http.MethodPut, dst, file)
 	if err != nil {
-		fmt.Printf("Couldn't create upload request object: " + err.Error())
-		return fmt.Errorf("Couldn't create upload request object: " + err.Error())
+		fmt.Printf("couldn't create upload request object: %s", err.Error())
+		return fmt.Errorf("couldn't create upload request object: %s", err.Error())
 	}
-	//reqOb.Header.Set("Content-Type", "application/octet-stream")
-	//reqOb.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	reqOb.Header.Set("x-ms-blob-type", "BlockBlob") // only used by Azure, ignored by S3
 	reqOb.ContentLength = fileSize
 
 	response, err := http.DefaultClient.Do(reqOb)
-	defer response.Body.Close()
 	if err != nil {
-		fmt.Printf("Couldn't upload file: " + err.Error())
-		return fmt.Errorf("Couldn't upload file: " + err.Error())
-	} else {
-		fmt.Printf("Uploaded file '%s' (%d bytes) status: %v - %v\n", src, fileSize, response.StatusCode, http.StatusText(response.StatusCode))
+		fmt.Printf("couldn't upload file: %s", err.Error())
+		return fmt.Errorf("couldn't upload file: %s", err.Error())
 	}
+	defer response.Body.Close()
+	if response.StatusCode != 201 && response.StatusCode != 200 {
+		var body []byte
+		response.Body.Read(body)
+		return fmt.Errorf("couldn't upload file, status: %s, message: %v", response.Status, string(body))
+	}
+	fmt.Printf("Uploaded file '%s' (%d bytes) status: %v - %v\n", src, fileSize, response.StatusCode, http.StatusText(response.StatusCode))
+
 	return nil
 }
 

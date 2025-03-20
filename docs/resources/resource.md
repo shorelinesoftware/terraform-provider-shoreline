@@ -37,15 +37,15 @@ resource "shoreline_resource" "az_k8s" {
 
 ### Required
 
-- **name** (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
-- **value** (String) The Op statement that defines a Metric or Resource.
+- `name` (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
+- `value` (String) The Op statement that defines a Metric or Resource.
 
 ### Optional
 
-- **description** (String) A user-friendly explanation of an object.
-- **id** (String) The ID of this resource.
-- **params** (List of String) Named variables to pass to an object (e.g. an Action).
+- `description` (String) A user-friendly explanation of an object.
+- `params` (List of String) Named variables to pass to an object (e.g. an Action).
 
 ### Read-Only
 
-- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
+- `id` (String) The ID of this resource.
+- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).

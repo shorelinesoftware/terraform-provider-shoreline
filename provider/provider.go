@@ -26,22 +26,6 @@ import (
 // # go:embed provider_conf.json
 // # var ObjectConfigJsonStr
 
-func CanonicalizeUrl(url string) (urlOut string, err error) {
-	urlRegexStr := `^(http(s)?://)?(?P<backend_node>([^\\.]*)\.)?(?P<customer>[^\\.]*)\.(?P<region>[^\\.]*)\.ap[ip]\.shoreline-(?P<cluster>[^\\.]*)\.io(/)?$`
-	urlBaseStr := "https://${backend_node}${customer}.${region}.api.shoreline-${cluster}.io"
-	urlRegex := regexp.MustCompile(urlRegexStr)
-	match := urlRegex.FindStringSubmatch(url)
-	if len(match) < 4 {
-		return "", fmt.Errorf("URL -- %s -- couldn't be mapped to canonical form -- %s -- (%d)\n", url, CanonicalUrl, len(match))
-	}
-	for i, name := range urlRegex.SubexpNames() {
-		if i > 0 && i <= len(match) {
-			urlBaseStr = strings.Replace(urlBaseStr, "${"+name+"}", match[i], 1)
-		}
-	}
-	return urlBaseStr, nil
-}
-
 func StringToJsonArray(data string) ([]interface{}, error) {
 	//jsObj := map[string]interface{}{}
 	jsObj := []interface{}{}
@@ -241,7 +225,7 @@ func CheckUpdateResult(result string) error {
 	}
 
 	actions := []string{"define", "delete", "update"}
-	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook", "configuration", "time_trigger", "circuit_breaker", "principal"}
+	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook", "configuration", "time_trigger", "circuit_breaker", "principal", "report_template", "dashboard"}
 	for _, act := range actions {
 		for _, typ := range types {
 			key := act + "_" + typ
@@ -500,6 +484,8 @@ func New(version string) func() *schema.Provider {
 				"shoreline_principal":       resourceShorelineObject(ObjectConfigJsonStr, "principal"),
 				"shoreline_resource":        resourceShorelineObject(ObjectConfigJsonStr, "resource"),
 				"shoreline_system_settings": resourceShorelineObject(ObjectConfigJsonStr, "system_settings"),
+				"shoreline_report_template": resourceShorelineObject(ObjectConfigJsonStr, "report_template"),
+				"shoreline_dashboard":       resourceShorelineObject(ObjectConfigJsonStr, "dashboard"),
 			},
 			DataSourcesMap: map[string]*schema.Resource{
 				"shoreline_version": &schema.Resource{
@@ -534,12 +520,12 @@ func New(version string) func() *schema.Provider {
 					Required: true,
 					ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
 						if !ValidateApiUrl(val.(string)) {
-							errs = append(errs, fmt.Errorf("%q must be of the form %s,\n but got: %s", key, CanonicalUrl, val.(string)))
+							errs = append(errs, fmt.Errorf("%q must be a valid URL,\n but got: %s", key, val.(string)))
 						}
 						return
 					},
 					DefaultFunc: schema.EnvDefaultFunc("SHORELINE_URL", nil),
-					Description: "Customer-specific URL for the Shoreline API server. It should be of the form ```" + CanonicalUrl + "``` .",
+					Description: "Customer-specific URL for the Shoreline API server.",
 				},
 				"token": {
 					Type:        schema.TypeString,
@@ -587,26 +573,15 @@ func configure(version string, p *schema.Provider) func(ctx context.Context, d *
 
 		var diags diag.Diagnostics = nil
 
-		canonUrl, err := CanonicalizeUrl(AuthUrl)
-		if err != nil {
-			//return nil, diag.Errorf("Couldn't map URL to canonical form.\n" + err.Error())
-			diags = diag.FromErr(err)
-			diags[0].Severity = diag.Warning
-			canonUrl = AuthUrl
-			appendActionLog(fmt.Sprintf("Non-standard url: %s -- to -- %s\n", AuthUrl, canonUrl))
-		} else {
-			appendActionLog(fmt.Sprintf("Mapped url: %s -- to -- %s\n", AuthUrl, canonUrl))
-		}
-
 		if hasToken {
-			SetAuth(&GlobalOpts, canonUrl, token.(string))
+			SetAuth(&GlobalOpts, AuthUrl, token.(string))
 		} else {
-			GlobalOpts.Url = canonUrl
+			GlobalOpts.Url = AuthUrl
 			if !LoadAuthConfig(&GlobalOpts) {
 				return nil, diag.Errorf("Failed to load auth credentials file.\n" + GetManualAuthMessage(&GlobalOpts))
 			}
-			if !selectAuth(&GlobalOpts, canonUrl) {
-				return nil, diag.Errorf("Failed to load auth credentials for %s\n"+GetManualAuthMessage(&GlobalOpts), canonUrl)
+			if !selectAuth(&GlobalOpts, AuthUrl) {
+				return nil, diag.Errorf("Failed to load auth credentials for %s\n"+GetManualAuthMessage(&GlobalOpts), AuthUrl)
 			}
 		}
 
@@ -690,6 +665,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		}
 
 		sch := &schema.Schema{}
+		maybeAddValidateFunc(sch, key, k)
 
 		description := CastToString(GetNestedValueOrDefault(objects, ToKeyPath("docs.attributes."+k), ""))
 		sch.Description = description
@@ -760,6 +736,34 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 						return true
 					}
 				}
+				if key == "report_template" {
+					switch k {
+					case "blocks":
+						oldJsonEncoded, err := base64.StdEncoding.DecodeString(old)
+						if err != nil {
+							return false
+						}
+						return string(oldJsonEncoded) == nu
+
+					case "links":
+						var conf string
+						err := json.Unmarshal([]byte(old), &conf)
+						if err != nil {
+							return false
+						}
+						return string(conf) == nu
+					}
+				}
+				if key == "dashboard" {
+					if k == "groups" || k == "values" {
+						var conf string
+						err := json.Unmarshal([]byte(old), &conf)
+						if err != nil {
+							return false
+						}
+						return string(conf) == nu
+					}
+				}
 				return false
 			}
 			// TODO warn if "data.force_set[i]" fields are present
@@ -772,6 +776,15 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 			//}
 		case "string":
 			sch.Type = schema.TypeString
+
+			if key == "principal" && k == "idp_name" {
+				sch.DiffSuppressFunc = func(diffKey, old, nu string, d *schema.ResourceData) bool {
+					// TODO: add a get_principal_class function in shoreline backend
+					// and return the appropriate idp_name using the idp_id from db
+					// otherwise it cannot be returned from symbol table manager
+					return diffKey == "idp_name"
+				}
+			}
 		case "string[]":
 			sch.Type = schema.TypeList
 			sch.Elem = &schema.Schema{
@@ -853,6 +866,7 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		sch.ForceNew = GetNestedValueOrDefault(attrMap, ToKeyPath("forcenew"), false).(bool)
 		deprecated := GetNestedValueOrDefault(attrMap, ToKeyPath("deprecated"), false).(bool)
 		deprField := GetNestedValueOrDefault(attrMap, ToKeyPath("deprecated_for"), "").(string)
+		replField := GetNestedValueOrDefault(attrMap, ToKeyPath("replaces"), "").(string)
 		conflicts := GetNestedValueOrDefault(attrMap, ToKeyPath("conflicts"), []interface{}{}).([]interface{})
 		if deprecated {
 			sch.Deprecated = fmt.Sprintf("Field '%s' is obsolete.", k)
@@ -941,6 +955,68 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 			}
 		}
 
+		associatedSettings := map[string]string{
+			"notebook_ad_hoc_approval_request_enabled":      "runbook_ad_hoc_approval_request_enabled",
+			"notebook_approval_request_expiry_time":         "runbook_approval_request_expiry_time",
+			"notebook_run_approval_expiry_time":             "run_approval_expiry_time",
+			"parallel_notebook_runs_fired_by_time_triggers": "parallel_runs_fired_by_time_triggers",
+			"runbook_ad_hoc_approval_request_enabled":       "notebook_ad_hoc_approval_request_enabled",
+			"runbook_approval_request_expiry_time":          "notebook_approval_request_expiry_time",
+			"run_approval_expiry_time":                      "notebook_run_approval_expiry_time",
+			"parallel_runs_fired_by_time_triggers":          "parallel_notebook_runs_fired_by_time_triggers",
+		}
+		if deprField != "" {
+			sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
+				_, preferredSettingNewValue := d.GetChange(associatedSettings[k])
+
+				if old == nu {
+					return true
+				}
+
+				switch typ {
+				case "int":
+					if nu == fmt.Sprintf("%v", defowlt.(float64)) && (preferredSettingNewValue.(int) != int(defowlt.(float64))) {
+						return true
+					}
+				case "bool":
+					if nu == fmt.Sprintf("%v", defowlt.(bool)) && (preferredSettingNewValue.(bool) != defowlt.(bool)) {
+						return true
+					}
+				default:
+					if defowlt != nil && nu == defowlt.(string) && (preferredSettingNewValue.(string) != defowlt.(string)) {
+						return true
+					}
+				}
+
+				return false
+			}
+		}
+
+		if replField != "" {
+			sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
+				if old == nu {
+					return true
+				}
+
+				_, deprecatedSettingNewValue := d.GetChange(associatedSettings[k])
+				switch typ {
+				case "int":
+					if nu == fmt.Sprintf("%v", defowlt.(float64)) && (deprecatedSettingNewValue.(int) != int(defowlt.(float64))) {
+						return true
+					}
+				case "bool":
+					if nu == fmt.Sprintf("%v", defowlt.(bool)) && (deprecatedSettingNewValue.(bool) != defowlt.(bool)) {
+						return true
+					}
+				default:
+					if defowlt != nil && nu == defowlt.(string) && deprecatedSettingNewValue.(string) != defowlt.(string) {
+						return true
+					}
+				}
+
+				return false
+			}
+		}
 		// NOTE: This actually messes up the file objects. Need a suppress function that's just for acceptance test comparisions.
 		//notStored, isBool := GetNestedValueOrDefault(attrMap, ToKeyPath("not_stored"), nil).(bool)
 		//if isBool && notStored {
@@ -1257,9 +1333,21 @@ func setFieldViaOp(typ string, attrs map[string]interface{}, name string, key st
 	var diags diag.Diagnostics
 
 	valStr := attrValueString(typ, key, val, attrs)
-	appendActionLog(fmt.Sprintf("Setting %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
-
 	op := fmt.Sprintf("%s.%s = %s", name, key, valStr)
+
+	if typ == "dashboard" {
+		isPrimary := GetNestedValueOrDefault(attrs, ToKeyPath(key+".primary"), false).(bool)
+		if isPrimary {
+			appendActionLog(fmt.Sprintf("Skipping setting %s field %s...\n", typ, key))
+			return nil
+		} else {
+			if key == "groups" || key == "values" {
+				op = fmt.Sprintf("%s.%s = %s", name, key, val)
+			}
+		}
+	}
+
+	appendActionLog(fmt.Sprintf("Setting %s field: '%s'.'%s' :: %+v\n", typ, name, key, val))
 
 	// TODO Let alias to be a list of fallbacks for versioning,
 	//   or have alternate ObjectConfigJsonStr based on backend version,
@@ -1424,6 +1512,142 @@ func shouldSkipSetField(key string, val interface{}, name string, typ string, at
 	}
 
 	return false, nil
+}
+
+func createUpdateSystemSettingsCommand(systemSettings map[string]interface{}) string {
+	var builder strings.Builder
+	builder.WriteString("update_configuration(")
+
+	first := true
+	for key, value := range systemSettings {
+		if !first {
+			builder.WriteString(", ")
+		}
+		first = false
+
+		builder.WriteString(key)
+		builder.WriteString("=")
+
+		switch v := value.(type) {
+		case string:
+			builder.WriteString(fmt.Sprintf("\"%s\"", v))
+		case int:
+			builder.WriteString(strconv.Itoa(v))
+		case bool:
+			builder.WriteString(strconv.FormatBool(v))
+		case []interface{}:
+			encodedList, _ := json.Marshal(v)
+
+			builder.WriteString(string(encodedList))
+
+		default:
+			builder.WriteString(fmt.Sprintf("\"%v\"", v))
+		}
+	}
+
+	builder.WriteString(")")
+
+	return builder.String()
+}
+
+func updateSystemSettings(attrs map[string]interface{}, objectDef map[string]interface{}, ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	settingsToUpdate := make(map[string]interface{})
+
+	settingsToUpdate["configuration_name"] = "system_settings"
+
+	skipSettings := map[string]bool{
+		"notebook_ad_hoc_approval_request_enabled":      true,
+		"notebook_approval_request_expiry_time":         true,
+		"notebook_run_approval_expiry_time":             true,
+		"parallel_notebook_runs_fired_by_time_triggers": true,
+		"runbook_ad_hoc_approval_request_enabled":       true,
+		"runbook_approval_request_expiry_time":          true,
+		"run_approval_expiry_time":                      true,
+		"parallel_runs_fired_by_time_triggers":          true,
+	}
+	preferredSettings := map[string]string{
+		"runbook_ad_hoc_approval_request_enabled": "notebook_ad_hoc_approval_request_enabled",
+		"runbook_approval_request_expiry_time":    "notebook_approval_request_expiry_time",
+		"run_approval_expiry_time":                "notebook_run_approval_expiry_time",
+		"parallel_runs_fired_by_time_triggers":    "parallel_notebook_runs_fired_by_time_triggers",
+	}
+
+	for key, _ := range attrs {
+		if skipSettings[key] {
+			continue
+		}
+		val, _ := d.GetOk(key)
+
+		defowlt := GetNestedValueOrDefault(attrs, ToKeyPath(key+".default"), nil)
+		attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(key+".type"), "string")
+
+		switch attrTyp {
+		case "int":
+			if d.HasChange(key) || val.(int) != int(defowlt.(float64)) {
+				settingsToUpdate[key] = val
+			}
+		default:
+			if d.HasChange(key) || val != defowlt {
+				settingsToUpdate[key] = val
+			}
+		}
+	}
+
+	for preferredSetting, deprecatedSetting := range preferredSettings {
+
+		_, preferredSettingNewValue := d.GetChange(preferredSetting)
+		_, deprecatedSettingNewValue := d.GetChange(deprecatedSetting)
+
+		defowlt := GetNestedValueOrDefault(attrs, ToKeyPath(preferredSetting+".default"), nil)
+		attrTyp := GetNestedValueOrDefault(attrs, ToKeyPath(preferredSetting+".type"), "string")
+
+		if d.HasChange(preferredSetting) {
+			settingsToUpdate[preferredSetting] = preferredSettingNewValue
+			continue
+		}
+		if d.HasChange(deprecatedSetting) {
+			settingsToUpdate[deprecatedSetting] = deprecatedSettingNewValue
+			continue
+		}
+		switch attrTyp {
+		case "int":
+
+			if preferredSettingNewValue.(int) != int(defowlt.(float64)) {
+				settingsToUpdate[preferredSetting] = preferredSettingNewValue
+				continue
+			}
+			if deprecatedSettingNewValue.(int) != int(defowlt.(float64)) {
+				settingsToUpdate[deprecatedSetting] = deprecatedSettingNewValue
+				continue
+			}
+		default:
+			if preferredSettingNewValue != defowlt {
+				settingsToUpdate[preferredSetting] = preferredSettingNewValue
+				continue
+			}
+
+			if deprecatedSettingNewValue != defowlt {
+				settingsToUpdate[deprecatedSetting] = deprecatedSettingNewValue
+				continue
+			}
+		}
+	}
+
+	op := createUpdateSystemSettingsCommand(settingsToUpdate)
+
+	appendActionLog(fmt.Sprintf("Updating system settings statement... '%s'\n", op))
+	result, err := runOpCommand(op, true)
+	if err != nil {
+		appendActionLog(fmt.Sprintf("Failed to update system settings: %s\n", err.Error()))
+
+		return diag.Errorf("Failed to update system settings: %s\n", err.Error())
+	}
+	err = CheckUpdateResult(result)
+	if err != nil {
+		return diag.Errorf("Failed to update system settings: %s\n", err.Error())
+	}
+
+	return nil
 }
 
 func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, objectDef map[string]interface{}, ctx context.Context, d *schema.ResourceData, meta interface{}, doDiff bool, isCreate bool) diag.Diagnostics {
@@ -1634,19 +1858,17 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 			skipKeys["enabled"] = true // aggregated into the `data` field
 		}
 	}
-	if typ == "system_settings" {
-		skipKeys["external_audit_storage_enabled"] = true
-		skipKeys["approval_feature_enabled"] = true
-		skipKeys["notebook_ad_hoc_approval_request_enabled"] = true
-		skipKeys["approval_editable_allowed_resource_query_enabled"] = true
-		skipKeys["approval_allow_individual_notification"] = true
-	}
 
 	for key, _ := range attrs {
+		forceUpdate := GetNestedValueOrDefault(attrs, ToKeyPath(key+".force_update"), false).(bool)
+		if forceUpdate {
+			forcedUpdate[CastToString(key)] = forceUpdate
+		}
+
 		if skipKeys[key] != true {
 			orderedAttrs = append(orderedAttrs, key)
 		} else {
-			appendActionLog(fmt.Sprintf("Notebook/System skipping key: %s\n", key))
+			appendActionLog(fmt.Sprintf("Notebook skipping key: %s\n", key))
 		}
 	}
 	if typ == "notebook" || typ == "runbook" {
@@ -1659,29 +1881,6 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		} else {
 			orderedAttrs = append(orderedAttrs, "approvers")
 			orderedAttrs = append(orderedAttrs, "allowed_entities")
-		}
-	}
-
-	if typ == "system_settings" {
-		// XXX: work around backend issues with data-dependent ordering
-		// external_audit_storage_enabled depends on several other fields...
-		orderedAttrs = append(orderedAttrs, "external_audit_storage_enabled")
-		// XXX: work around backend issues with data-dependent ordering
-		// approvalEnabled depends on several other fields, or vice versa depending on it's value
-		approvalEnabled, _ := d.GetOk("approval_feature_enabled")
-		if CastToBool(approvalEnabled) {
-			orderedAttrs = append(orderedAttrs, "approval_feature_enabled")
-			orderedAttrs = append(orderedAttrs, "approval_editable_allowed_resource_query_enabled")
-			orderedAttrs = append(orderedAttrs, "notebook_ad_hoc_approval_request_enabled")
-			orderedAttrs = append(orderedAttrs, "approval_allow_individual_notification")
-		} else {
-			// approval_feature_enabled depends on slackConfig and notebook_ad_hoc_approval_request_enabled
-			orderedAttrs = append(orderedAttrs, "approval_allow_individual_notification")
-			orderedAttrs = append(orderedAttrs, "notebook_ad_hoc_approval_request_enabled")
-			// NOTE: approval_editable_allowed_resource_query_enabled depends on approval_feature_enabled
-			//         ERROR: approval_editable_allowed_resource_query_enabled cannot be true if approval_feature_enabled is false.
-			orderedAttrs = append(orderedAttrs, "approval_editable_allowed_resource_query_enabled")
-			orderedAttrs = append(orderedAttrs, "approval_feature_enabled")
 		}
 	}
 
@@ -1724,7 +1923,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		// NOTE: Terraform reports !exists when a value is explicitly supplied, but matches the 'default'
 		defowlt := GetNestedValueOrDefault(attrs, ToKeyPath(key+".default"), nil)
 
-		if !exists && !checkKeyChanged(d, typ, key, val, defowlt) && !forceSet && !forcedChangeKeys[key] && !forcedUpdate[key] {
+		if !exists && !d.HasChange(key) && !forceSet && !forcedChangeKeys[key] && !forcedUpdate[key] {
 			appendActionLog(fmt.Sprintf("FieldDoesNotExist: %s: '%s'.'%s' val(%v) HasChange(%v), forceSet(%v) isCreate(%v) default(%v)\n", typ, name, key, val, d.HasChange(key), forceSet, isCreate, defowlt))
 			// Handle GetOk() bug...
 			if isCreate {
@@ -1740,13 +1939,13 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		// we have to restore the value as needed.
 		if key == "enabled" {
 			enableVal, _ = CastToBoolMaybe(val)
-			if checkKeyChanged(d, typ, key, val, defowlt) || !doDiff {
+			if d.HasChange(key) || !doDiff {
 				writeEnable = true
 			}
 			appendActionLog(fmt.Sprintf("CheckEnableState: %s: '%s' write(%v) val(%v) change(%v) hasChange:(%v) doDiff(%v)\n", typ, name, writeEnable, enableVal, anyChange, d.HasChange(key), doDiff))
 			continue
 		}
-		if doDiff && !checkKeyChanged(d, typ, key, val, defowlt) && !forcedChangeKeys[key] && !forcedUpdate[key] {
+		if doDiff && !d.HasChange(key) && !forcedChangeKeys[key] && !forcedUpdate[key] {
 			continue
 		}
 
@@ -1791,14 +1990,6 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		}
 	}
 	return nil
-}
-
-func checkKeyChanged(d *schema.ResourceData, typ string, key string, val interface{}, defaultVal interface{}) bool {
-	if typ == "system_settings" && defaultVal != nil {
-		return (d.HasChange(key) || val != defaultVal)
-	} else {
-		return d.HasChange(key)
-	}
 }
 
 func notebookIsInline(typ string, attrs map[string]interface{}, objectDef map[string]interface{}, ctx context.Context, d *schema.ResourceData, meta interface{}) bool {
@@ -2152,7 +2343,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 
 		stepsJs := map[string]interface{}{}
 
-		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" || typ == "runbook" || typ == "time_trigger" || typ == "circuit_breaker" {
+		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" || typ == "runbook" || typ == "time_trigger" || typ == "circuit_breaker" || typ == "report_template" || typ == "dashboard" {
 			// extract fields from step objects
 			op := fmt.Sprintf("get_%s_class( %s_name = \"%s\" )", typ, typ, name)
 			extraJs, err := runOpCommandToJson(op)
@@ -2170,6 +2361,18 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 					err := json.Unmarshal([]byte(confStr), &conf)
 					if err == nil {
 						SetNestedValue(stepsJs, ToKeyPath("params_unpack"), conf)
+					}
+				}
+			}
+			if typ == "dashboard" {
+				confStr, hasConfStr := GetNestedValueOrDefault(stepsJs, ToKeyPath("configuration"), nil).(string)
+
+				if hasConfStr {
+					conf := map[string]interface{}{}
+					err := json.Unmarshal([]byte(confStr), &conf)
+
+					if err == nil {
+						SetNestedValue(stepsJs, ToKeyPath("dashboard_configuration"), conf)
 					}
 				}
 			}
@@ -2310,7 +2513,11 @@ func resourceShorelineObjectUpdate(typ string, attrs map[string]interface{}, obj
 		name := d.Get("name").(string)
 		appendActionLog(fmt.Sprintf("Updated object '%s': '%s' :: %+v\n", typ, name, d))
 
-		diags = resourceShorelineObjectSetFields(typ, attrs, objectDef, ctx, d, meta, true, false)
+		if typ == "system_settings" {
+			diags = updateSystemSettings(attrs, objectDef, ctx, d, meta)
+		} else {
+			diags = resourceShorelineObjectSetFields(typ, attrs, objectDef, ctx, d, meta, true, false)
+		}
 		if diags != nil {
 			// TODO delete incomplete object?
 			return diags

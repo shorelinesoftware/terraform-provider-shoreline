@@ -109,32 +109,32 @@ resource "shoreline_alarm" "jvm_trace_heap_alarm" {
 
 ### Required
 
-- **fire_query** (String) The trigger condition for an Alarm (general expression) or the TimeTrigger (e.g. 'every 5m').
-- **name** (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
+- `fire_query` (String) The trigger condition for an Alarm (general expression) or the TimeTrigger (e.g. 'every 5m').
+- `name` (String) The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).
 
 ### Optional
 
-- **check_interval_sec** (String) Defaults to `1`.
-- **clear_query** (String) The Alarm's resolution condition.
-- **compile_eligible** (Boolean) If the Alarm can be effectively optimized. Defaults to `true`.
-- **condition_type** (String) Kind of check in an Alarm (e.g. above or below) vs a threshold for a Metric.
-- **condition_value** (String) Switching value (threshold) for a Metric in an Alarm.
-- **description** (String) A user-friendly explanation of an object.
-- **enabled** (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
-- **family** (String) General class for an Action or Bot (e.g., custom, standard, metric, or system check). Defaults to `custom`.
-- **fire_long_template** (String) The long description of the Alarm's triggering condition.
-- **fire_short_template** (String) The short description of the Alarm's triggering condition.
-- **fire_title_template** (String) UI title of the Alarm's triggering condition.
-- **id** (String) The ID of this resource.
-- **metric_name** (String) The Alarm's triggering Metric.
-- **mute_query** (String) The Alarm's mute condition.
-- **raise_for** (String) Where an Alarm is raised (e.g., local to a resource, or global to the system). Defaults to `local`.
-- **resolve_long_template** (String) The long description of the Alarm's resolution.
-- **resolve_short_template** (String) The short description of the Alarm's resolution.
-- **resolve_title_template** (String) UI title of the Alarm's' resolution.
-- **resource_query** (String) A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
-- **resource_type** (String)
+- `check_interval_sec` (String) Defaults to `1`.
+- `clear_query` (String) The Alarm's resolution condition.
+- `compile_eligible` (Boolean) If the Alarm can be effectively optimized. Defaults to `true`.
+- `condition_type` (String) Kind of check in an Alarm (e.g. above or below) vs a threshold for a Metric.
+- `condition_value` (String) Switching value (threshold) for a Metric in an Alarm.
+- `description` (String) A user-friendly explanation of an object.
+- `enabled` (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
+- `family` (String) General class for an Action or Bot (e.g., custom, standard, metric, or system check). Defaults to `custom`.
+- `fire_long_template` (String) The long description of the Alarm's triggering condition.
+- `fire_short_template` (String) The short description of the Alarm's triggering condition.
+- `fire_title_template` (String) UI title of the Alarm's triggering condition.
+- `metric_name` (String) The Alarm's triggering Metric.
+- `mute_query` (String) The Alarm's mute condition.
+- `raise_for` (String) Where an Alarm is raised (e.g., local to a resource, or global to the system). Defaults to `local`.
+- `resolve_long_template` (String) The long description of the Alarm's resolution.
+- `resolve_short_template` (String) The short description of the Alarm's resolution.
+- `resolve_title_template` (String) UI title of the Alarm's' resolution.
+- `resource_query` (String) A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
+- `resource_type` (String)
 
 ### Read-Only
 
-- **type** (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
+- `id` (String) The ID of this resource.
+- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
