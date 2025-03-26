@@ -57,7 +57,6 @@ var ObjectConfigJsonStr = `
 			"metric_name":            { "type": "string",   "optional": true, "step": "condition_details.[0].metric_name" },
 			"raise_for":              { "type": "command",  "optional": true, "step": "condition_details.[0].raise_for", "default": "local" },
 			"check_interval_sec":     { "type": "command",  "optional": true, "step": "check_interval_sec", "default": 1, "outtype": "int" },
-			"compile_eligible":       { "type": "bool",     "optional": true, "step": "compile_eligible", "default": true },
 			"resource_type":          { "type": "resource", "optional": true, "step": "resource_type" },
 			"family":                 { "type": "command",  "optional": true, "step": "config_data.family", "default": "custom" }
 		}
@@ -374,7 +373,6 @@ var ObjectConfigJsonStr = `
 			"checksum":                "Cryptographic hash (e.g. md5) of a File Resource.",
 			"clear_query":             "The Alarm's resolution condition.",
 			"command":                 "A specific action to run.",
-			"compile_eligible":        "If the Alarm can be effectively optimized.",
 			"complete_long_template":  "The long description of the Action's completion.",
 			"complete_short_template": "The short description of the Action's completion.",
 			"complete_title_template": "UI title of the Action's completion.",
