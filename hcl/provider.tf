@@ -68,7 +68,6 @@ resource "shoreline_alarm" "cpu_alarm" {
   fire_short_template = "fired blah123"
   resolve_short_template = "cleared blah123"
   #check_interval_sec = "50"
-  compile_eligible = false
   condition_type = "above"
   condition_value = 10.1
 

@@ -84,9 +84,6 @@ resource "shoreline_alarm" "jvm_trace_heap_alarm" {
   fire_long_template    = "JVM heap usage (process ${var.jvm_process_regex}) exceeded memory threshold ${var.mem_threshold} on ${var.resource_query}"
   resolve_long_template = "JVM heap usage (process ${var.jvm_process_regex}) below memory threshold ${var.mem_threshold} on ${var.resource_query}"
 
-  # low-frequency, and a linux command, so compiling won't help
-  compile_eligible = false
-
   # alarm is raised local to a resource (vs global)
   raise_for = "local"
   # raised on a linux command (not a standard metric)
@@ -116,7 +113,6 @@ resource "shoreline_alarm" "jvm_trace_heap_alarm" {
 
 - `check_interval_sec` (String) Defaults to `1`.
 - `clear_query` (String) The Alarm's resolution condition. Defaults to ``.
-- `compile_eligible` (Boolean) If the Alarm can be effectively optimized. Defaults to `true`.
 - `condition_type` (String) Kind of check in an Alarm (e.g. above or below) vs a threshold for a Metric. Defaults to ``.
 - `condition_value` (String) Switching value (threshold) for a Metric in an Alarm. Defaults to ``.
 - `description` (String) A user-friendly explanation of an object. Defaults to ``.
