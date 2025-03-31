@@ -38,11 +38,12 @@ See the Shoreline [Notebook Documentation](https://docs.shoreline.io/ui/notebook
 - `editors` (List of String) List of users who can edit the object (with configure permission). Empty maps to all users.
 - `enabled` (Boolean) If the object is currently enabled or disabled. Defaults to `true`.
 - `external_params` (String) Notebook parameters defined via with a JSON path used to extract the parameter's value from an external payload, such as an Alertmanager alert.
-- `filter_resource_to_action` (Boolean) Determines whether parameters containing resources are exported to actions. Defaults to `true`.
+- `filter_resource_to_action` (Boolean) Determines whether parameters containing resources are exported to actions. Defaults to `false`.
 - `is_run_output_persisted` (Boolean) A boolean value denoting whether or not cell outputs should be persisted when running a notebook Defaults to `true`.
 - `labels` (List of String) A list of strings by which notebooks can be grouped.
 - `params` (String) Named variables to pass to an object (e.g. an Action).
 - `resource_query` (String, Deprecated) **Deprecated** Please use 'allowed_resources_query' instead. A set of Resources (e.g. host, pod, container), optionally filtered on tags or dynamic conditions.
+- `secret_names` (List of String) A list of strings that contains the name of the secrets that are used in the runbook.
 - `timeout_ms` (Number) Defaults to `60000`.
 
 ### Read-Only

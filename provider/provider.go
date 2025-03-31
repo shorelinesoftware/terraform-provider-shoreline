@@ -1188,11 +1188,15 @@ func NormalizeNotebookCells(cells *[]interface{}) {
 		}
 		enabled := GetNestedValueOrDefault(vmap, ToKeyPath("enabled"), nil)
 		name := GetNestedValueOrDefault(vmap, ToKeyPath("name"), nil)
+		secret_aware := GetNestedValueOrDefault(vmap, ToKeyPath("secret_aware"), nil)
 		if enabled == nil {
 			vmap["enabled"] = true
 		}
 		if name == nil {
 			vmap["name"] = "unnamed"
+		}
+		if secret_aware == nil {
+			vmap["secret_aware"] = false
 		}
 	}
 }
@@ -1860,6 +1864,11 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	}
 
 	for key, _ := range attrs {
+		forceUpdate := GetNestedValueOrDefault(attrs, ToKeyPath(key+".force_update"), false).(bool)
+		if forceUpdate {
+			forcedUpdate[CastToString(key)] = forceUpdate
+		}
+
 		if skipKeys[key] != true {
 			orderedAttrs = append(orderedAttrs, key)
 		} else {
@@ -2403,7 +2412,7 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 			aliasMap = GetNestedValueOrDefault(objectDef, ToKeyPath("internal.alias.map."+aliasKeyVal), map[string]interface{}{}).(map[string]interface{})
 		}
 
-		readFirst := map[string]bool{"enable": true, "cells": true}
+		readFirst := map[string]bool{"enable": true, "cells": true, "secret_aware": true}
 		attrFirst := []string{}
 		attrList := []string{}
 

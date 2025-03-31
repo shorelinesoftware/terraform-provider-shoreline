@@ -57,7 +57,6 @@ var ObjectConfigJsonStr = `
 			"metric_name":            { "type": "string",   "optional": true, "step": "condition_details.[0].metric_name" },
 			"raise_for":              { "type": "command",  "optional": true, "step": "condition_details.[0].raise_for", "default": "local" },
 			"check_interval_sec":     { "type": "command",  "optional": true, "step": "check_interval_sec", "default": 1, "outtype": "int" },
-			"compile_eligible":       { "type": "bool",     "optional": true, "step": "compile_eligible", "default": true },
 			"resource_type":          { "type": "resource", "optional": true, "step": "resource_type" },
 			"family":                 { "type": "command",  "optional": true, "step": "config_data.family", "default": "custom" }
 		}
@@ -247,7 +246,8 @@ var ObjectConfigJsonStr = `
 			"communication_cud_notifications":       { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_cud_notifications" },
 			"communication_approval_notifications":  { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_approval_notifications" },
 			"communication_execution_notifications": { "type": "bool", "default": true, "optional": true, "min_ver": "17.0.0", "step": "communication_execution_notifications" },
-			"filter_resource_to_action": { "type": "bool", "default": true, "optional": true, "min_ver": "27.2.0" }
+			"filter_resource_to_action": { "type": "bool", "default": false, "optional": true, "min_ver": "28.0.0", "force_update": true },
+			"secret_names": { "type": "string_set", "optional": true, "min_ver": "28.1.0" }
 		}
 	},
 
@@ -316,7 +316,8 @@ var ObjectConfigJsonStr = `
 			"parallel_runs_fired_by_time_triggers":             { "type": "int",      "optional": true, "default": 10, "min_ver": "25.0.0", "replaces": "parallel_notebook_runs_fired_by_time_triggers" },
 			"maintenance_mode_enabled":                         { "type": "bool",     "optional": true, "min_ver": "25.1.0", "default": false },
 			"allowed_tags":                                     { "type": "string_set", "optional": true, "min_ver": "27.2.0" },
-			"skipped_tags":                                     { "type": "string_set", "optional": true, "min_ver": "27.2.0" }
+			"skipped_tags":                                     { "type": "string_set", "optional": true, "min_ver": "27.2.0" },
+			"managed_secrets": 									{ "type": "string", "optional": true, "min_ver": "28.1.0", "default": "LOCAL" }
 		}
 	},
 
@@ -372,7 +373,6 @@ var ObjectConfigJsonStr = `
 			"checksum":                "Cryptographic hash (e.g. md5) of a File Resource.",
 			"clear_query":             "The Alarm's resolution condition.",
 			"command":                 "A specific action to run.",
-			"compile_eligible":        "If the Alarm can be effectively optimized.",
 			"complete_long_template":  "The long description of the Action's completion.",
 			"complete_short_template": "The short description of the Action's completion.",
 			"complete_title_template": "UI title of the Action's completion.",
@@ -467,6 +467,7 @@ var ObjectConfigJsonStr = `
 			"maintenance_mode_enabled":                        	"System setting that when enabled, rejects new runs, allowing ongoing tasks to complete before stopping.",
 			"allowed_tags":                                     "Defines a list of tags that are allowed on agent tag ingestion",
 			"skipped_tags":                                     "Defines a list of tags that are skipped on agent tag ingestion",
+			"managed_secrets": 									"System setting that discriminates between usage of external vaults and the built in one.",
 			"integration_name":                                 "The name/symbol of a Shoreline integration involved in triggering the bot.",
 			"editors":                                          "List of users who can edit the object (with configure permission). Empty maps to all users.",
 			"communication_cud_notifications":                  "Enables slack notifications for create/update/delete operations. (Requires workspace and channel.)",
@@ -483,6 +484,7 @@ var ObjectConfigJsonStr = `
 			"blocks":           	   "The JSON encoded blocks of the report template.",
 			"links":           	   	   "The JSON encoded links of a report template with other report templates.",
 			"dashboard_type":          "Specifies the type of the dashboard configuration. Currently, only 'TAGS_SEQUENCE' is supported.",
+			"secret_names":            "A list of strings that contains the name of the secrets that are used in the runbook.",
 			"groups":                  "A JSON-encoded list of groups in the dashboard configuration. Each group is an object with 'name' (the group's name) and 'tags' (a list of tag names belonging to the group).",
 			"values":                  "A JSON-encoded list of objects defining the values and their associated colors in the dashboard configuration. Each object contains: 'color' (the color associated with the values) and 'values' (a list of values corresponding to specific tags).",
 			"other_tags":              "A list of additional tags that will be displayed for the resources."
