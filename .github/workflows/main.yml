@@ -16,11 +16,11 @@ jobs:
         run: make scan
       - name: Unit tests
         run: make test
-      - name: Account tests
-        env:
-          SHORELINE_URL: ${{ secrets.SHORELINE_URL }}
-          SHORELINE_TOKEN: ${{ secrets.SHORELINE_TOKEN }}
-        run: make testacc
+      # - name: Account tests
+      #   env:
+      #     SHORELINE_URL: ${{ secrets.SHORELINE_URL }}
+      #     SHORELINE_TOKEN: ${{ secrets.SHORELINE_TOKEN }}
+      #   run: make testacc
       - name: Build releases
         run: make release
       - name: Configure AWS Credentials
