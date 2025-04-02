@@ -74,6 +74,11 @@ func buildCellsData(cells interface{}) (interface{}, error) {
 			return nil, fmt.Errorf(`runbook cell 'enabled' must be a boolean (or not set).`)
 		}
 
+		name, enOk := GetNestedValueOrDefault(cell, ToKeyPath("name"), "unnamed").(string)
+		if !enOk {
+			return nil, fmt.Errorf(`runbook cell 'name' must be a string (or not set).`)
+		}
+
 		secretAware, enOk := GetNestedValueOrDefault(cell, ToKeyPath("secret_aware"), false).(bool)
 		if !enOk {
 			return nil, fmt.Errorf(`runbook cell 'secret_aware' must be a boolean (or not set).`)
@@ -87,7 +92,7 @@ func buildCellsData(cells interface{}) (interface{}, error) {
 				"content":      markdownContent,
 				"enabled":      enabled,
 				"type":         "MARKDOWN",
-				"name":         "unnamed",
+				"name":         name,
 				"secret_aware": secretAware,
 			}
 		} else {
@@ -98,7 +103,7 @@ func buildCellsData(cells interface{}) (interface{}, error) {
 				"content":      oplangContent,
 				"enabled":      enabled,
 				"type":         "OP_LANG",
-				"name":         "unnamed",
+				"name":         name,
 				"secret_aware": secretAware,
 			}
 		}
