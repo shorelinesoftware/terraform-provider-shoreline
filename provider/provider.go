@@ -417,7 +417,7 @@ func GetBackendVersionInfo() (build string, version string, major int64, minor i
 		return
 	}
 	version = GetNestedValueOrDefault(buildJs, ToKeyPath("tag"), "unknown").(string)
-	if strings.HasPrefix(version, "stable") || strings.HasPrefix(version, "release") || strings.HasPrefix(version, "arm") {
+	if strings.HasPrefix(version, "stable") || strings.HasPrefix(version, "release") {
 		// parse out '\d+\.\d+.\d+' suffix
 		major, minor, patch, err = ExtractVersionData(version)
 	} else {
@@ -1870,6 +1870,11 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 	}
 
 	for key, _ := range attrs {
+		forceUpdate := GetNestedValueOrDefault(attrs, ToKeyPath(key+".force_update"), false).(bool)
+		if forceUpdate {
+			forcedUpdate[CastToString(key)] = forceUpdate
+		}
+
 		if skipKeys[key] != true {
 			orderedAttrs = append(orderedAttrs, key)
 		} else {
