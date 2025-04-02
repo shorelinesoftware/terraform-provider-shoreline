@@ -417,7 +417,7 @@ func GetBackendVersionInfo() (build string, version string, major int64, minor i
 		return
 	}
 	version = GetNestedValueOrDefault(buildJs, ToKeyPath("tag"), "unknown").(string)
-	if strings.HasPrefix(version, "stable") || strings.HasPrefix(version, "release") {
+	if strings.HasPrefix(version, "stable") || strings.HasPrefix(version, "release") || strings.HasPrefix(version, "arm") {
 		// parse out '\d+\.\d+.\d+' suffix
 		major, minor, patch, err = ExtractVersionData(version)
 	} else {
