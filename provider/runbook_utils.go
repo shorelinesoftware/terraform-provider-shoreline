@@ -54,7 +54,6 @@ func buildRunbookDataObject(d *schema.ResourceData, cells interface{}) (interfac
 
 func buildCellsData(cells interface{}) (interface{}, error) {
 	decodedCells := cells.([]interface{})
-	var cellContent map[string]interface{}
 	cellsData := []interface{}{}
 
 	appendActionLog(fmt.Sprintf("building runbook cells from: %v\n", cells))
@@ -79,39 +78,54 @@ func buildCellsData(cells interface{}) (interface{}, error) {
 			return nil, fmt.Errorf(`runbook cell 'name' must be a string (or not set).`)
 		}
 
-		secretAware, enOk := GetNestedValueOrDefault(cell, ToKeyPath("secret_aware"), false).(bool)
-		if !enOk {
-			return nil, fmt.Errorf(`runbook cell 'secret_aware' must be a boolean (or not set).`)
-		}
+		secretAware := GetNestedValueOrDefault(cell, ToKeyPath("secret_aware"), nil)
 
-		if markdownContent != nil {
-			if _, ok := markdownContent.(string); !ok {
-				return nil, fmt.Errorf(`runbook cell markdown must be a string`)
-			}
-			cellContent = map[string]interface{}{
-				"content":      markdownContent,
-				"enabled":      enabled,
-				"type":         "MARKDOWN",
-				"name":         name,
-				"secret_aware": secretAware,
-			}
-		} else {
-			if _, ok := oplangContent.(string); !ok {
-				return nil, fmt.Errorf(`runbook cell oplang must be a string`)
-			}
-			cellContent = map[string]interface{}{
-				"content":      oplangContent,
-				"enabled":      enabled,
-				"type":         "OP_LANG",
-				"name":         name,
-				"secret_aware": secretAware,
-			}
+		cellContent, err := GetCellContent(markdownContent, oplangContent, enabled, secretAware, name)
+		if err != nil {
+			return nil, err
 		}
 
 		cellsData = append(cellsData, cellContent)
 	}
 
 	return cellsData, nil
+}
+
+func GetCellContent(markdownContent interface{}, oplangContent interface{}, enabled bool, secretAware interface{}, name string) (map[string]interface{}, error) {
+	var cellContent map[string]interface{}
+	if markdownContent != nil {
+		if _, ok := markdownContent.(string); !ok {
+			return nil, fmt.Errorf(`runbook cell markdown must be a string`)
+		}
+
+		cellContent = map[string]interface{}{
+			"content": markdownContent,
+			"enabled": enabled,
+			"type":    "MARKDOWN",
+			"name":    name,
+		}
+	} else {
+		if _, ok := oplangContent.(string); !ok {
+			return nil, fmt.Errorf(`runbook cell oplang must be a string`)
+		}
+
+		cellContent = map[string]interface{}{
+			"content": oplangContent,
+			"enabled": enabled,
+			"type":    "OP_LANG",
+			"name":    name,
+		}
+	}
+
+	if secretAware != nil {
+		if _, ok := secretAware.(bool); !ok {
+			return nil, fmt.Errorf(`runbook cell 'secret_aware' must be a boolean (or not set).`)
+		}
+
+		cellContent["secret_aware"] = secretAware.(bool)
+	}
+
+	return cellContent, nil
 }
 
 func buildParametersData(params interface{}, exists bool) ([]interface{}, error) {
