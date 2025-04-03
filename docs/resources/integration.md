@@ -27,6 +27,7 @@ See the Shoreline [Metrics Documentation](https://docs.shoreline.io/integrations
 ### Optional
 
 - `account_id` (String) Account ID for a 3rd-party service integration.
+- `api_certificate` (String) API certificate for a 3rd-party service integration.
 - `api_key` (String) API key for a 3rd-party service integration.
 - `api_rate_limit` (Number) The number of API calls a client is able to make in a minute.
 - `api_url` (String) API url for a 3rd-party service integration.
