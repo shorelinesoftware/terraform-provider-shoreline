@@ -1,3 +1,8 @@
+# set USE_VARS=1 to use environment variables from the variables.env file
+ifeq ($(USE_VARS), 1)
+	include ./variables.env
+endif
+
 default: install
 
 REPODIR=/tmp/tf-repo/providers
@@ -67,3 +72,28 @@ testacc:
 # no checked in files should contain tokens
 scan:
 	find . -type f | xargs grep -l -e '[e]yJhb' || echo "scan is clean"
+
+
+EXAMPLES_ROOT_PATH=./examples/resources/_root
+
+init_ex:
+	SHORELINE_URL=$(SHORELINE_URL) SHORELINE_TOKEN=$(SHORELINE_TOKEN) SHORELINE_DEBUG=$(SHORELINE_DEBUG) tofu -chdir=$(EXAMPLES_ROOT_PATH) init
+
+apply_ex:
+	SHORELINE_URL=$(SHORELINE_URL) SHORELINE_TOKEN=$(SHORELINE_TOKEN) SHORELINE_DEBUG=$(SHORELINE_DEBUG) tofu -chdir=$(EXAMPLES_ROOT_PATH) apply --auto-approve
+
+apply_ex_na:
+	SHORELINE_URL=$(SHORELINE_URL) SHORELINE_TOKEN=$(SHORELINE_TOKEN) SHORELINE_DEBUG=$(SHORELINE_DEBUG) tofu -chdir=$(EXAMPLES_ROOT_PATH) apply
+
+destroy_ex:
+	SHORELINE_URL=$(SHORELINE_URL) SHORELINE_TOKEN=$(SHORELINE_TOKEN) SHORELINE_DEBUG=$(SHORELINE_DEBUG) tofu -chdir=$(EXAMPLES_ROOT_PATH) destroy --auto-approve
+
+destroy_ex_na:
+	SHORELINE_URL=$(SHORELINE_URL) SHORELINE_TOKEN=$(SHORELINE_TOKEN) SHORELINE_DEBUG=$(SHORELINE_DEBUG) tofu -chdir=$(EXAMPLES_ROOT_PATH) destroy
+
+plan_ex:
+	SHORELINE_URL=$(SHORELINE_URL) SHORELINE_TOKEN=$(SHORELINE_TOKEN) SHORELINE_DEBUG=$(SHORELINE_DEBUG) tofu -chdir=$(EXAMPLES_ROOT_PATH) plan
+
+.PHONY: distclean_ex
+distclean_ex:
+	rm -rf $(EXAMPLES_ROOT_PATH)/terraform.tfstate $(EXAMPLES_ROOT_PATH)/terraform.tfstate.backup $(EXAMPLES_ROOT_PATH)/.terraform $(EXAMPLES_ROOT_PATH)/.terraform.lock.hcl

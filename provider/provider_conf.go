@@ -195,7 +195,9 @@ var ObjectConfigJsonStr = `
 			"client_id":                   { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.client_id" },
 			"client_secret":               { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.client_secret" },
 
-			"idp_name":                    { "type": "string", "optional": true, "min_ver": "22.0.0", "step": "params_unpack.idp_name" }
+			"idp_name":                    { "type": "string", "optional": true, "min_ver": "22.0.0", "step": "params_unpack.idp_name" },
+
+			"api_certificate":             { "type": "string", "optional": true, "min_ver": "28.1.0", "step": "params_unpack.api_certificate" }
 		}
 	},
 
@@ -487,7 +489,8 @@ var ObjectConfigJsonStr = `
 			"secret_names":            "A list of strings that contains the name of the secrets that are used in the runbook.",
 			"groups":                  "A JSON-encoded list of groups in the dashboard configuration. Each group is an object with 'name' (the group's name) and 'tags' (a list of tag names belonging to the group).",
 			"values":                  "A JSON-encoded list of objects defining the values and their associated colors in the dashboard configuration. Each object contains: 'color' (the color associated with the values) and 'values' (a list of values corresponding to specific tags).",
-			"other_tags":              "A list of additional tags that will be displayed for the resources."
+			"other_tags":              "A list of additional tags that will be displayed for the resources.",
+			"api_certificate":         "API certificate for a 3rd-party service integration."
 		}
 	}
 }

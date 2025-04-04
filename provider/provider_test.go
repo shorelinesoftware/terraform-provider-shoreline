@@ -820,8 +820,8 @@ func buildMockAccResourceReportTemplate(prefix string, full bool) string {
 			  depends_on = [
 					shoreline_report_template.` + report_name + `
 				]
-			}	
-			
+			}
+
 			resource "shoreline_report_template" "linked_report_template" {
 				name = "linked_report_template"
 				blocks = ` + wrapJsonEncode("[]") + `
@@ -979,11 +979,11 @@ func TestAccResourceRunbook(t *testing.T) {
 }
 
 func buildMockRunbookCells() string {
-	return "[{\"md\":\"CREATE\"},{\"op\":\"action success = `echo SUCCESS`\"},{\"op\":\"enable success\"},{\"op\":\"success\",\"enabled\":false},{\"md\":\"CLEANUP\"},{\"op\":\"delete success\"}]"
+	return "[{\"md\":\"CREATE\"},{\"op\":\"action success = `echo SUCCESS`\", \"name\":\"success\"},{\"op\":\"enable success\"},{\"op\":\"success\",\"enabled\":false},{\"md\":\"CLEANUP\"},{\"op\":\"delete success\"}]"
 }
 
 func buildExpectedRunbookCells() string {
-	return "[\n  {\n    \"enabled\": true,\n    \"md\": \"CREATE\",\n    \"name\": \"unnamed\"\n  },\n  {\n    \"enabled\": true,\n    \"name\": \"unnamed\",\n    \"op\": \"action success = `echo SUCCESS`\"\n  },\n  {\n    \"enabled\": true,\n    \"name\": \"unnamed\",\n    \"op\": \"enable success\"\n  },\n  {\n    \"enabled\": false,\n    \"name\": \"unnamed\",\n    \"op\": \"success\"\n  },\n  {\n    \"enabled\": true,\n    \"md\": \"CLEANUP\",\n    \"name\": \"unnamed\"\n  },\n  {\n    \"enabled\": true,\n    \"name\": \"unnamed\",\n    \"op\": \"delete success\"\n  }\n]"
+	return "[\n  {\n    \"enabled\": true,\n    \"md\": \"CREATE\",\n    \"name\": \"unnamed\"\n  },\n  {\n    \"enabled\": true,\n    \"name\": \"success\",\n    \"op\": \"action success = `echo SUCCESS`\"\n  },\n  {\n    \"enabled\": true,\n    \"name\": \"unnamed\",\n    \"op\": \"enable success\"\n  },\n  {\n    \"enabled\": false,\n    \"name\": \"unnamed\",\n    \"op\": \"success\"\n  },\n  {\n    \"enabled\": true,\n    \"md\": \"CLEANUP\",\n    \"name\": \"unnamed\"\n  },\n  {\n    \"enabled\": true,\n    \"name\": \"unnamed\",\n    \"op\": \"delete success\"\n  }\n]"
 }
 
 func buildMockRunbookParams() string {
