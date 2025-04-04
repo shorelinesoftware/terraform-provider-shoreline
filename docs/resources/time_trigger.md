@@ -23,8 +23,8 @@ Shoreline time_trigger. A condition that triggers Notebooks.
 ### Optional
 
 - `enabled` (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
-- `end_date` (String) When the trigger condition stops firing. (defaults to unset, e.g. no stop date). The accepted format is ISO8601, e.g. '2029-02-17T08:08:01'.
-- `start_date` (String) When the trigger condition starts firing (defaults to creation/update time of the trigger). The accepted format is ISO8601, e.g. '2024-02-17T08:08:01'.
+- `end_date` (String) When the trigger condition stops firing. (defaults to unset, e.g. no stop date). The accepted format is ISO8601, e.g. '2029-02-17T08:08:01'. Defaults to ``.
+- `start_date` (String) When the trigger condition starts firing (defaults to creation/update time of the trigger). The accepted format is ISO8601, e.g. '2024-02-17T08:08:01'. Defaults to ``.
 
 ### Read-Only
 

@@ -1,3 +1,4 @@
+# DEPRECATED: Use the `cells` field instead
 resource "shoreline_runbook" "data_runbook" {
   name        = "data_runbook"
   description = "A sample runbook defined using the data field, which loads the runbook configuration from a separate JSON file."
