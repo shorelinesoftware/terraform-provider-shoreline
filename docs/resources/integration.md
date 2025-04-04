@@ -27,6 +27,7 @@ See the Shoreline [Metrics Documentation](https://docs.shoreline.io/integrations
 ### Optional
 
 - `account_id` (String) Account ID for a 3rd-party service integration. Defaults to ``.
+- `api_certificate` (String) API certificate for a 3rd-party service integration. Defaults to ``.
 - `api_key` (String) API key for a 3rd-party service integration. Defaults to ``.
 - `api_rate_limit` (Number) The number of API calls a client is able to make in a minute. Defaults to `0`.
 - `api_url` (String) API url for a 3rd-party service integration. Defaults to ``.
@@ -37,18 +38,6 @@ See the Shoreline [Metrics Documentation](https://docs.shoreline.io/integrations
 - `client_secret` (String) Client secret for a 3rd-party service integration (Microsoft Entra ID). Defaults to ``.
 - `credentials` (String) The credentials used for a 3rd-party service integration (google cloud identity), encoded in base64. Defaults to ``.
 - `dashboard_name` (String, Deprecated) **Deprecated** Field 'dashboard_name' is obsolete. The name of a dashboard for 3rd-party service integration (datadog). Defaults to ``.
-- `account_id` (String) Account ID for a 3rd-party service integration.
-- `api_certificate` (String) API certificate for a 3rd-party service integration.
-- `api_key` (String) API key for a 3rd-party service integration.
-- `api_rate_limit` (Number) The number of API calls a client is able to make in a minute.
-- `api_url` (String) API url for a 3rd-party service integration.
-- `app_key` (String) Application key for a 3rd-party service integration.
-- `cache_ttl` (Number) The amount of time group memberships will be cached (in milliseconds).
-- `cache_ttl_ms` (Number) The amount of time group memberships will be cached (in milliseconds).
-- `client_id` (String) Application id for a 3rd-party service integration (Microsoft Entra ID).
-- `client_secret` (String) Client secret for a 3rd-party service integration (Microsoft Entra ID).
-- `credentials` (String) The credentials used for a 3rd-party service integration (google cloud identity), encoded in base64.
-- `dashboard_name` (String, Deprecated) **Deprecated** Field 'dashboard_name' is obsolete. The name of a dashboard for 3rd-party service integration (datadog).
 - `enabled` (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
 - `external_url` (String) External url for a 3rd-party service integration. Defaults to ``.
 - `idp_name` (String) The Identity Provider's name. Defaults to ``.
