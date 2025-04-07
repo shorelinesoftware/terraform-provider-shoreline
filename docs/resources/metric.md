@@ -70,9 +70,9 @@ for more info.
 
 ### Optional
 
-- `description` (String) A user-friendly explanation of an object.
-- `resource_type` (String)
-- `units` (String) Units of a Metric (e.g., bytes, blocks, packets, percent).
+- `description` (String) A user-friendly explanation of an object. Defaults to ``.
+- `resource_type` (String) Defaults to ``.
+- `units` (String) Units of a Metric (e.g., bytes, blocks, packets, percent). Defaults to ``.
 
 ### Read-Only
 

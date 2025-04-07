@@ -22,12 +22,12 @@ Shoreline principal. An authorization group (e.g. Okta groups). Note: Admin priv
 
 ### Optional
 
-- `action_limit` (Number) The number of simultaneous actions allowed for a permissions group.
-- `administer_permission` (Boolean) If a permissions group is allowed to perform "administer" actions.
-- `configure_permission` (Boolean) If a permissions group is allowed to perform "configure" actions.
-- `execute_limit` (Number) The number of simultaneous linux (shell) commands allowed for a permissions group.
-- `idp_name` (String) The Identity Provider's name.
-- `view_limit` (Number) The number of simultaneous metrics allowed for a permissions group.
+- `action_limit` (Number) The number of simultaneous actions allowed for a permissions group. Defaults to `0`.
+- `administer_permission` (Boolean) If a permissions group is allowed to perform "administer" actions. Defaults to `false`.
+- `configure_permission` (Boolean) If a permissions group is allowed to perform "configure" actions. Defaults to `false`.
+- `execute_limit` (Number) The number of simultaneous linux (shell) commands allowed for a permissions group. Defaults to `0`.
+- `idp_name` (String) The Identity Provider's name. Defaults to ``.
+- `view_limit` (Number) The number of simultaneous metrics allowed for a permissions group. Defaults to `0`.
 
 ### Read-Only
 

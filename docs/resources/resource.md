@@ -42,7 +42,7 @@ resource "shoreline_resource" "az_k8s" {
 
 ### Optional
 
-- `description` (String) A user-friendly explanation of an object.
+- `description` (String) A user-friendly explanation of an object. Defaults to ``.
 - `params` (List of String) Named variables to pass to an object (e.g. an Action).
 
 ### Read-Only
