@@ -471,21 +471,21 @@ func New(version string) func() *schema.Provider {
 			//	"shoreline_datasource": dataSourceShoreline(),
 			//},
 			ResourcesMap: map[string]*schema.Resource{
-				"shoreline_action":          resourceShorelineObject(ObjectConfigJsonStr, "action"),
-				"shoreline_alarm":           resourceShorelineObject(ObjectConfigJsonStr, "alarm"),
-				"shoreline_time_trigger":    resourceShorelineObject(ObjectConfigJsonStr, "time_trigger"),
-				"shoreline_bot":             resourceShorelineObject(ObjectConfigJsonStr, "bot"),
-				"shoreline_circuit_breaker": resourceShorelineObject(ObjectConfigJsonStr, "circuit_breaker"),
-				"shoreline_file":            resourceShorelineObject(ObjectConfigJsonStr, "file"),
-				"shoreline_integration":     resourceShorelineObject(ObjectConfigJsonStr, "integration"),
-				"shoreline_metric":          resourceShorelineObject(ObjectConfigJsonStr, "metric"),
-				"shoreline_notebook":        resourceShorelineObject(ObjectConfigJsonStr, "notebook"),
-				"shoreline_runbook":         resourceShorelineObject(ObjectConfigJsonStr, "notebook"), // alias shoreline_runbook to shoreline_notebook
-				"shoreline_principal":       resourceShorelineObject(ObjectConfigJsonStr, "principal"),
-				"shoreline_resource":        resourceShorelineObject(ObjectConfigJsonStr, "resource"),
-				"shoreline_system_settings": resourceShorelineObject(ObjectConfigJsonStr, "system_settings"),
-				"shoreline_report_template": resourceShorelineObject(ObjectConfigJsonStr, "report_template"),
-				"shoreline_dashboard":       resourceShorelineObject(ObjectConfigJsonStr, "dashboard"),
+				"shoreline_action":          ResourceShorelineObject(ObjectConfigJsonStr, "action"),
+				"shoreline_alarm":           ResourceShorelineObject(ObjectConfigJsonStr, "alarm"),
+				"shoreline_time_trigger":    ResourceShorelineObject(ObjectConfigJsonStr, "time_trigger"),
+				"shoreline_bot":             ResourceShorelineObject(ObjectConfigJsonStr, "bot"),
+				"shoreline_circuit_breaker": ResourceShorelineObject(ObjectConfigJsonStr, "circuit_breaker"),
+				"shoreline_file":            ResourceShorelineObject(ObjectConfigJsonStr, "file"),
+				"shoreline_integration":     ResourceShorelineObject(ObjectConfigJsonStr, "integration"),
+				"shoreline_metric":          ResourceShorelineObject(ObjectConfigJsonStr, "metric"),
+				"shoreline_notebook":        ResourceShorelineObject(ObjectConfigJsonStr, "notebook"),
+				"shoreline_runbook":         ResourceShorelineObject(ObjectConfigJsonStr, "notebook"), // alias shoreline_runbook to shoreline_notebook
+				"shoreline_principal":       ResourceShorelineObject(ObjectConfigJsonStr, "principal"),
+				"shoreline_resource":        ResourceShorelineObject(ObjectConfigJsonStr, "resource"),
+				"shoreline_system_settings": ResourceShorelineObject(ObjectConfigJsonStr, "system_settings"),
+				"shoreline_report_template": ResourceShorelineObject(ObjectConfigJsonStr, "report_template"),
+				"shoreline_dashboard":       ResourceShorelineObject(ObjectConfigJsonStr, "dashboard"),
 			},
 			DataSourcesMap: map[string]*schema.Resource{
 				"shoreline_version": &schema.Resource{
@@ -635,7 +635,7 @@ func configure(version string, p *schema.Provider) func(ctx context.Context, d *
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
+func ResourceShorelineObject(configJsStr string, key string) *schema.Resource {
 	params := map[string]*schema.Schema{}
 
 	objects := map[string]interface{}{}
@@ -890,15 +890,13 @@ func resourceShorelineObject(configJsStr string, key string) *schema.Resource {
 		if replacesField != "" {
 			sch.ConflictsWith = []string{replacesField}
 		}
-		//WriteMsg("WARNING: JSON config from resourceShorelineObject(%s) %s.Optional = %+v.\n", key, k, sch.Optional)
-		//WriteMsg("WARNING: JSON config from resourceShorelineObject(%s) %s.Required = %+v.\n", key, k, sch.Required)
-		//WriteMsg("WARNING: JSON config from resourceShorelineObject(%s) %s.Computed = %+v.\n", key, k, sch.Computed)
+		//WriteMsg("WARNING: JSON config from ResourceShorelineObject(%s) %s.Optional = %+v.\n", key, k, sch.Optional)
+		//WriteMsg("WARNING: JSON config from ResourceShorelineObject(%s) %s.Required = %+v.\n", key, k, sch.Required)
+		//WriteMsg("WARNING: JSON config from ResourceShorelineObject(%s) %s.Computed = %+v.\n", key, k, sch.Computed)
 		//defowlt := GetNestedValueOrDefault(attrMap, ToKeyPath("value"), nil)
-		defowlt := GetNestedValueOrDefault(attrMap, ToKeyPath("default"), nil)
-		if defowlt != nil {
-			//appendActionLogInner(fmt.Sprintf("NOTE: DEFAULT resourceShorelineObject(%s) %s.Default = %+v.\n", key, k, defowlt))
-			sch.Default = defowlt
-		}
+		sch, defowlt := SetAttributeDefaultValue(attrMap, sch)
+		//appendActionLogInner(fmt.Sprintf("NOTE: DEFAULT ResourceShorelineObject(%s) %s.Default = %+v.\n", key, k, defowlt))
+
 		suppressNullDiffRegex, isStr := GetNestedValueOrDefault(attrMap, ToKeyPath("suppress_null_regex"), nil).(string)
 		if isStr {
 			sch.DiffSuppressFunc = func(k, old, nu string, d *schema.ResourceData) bool {
@@ -1234,36 +1232,56 @@ func SortListByStrVal(val []interface{}) []interface{} {
 	return sortedCopy
 }
 
-func attrValueDefault(attrTyp string) interface{} {
+// AttrValueDefault returns the default value for a given attribute type
+// Used for both schema defaults and when no value is provided in configuration
+func AttrValueDefault(attrTyp string) interface{} {
 	switch attrTyp {
-	case "command":
+	case "string", "command", "time_s", "label", "resource", "b64json":
 		return ""
-	case "time_s":
-		return ""
-	case "b64json":
-		return ""
-	case "string":
-		return ""
-	case "string[]":
-		return []string{}
-	case "string_set":
-		return []string{}
-	case "bool":
+	case "bool", "intbool":
 		return false
-	case "intbool": // special handling to/from backend ("1"/"0")
-		return false
-	case "float":
-		return float64(0)
 	case "int":
 		return int(0)
 	case "unsigned":
 		return uint(0)
-	case "label":
-		return ""
-	case "resource":
+	case "float":
+		return float64(0)
+	case "string[]", "string_set":
+		return []string{}
+	default:
 		return ""
 	}
-	return ""
+}
+
+// SetAttributeDefaultValue sets the default value for a schema attribute based on the attribute map configuration.
+// If the attribute is required or computed, no default is set. Also, defaults are not set for list or set types
+// as they're not supported by Terraform. Otherwise, it will use either the explicitly specified default
+// from the attribute map, or fall back to a type-specific default value if none is specified.
+func SetAttributeDefaultValue(attrMap map[string]interface{}, sch *schema.Schema) (*schema.Schema, interface{}) {
+	required := GetNestedValueOrDefault(attrMap, ToKeyPath("required"), false).(bool)
+	computed := GetNestedValueOrDefault(attrMap, ToKeyPath("computed"), false).(bool)
+	attrTyp := GetNestedValueOrDefault(attrMap, ToKeyPath("type"), "string").(string)
+
+	// Don't set default if the field is required or computed
+	if required || computed {
+		return sch, nil
+	}
+
+	// Don't set default for list or set types (string[] or string_set)
+	if attrTyp == "string[]" || attrTyp == "string_set" {
+		return sch, nil
+	}
+
+	defowlt := GetNestedValueOrDefault(attrMap, ToKeyPath("default"), nil)
+
+	if defowlt == nil {
+		// If no default is specified, use the type-specific default
+		defowlt = AttrValueDefault(attrTyp)
+	}
+
+	sch.Default = defowlt
+
+	return sch, defowlt
 }
 
 func attrValueString(typ string, key string, val interface{}, attrs map[string]interface{}) string {
@@ -1484,7 +1502,7 @@ func shouldSkipSetField(key string, val interface{}, name string, typ string, at
 			val, exists := d.GetOk(key)
 			defowlt := GetNestedValueOrDefault(attrs, ToKeyPath(key+".default"), nil)
 			if defowlt == nil {
-				defowlt = attrValueDefault(attrTyp)
+				defowlt = AttrValueDefault(attrTyp)
 			}
 			appendActionLog(fmt.Sprintf("Set (checking min_ver): %s: '%s'.'%s' exists(%v) val(%v : %T) default(%v : %T) ver(%v) backend_ver(%v)\n", typ, name, key, exists, val, val, defowlt, defowlt, min_ver, backendVersion.Version))
 			// NOTE: because of the bug in GetOk(), we can't know for sure if the value is set in the TF HCL
