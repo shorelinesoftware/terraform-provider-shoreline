@@ -1213,7 +1213,7 @@ func IsSecretAwareSupported(backendVersion VersionRecord) bool {
 		return true
 	}
 	if backendVersion.Major == 28 {
-		return backendVersion.Minor == 1 ||
+		return (backendVersion.Minor == 1 && backendVersion.Patch >= 54) ||
 			(backendVersion.Minor == 2 && backendVersion.Patch >= 4) ||
 			backendVersion.Minor > 3
 	}
