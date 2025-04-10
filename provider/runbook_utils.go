@@ -117,12 +117,16 @@ func GetCellContent(markdownContent interface{}, oplangContent interface{}, enab
 		}
 	}
 
-	if secretAware != nil {
-		if _, ok := secretAware.(bool); !ok {
-			return nil, fmt.Errorf(`runbook cell 'secret_aware' must be a boolean (or not set).`)
-		}
+	// Only add secret_aware if the backend version supports it
+	backendVersion := GetBackendVersionInfoStruct()
+	if IsSecretAwareSupported(backendVersion) {
+		if secretAware != nil {
+			if _, ok := secretAware.(bool); !ok {
+				return nil, fmt.Errorf(`runbook cell 'secret_aware' must be a boolean (or not set).`)
+			}
 
-		cellContent["secret_aware"] = secretAware.(bool)
+			cellContent["secret_aware"] = secretAware.(bool)
+		}
 	}
 
 	return cellContent, nil

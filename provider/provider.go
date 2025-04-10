@@ -1195,14 +1195,29 @@ func NormalizeNotebookCells(cells *[]interface{}) {
 		}
 
 		backendVersion := GetBackendVersionInfoStruct()
-		if backendVersion.Major >= 28 && backendVersion.Minor >= 1 && backendVersion.Minor != 3 {
+		if IsSecretAwareSupported(backendVersion) {
 			secret_aware := GetNestedValueOrDefault(vmap, ToKeyPath("secret_aware"), nil)
 			// set secret_aware only if backend version >= 28.1 && backend_version != 28.3
 			if secret_aware == nil {
 				vmap["secret_aware"] = false
 			}
+		} else {
+			// Explicitly remove secret_aware if backend version doesn't support it
+			delete(vmap, "secret_aware")
 		}
 	}
+}
+
+func IsSecretAwareSupported(backendVersion VersionRecord) bool {
+	if backendVersion.Major > 28 {
+		return true
+	}
+	if backendVersion.Major == 28 {
+		return (backendVersion.Minor == 1 && backendVersion.Patch >= 54) ||
+			(backendVersion.Minor == 2 && backendVersion.Patch >= 4) ||
+			backendVersion.Minor > 3
+	}
+	return false // Covers Major < 28
 }
 
 func EscapeString(val interface{}) string {
