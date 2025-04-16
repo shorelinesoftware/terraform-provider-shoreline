@@ -53,7 +53,13 @@ func buildRunbookDataObject(d *schema.ResourceData, cells interface{}) (interfac
 }
 
 func buildCellsData(cells interface{}) (interface{}, error) {
-	decodedCells := cells.([]interface{})
+
+	var decodedCells []interface{}
+	if cellsList, ok := cells.([]interface{}); ok {
+		decodedCells = cellsList
+	} else {
+		return nil, fmt.Errorf(`runbook cells must be a list`)
+	}
 	cellsData := []interface{}{}
 
 	appendActionLog(fmt.Sprintf("building runbook cells from: %v\n", cells))
