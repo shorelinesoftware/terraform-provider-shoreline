@@ -98,4 +98,3 @@ resource "shoreline_integration" "am9" {
   enabled          = true
   permissions_user = "<permissions_user>"
 }
- 
