@@ -27,6 +27,7 @@ See the Shoreline [Metrics Documentation](https://docs.shoreline.io/integrations
 ### Optional
 
 - `account_id` (String) Account ID for a 3rd-party service integration. Defaults to ``.
+- `address` (String) The URL of the Vault server. Defaults to ``.
 - `api_certificate` (String) API certificate for a 3rd-party service integration. Defaults to ``.
 - `api_key` (String) API key for a 3rd-party service integration. Defaults to ``.
 - `api_rate_limit` (Number) The number of API calls a client is able to make in a minute. Defaults to `0`.
@@ -43,7 +44,10 @@ See the Shoreline [Metrics Documentation](https://docs.shoreline.io/integrations
 - `idp_name` (String) The Identity Provider's name. Defaults to ``.
 - `insights_collector_api_key` (String) Insights key for a 3rd-party service integration. Defaults to ``.
 - `insights_collector_url` (String) Insights url for a 3rd-party service integration. Defaults to ``.
+- `jwt_auth_path` (String) The path to the JWT authentication method in Vault. It tells NVault where to perform JWT login requests. Defaults to ``.
+- `namespace` (String) A logical namespace in Vault used to organize and isolate secrets and policies. Defaults to ``.
 - `permissions_user` (String) The user which 3rd-party service integration remediations run as (default 'Shoreline'). Defaults to ``.
+- `role_name` (String) The name of the Vault role configured under the JWT auth method. It determines policies and constraints for the login. Defaults to ``.
 - `site_url` (String) Site/Application url for a 3rd-party service integration. Defaults to ``.
 - `subject` (String) The subject whose authentication details is used for a 3rd-party service integration (google cloud identity). Defaults to ``.
 - `tenant_id` (String) Tenant id for a 3rd-party service integration (Microsoft Entra ID). Defaults to ``.

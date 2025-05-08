@@ -162,42 +162,47 @@ var ObjectConfigJsonStr = `
 			}
 		},
 		"attributes": {
-			"type":                        { "type": "string",   "computed": true, "value": "INTEGRATION" },
-			"name":                        { "type": "label",    "required": true, "forcenew": true, "skip": true },
-			"service_name":                { "type": "command",  "required": true, "primary": true, "forcenew": true, "skip": true },
-			"serial_number":               { "type": "string",   "required": true },
-			"permissions_user":            { "type": "string",   "optional": true, "match_null": "Shoreline" },
-			"api_url":                     { "type": "string",   "optional": true, "step": "params_unpack.api_url" },
-			"site_url":                    { "type": "string",   "optional": true, "step": "params_unpack.site_url", "min_ver": "19.0.0"},
-			"api_key":                     { "type": "string",   "optional": true, "step": "params_unpack.api_key" },
-			"app_key":                     { "type": "string",   "optional": true, "step": "params_unpack.app_key" },
-			"dashboard_name":              { "type": "string",   "optional": true, "step": "params_unpack.dashboard_name", "max_ver": "25.99.999", "deprecated": true },
-			"webhook_name":                { "type": "string",   "optional": true, "step": "params_unpack.webhook_name" },
-			"##description":               { "type": "string",   "optional": true },
+			"type":                         { "type": "string",   "computed": true, "value": "INTEGRATION" },
+			"name":                         { "type": "label",    "required": true, "forcenew": true, "skip": true },
+			"service_name":                 { "type": "command",  "required": true, "primary": true, "forcenew": true, "skip": true },
+			"serial_number":                { "type": "string",   "required": true },
+			"permissions_user":             { "type": "string",   "optional": true, "match_null": "Shoreline" },
+			"api_url":                      { "type": "string",   "optional": true, "step": "params_unpack.api_url" },
+			"site_url":                     { "type": "string",   "optional": true, "step": "params_unpack.site_url", "min_ver": "19.0.0"},
+			"api_key":                      { "type": "string",   "optional": true, "step": "params_unpack.api_key" },
+			"app_key":                      { "type": "string",   "optional": true, "step": "params_unpack.app_key" },
+			"dashboard_name":               { "type": "string",   "optional": true, "step": "params_unpack.dashboard_name", "max_ver": "25.99.999", "deprecated": true },
+			"webhook_name":                 { "type": "string",   "optional": true, "step": "params_unpack.webhook_name" },
+			"##description":                { "type": "string",   "optional": true },
 
-			"account_id":                  { "type": "string",   "optional": true, "step": "params_unpack.account_id" },
-			"insights_collector_url":      { "type": "string",   "optional": true, "step": "params_unpack.insights_collector_url" },
-			"insights_collector_api_key":  { "type": "string",   "optional": true, "step": "params_unpack.insights_collector_api_key" },
+			"account_id":                   { "type": "string",   "optional": true, "step": "params_unpack.account_id" },
+			"insights_collector_url":       { "type": "string",   "optional": true, "step": "params_unpack.insights_collector_url" },
+			"insights_collector_api_key":   { "type": "string",   "optional": true, "step": "params_unpack.insights_collector_api_key" },
 			"#incident_management_url":     { "type": "string",   "optional": true, "step": "params_unpack.incident_management_url" },
 			"#incident_management_api_key": { "type": "string",   "optional": true, "step": "params_unpack.incident_management_api_key" },
 
-			"cache_ttl":                   { "type": "int", "optional": true, "step": "params_unpack.cache_ttl" },
-			"api_rate_limit":              { "type": "int", "optional": true, "step": "params_unpack.api_rate_limit" },
-			"enabled":                     { "type": "intbool",  "optional": true, "default": false },
+			"cache_ttl":                    { "type": "int", "optional": true, "step": "params_unpack.cache_ttl" },
+			"api_rate_limit":               { "type": "int", "optional": true, "step": "params_unpack.api_rate_limit" },
+			"enabled":                      { "type": "intbool",  "optional": true, "default": false },
 
-			"external_url":                { "type": "string",   "optional": true, "min_ver": "17.0.0", "step": "params_unpack.external_url" },
+			"external_url":                 { "type": "string",   "optional": true, "min_ver": "17.0.0", "step": "params_unpack.external_url" },
 
-			"cache_ttl_ms":                { "type": "int",    "optional": true, "min_ver": "18.0.0", "step": "params_unpack.cache_ttl_ms" },
-			"subject":                     { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.subject" },
-			"credentials":                 { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.credentials" },
+			"cache_ttl_ms":                 { "type": "int",    "optional": true, "min_ver": "18.0.0", "step": "params_unpack.cache_ttl_ms" },
+			"subject":                      { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.subject" },
+			"credentials":                  { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.credentials" },
 
-			"tenant_id":                   { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.tenant_id" },
-			"client_id":                   { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.client_id" },
-			"client_secret":               { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.client_secret" },
+			"tenant_id":                    { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.tenant_id" },
+			"client_id":                    { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.client_id" },
+			"client_secret":                { "type": "string", "optional": true, "min_ver": "18.0.0", "step": "params_unpack.client_secret" },
 
-			"idp_name":                    { "type": "string", "optional": true, "min_ver": "22.0.0", "step": "params_unpack.idp_name" },
+			"idp_name":                     { "type": "string", "optional": true, "min_ver": "22.0.0", "step": "params_unpack.idp_name" },
 
-			"api_certificate":             { "type": "string", "optional": true, "min_ver": "28.1.0", "step": "params_unpack.api_certificate" }
+			"api_certificate":              { "type": "string", "optional": true, "min_ver": "28.1.0", "step": "params_unpack.api_certificate" },
+			
+			"address":                      { "type": "string", "optional": true, "min_ver": "28.4.0", "step": "params_unpack.address" },
+			"namespace":                    { "type": "string", "optional": true, "min_ver": "28.4.0", "step": "params_unpack.namespace" },  
+			"role_name":                    { "type": "string", "optional": true, "min_ver": "28.4.0", "step": "params_unpack.role_name" },
+			"jwt_auth_path":                { "type": "string", "optional": true, "min_ver": "28.4.0", "step": "params_unpack.jwt_auth_path" }
 		}
 	},
 
@@ -345,6 +350,16 @@ var ObjectConfigJsonStr = `
        }
     },
 
+	"nvault_secret": {
+        "attributes": {
+            "type":              { "type": "string",   "computed": true, "value": "NVAULT_SECRET" },
+            "name":              { "type": "label",    "required": true, "forcenew": true, "skip": true },
+            "vault_secret_path": { "type": "string",   "required": true, "step": "secret_info.vault_secret_path" },
+            "vault_secret_key":  { "type": "string",   "required": true, "step": "secret_info.vault_secret_key" },
+            "vault_namespace":   { "type": "string",   "required": true, "step": "secret_info.vault_namespace" }
+        }
+    },
+
 	"docs": {
 		"objects": {
 			"action":    "A command that can be run.\n\nSee the Shoreline [Actions Documentation](https://docs.shoreline.io/actions) for more info.",
@@ -360,7 +375,8 @@ var ObjectConfigJsonStr = `
 			"resource":  "A server or compute resource in the system (e.g. host, pod, container).\n\nSee the Shoreline [Resources Documentation](https://docs.shoreline.io/platform/resources) for more info.",
 			"system_settings":  "System-level settings. Note: there must only be one instance of this terraform resource named 'system_settings'.\n\nSee the Shoreline [Settings Documentation](https://docs.shoreline.io/platform/settings) for more info.",
 			"report_template":  "A resource report template. Note: Configure privilege (in Shoreline) to create report template objects.",
-			"dashboard": "A platform for visualizing resources and their associated tags."
+			"dashboard": "A platform for visualizing resources and their associated tags.",
+			"nvault_secret": "A secret managed by NVault. Creating it requires an active NVault integration to be configured and enabled."
 		},
 
 		"attributes": {
@@ -490,7 +506,14 @@ var ObjectConfigJsonStr = `
 			"groups":                  "A JSON-encoded list of groups in the dashboard configuration. Each group is an object with 'name' (the group's name) and 'tags' (a list of tag names belonging to the group).",
 			"values":                  "A JSON-encoded list of objects defining the values and their associated colors in the dashboard configuration. Each object contains: 'color' (the color associated with the values) and 'values' (a list of values corresponding to specific tags).",
 			"other_tags":              "A list of additional tags that will be displayed for the resources.",
-			"api_certificate":         "API certificate for a 3rd-party service integration."
+			"api_certificate":         "API certificate for a 3rd-party service integration.",
+			"address":                 "The URL of the Vault server.",
+			"namespace":               "A logical namespace in Vault used to organize and isolate secrets and policies.",
+			"jwt_auth_path":           "The path to the JWT authentication method in Vault. It tells NVault where to perform JWT login requests.",
+			"role_name":               "The name of the Vault role configured under the JWT auth method. It determines policies and constraints for the login.",
+			"vault_secret_path":       "The full path in Vault where the secret is stored. It includes the mount path and the subpath. It tells Vault where to look for the secret.",
+			"vault_secret_key":        "The specific key within the secret data to retrieve.",
+			"vault_namespace":         "Must match the namespace configured in an existing NVault integration."
 		}
 	}
 }
