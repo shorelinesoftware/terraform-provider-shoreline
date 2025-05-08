@@ -204,7 +204,13 @@ func runOpCommandToJson(command string) (map[string]interface{}, error) {
 }
 
 func getNamedObjectFromClassDef(name string, typ string, classJs map[string]interface{}) map[string]interface{} {
-	baseKey := fmt.Sprintf("get_%s_class.%s_classes", typ, typ)
+	baseKey := ""
+	if typ == "nvault_secret" {
+		baseKey = "get_secret.secrets"
+	} else {
+		baseKey = fmt.Sprintf("get_%s_class.%s_classes", typ, typ)
+	}
+
 	baseArray, isArray := GetNestedValueOrDefault(classJs, ToKeyPath(baseKey), []interface{}{}).([]interface{})
 	if isArray {
 		for _, curJs := range baseArray {
@@ -225,7 +231,7 @@ func CheckUpdateResult(result string) error {
 	}
 
 	actions := []string{"define", "delete", "update"}
-	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook", "configuration", "time_trigger", "circuit_breaker", "principal", "report_template", "dashboard"}
+	types := []string{"resource", "metric", "alarm", "action", "bot", "file", "integration", "notebook", "configuration", "time_trigger", "circuit_breaker", "principal", "report_template", "dashboard", "secret"}
 	for _, act := range actions {
 		for _, typ := range types {
 			key := act + "_" + typ
@@ -486,6 +492,7 @@ func New(version string) func() *schema.Provider {
 				"shoreline_system_settings": ResourceShorelineObject(ObjectConfigJsonStr, "system_settings"),
 				"shoreline_report_template": ResourceShorelineObject(ObjectConfigJsonStr, "report_template"),
 				"shoreline_dashboard":       ResourceShorelineObject(ObjectConfigJsonStr, "dashboard"),
+				"shoreline_nvault_secret":   ResourceShorelineObject(ObjectConfigJsonStr, "nvault_secret"),
 			},
 			DataSourcesMap: map[string]*schema.Resource{
 				"shoreline_version": &schema.Resource{
@@ -2096,7 +2103,17 @@ func resourceShorelineObjectCreate(typ string, primary string, attrs map[string]
 		}
 		//appendActionLog(fmt.Sprintf("primaryValStr is ((( %+v )))\n", primaryValStr))
 		//op := fmt.Sprintf("%s %s = \"%s\"", typ, name, primaryVal)
-		op := fmt.Sprintf("%s %s = %s", typ, name, primaryValStr)
+		op := ""
+		if typ == "nvault_secret" {
+			vaultNamespace := d.Get("vault_namespace")
+			vaultSecretPath := d.Get("vault_secret_path")
+			vaultSecretKey := d.Get("vault_secret_key")
+
+			op = fmt.Sprintf("%s %s = nvault_config(\"%s\", \"%s\", \"%s\")", typ, name, vaultNamespace, vaultSecretPath, vaultSecretKey)
+		} else {
+			op = fmt.Sprintf("%s %s = %s", typ, name, primaryValStr)
+		}
+
 		//if typ == "bot" {
 		//	// special handling for BOT creation statement "bot <name>=
 		//	action := d.Get("action_statement").(string)
@@ -2386,9 +2403,15 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 
 		stepsJs := map[string]interface{}{}
 
-		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" || typ == "runbook" || typ == "time_trigger" || typ == "circuit_breaker" || typ == "report_template" || typ == "dashboard" {
+		if typ == "alarm" || typ == "action" || typ == "bot" || typ == "integration" || typ == "notebook" || typ == "runbook" || typ == "time_trigger" || typ == "circuit_breaker" || typ == "report_template" || typ == "dashboard" || typ == "nvault_secret" {
 			// extract fields from step objects
-			op := fmt.Sprintf("get_%s_class( %s_name = \"%s\" )", typ, typ, name)
+			op := ""
+			if typ == "nvault_secret" {
+				op = fmt.Sprintf("get_secret( secret_name = \"%s\" )", name)
+			} else {
+				op = fmt.Sprintf("get_%s_class( %s_name = \"%s\" )", typ, typ, name)
+			}
+
 			extraJs, err := runOpCommandToJson(op)
 			if err != nil {
 				diags = diag.Errorf("Failed to read %s - %s: %s", typ, name, err.Error())
@@ -2418,6 +2441,11 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 						SetNestedValue(stepsJs, ToKeyPath("dashboard_configuration"), conf)
 					}
 				}
+			}
+
+			if typ == "nvault_secret" {
+				secretInfo := GetNestedValueOrDefault(stepsJs, ToKeyPath("secret_info"), nil)
+				SetNestedValue(stepsJs, ToKeyPath("secret_info"), secretInfo)
 			}
 		}
 
