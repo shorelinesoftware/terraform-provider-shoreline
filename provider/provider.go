@@ -1223,10 +1223,7 @@ func IsSecretAwareSupported(backendVersion VersionRecord) bool {
 func EscapeString(val interface{}) string {
 	out := fmt.Sprintf("%s", val)
 
-	slash := regexp.MustCompile(`\\`)
-	out = slash.ReplaceAllString(out, "\\\\")
-	quote := regexp.MustCompile(`"`)
-	out = quote.ReplaceAllString(out, "\\\"")
+	out = encodeStringSpecialCharacters(out)
 
 	return out
 }
@@ -2599,4 +2596,8 @@ func resourceShorelineObjectDelete(typ string, objectDef map[string]interface{})
 		}
 		return diags
 	}
+}
+func encodeStringSpecialCharacters(str string) string {
+	quoted_str := strconv.Quote(str)
+	return quoted_str[1 : len(quoted_str)-1]
 }
