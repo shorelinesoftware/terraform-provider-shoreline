@@ -1221,11 +1221,11 @@ func IsSecretAwareSupported(backendVersion VersionRecord) bool {
 }
 
 func EscapeString(val interface{}) string {
-	out := fmt.Sprintf("%s", val)
+	str := fmt.Sprintf("%s", val)
 
-	out = encodeStringSpecialCharacters(out)
+	quoted_str := strconv.Quote(str)
 
-	return out
+	return quoted_str[1 : len(quoted_str)-1]
 }
 
 func SortListByStrVal(val []interface{}) []interface{} {
@@ -2596,8 +2596,4 @@ func resourceShorelineObjectDelete(typ string, objectDef map[string]interface{})
 		}
 		return diags
 	}
-}
-func encodeStringSpecialCharacters(str string) string {
-	quoted_str := strconv.Quote(str)
-	return quoted_str[1 : len(quoted_str)-1]
 }
