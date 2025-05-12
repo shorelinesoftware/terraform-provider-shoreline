@@ -84,19 +84,23 @@ jobs:
             echo "#!/bin/sh" > "$GNUPGHOME/passphrase-script"
             echo "echo \"${{ secrets.PASSPHRASE }}\"" >> "$GNUPGHOME/passphrase-script"
             chmod 700 "$GNUPGHOME/passphrase-script"
+            
             # Configure gpg-agent to use the script for pinentry
             echo "pinentry-program $GNUPGHOME/passphrase-script" >> "$GNUPGHOME/gpg-agent.conf"
             echo "allow-loopback-pinentry" >> "$GNUPGHOME/gpg-agent.conf" # Needed for gpg-agent >= 2.1
+            # Set a short TTL for the passphrase cache to avoid potential hangs if pinentry fails
+            echo "default-cache-ttl 60" >> "$GNUPGHOME/gpg-agent.conf"
+            echo "max-cache-ttl 120" >> "$GNUPGHOME/gpg-agent.conf"
 
-            # Restart the agent to load the new config
-            echo "Restarting gpg-agent..."
-            gpgconf --homedir="$GNUPGHOME" --kill gpg-agent || true # Kill might fail if not running, ignore error
-            gpg-agent --homedir="$GNUPGHOME" --daemon --pinentry-program "$GNUPGHOME/passphrase-script" # Start daemon explicitly
+            # Launch the agent with the new config if not already running
+            echo "Launching/Reloading gpg-agent..."
+            gpgconf --homedir "$GNUPGHOME" --launch gpg-agent
 
-            # Test pinentry (optional but good for debugging)
-            echo "Testing pinentry..."
-            echo "test" | gpg --homedir="$GNUPGHOME" --clearsign > /dev/null
-            echo "Pinentry test successful."
+            # Pre-seed the agent cache with the passphrase by signing something small
+            # This avoids the first real signing operation (e.g., by goreleaser) needing pinentry
+            echo "Pre-seeding passphrase cache..."
+            echo "test" | gpg --homedir "$GNUPGHOME" --batch --pinentry-mode loopback --use-agent --clearsign > /dev/null
+            echo "Passphrase cache seeded successfully."
           else
             echo "No PASSPHRASE secret provided, skipping passphrase setup."
           fi
