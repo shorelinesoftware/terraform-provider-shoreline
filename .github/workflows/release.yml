@@ -39,40 +39,43 @@ jobs:
         with:
           go-version: '^1.23.4'
       -
-        name: Import GPG key
+        name: Import GPG key and configure for goreleaser
         id: import_gpg
         run: |
-          # Create a temporary file for the private key
-          echo "${{ secrets.GPG_PRIVATE_KEY }}" > /tmp/private.key
+          # Create a secure temporary directory
+          TEMP_DIR="$(mktemp -d -t gpg-XXXXXXXXXX)"
+          chmod 700 "$TEMP_DIR"
           
-          # Import the key with passphrase
-          echo "${{ secrets.PASSPHRASE }}" | gpg --batch --passphrase-fd 0 --import /tmp/private.key
+          # Write key to file
+          KEYFILE="$TEMP_DIR/private.key"
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" > "$KEYFILE"
+          chmod 600 "$KEYFILE"
           
-          # Store fingerprint for use with goreleaser
-          FINGERPRINT=$(gpg --list-secret-keys --keyid-format LONG | grep sec | awk '{print $2}' | cut -d'/' -f2)
-          echo "fingerprint=$FINGERPRINT" >> $GITHUB_OUTPUT
+          # Import key
+          gpg --batch --import "$KEYFILE"
           
-          # Configure Git (if needed)
-          git config --global user.signingkey $FINGERPRINT
-          git config --global commit.gpgsign true
-          
-          # Setup for non-interactive use with passphrase
+          # Setup GPG to use passphrase non-interactively
           mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
           echo "allow-loopback-pinentry" > ~/.gnupg/gpg-agent.conf
           echo "pinentry-mode loopback" > ~/.gnupg/gpg.conf
           gpg-connect-agent reloadagent /bye
           
+          # Get fingerprint for goreleaser
+          FINGERPRINT=$(gpg --list-secret-keys --keyid-format LONG | grep sec | awk '{print $2}' | cut -d'/' -f2)
+          echo "fingerprint=$FINGERPRINT" >> $GITHUB_OUTPUT
+          
           # Clean up
-          rm /tmp/private.key
+          shred -u "$KEYFILE" 2>/dev/null || rm -f "$KEYFILE"
+          rm -rf "$TEMP_DIR"
       -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2.8.1
         with:
-          #version: latest
           version: '~> v2'
           args: release --clean
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-          # GitHub sets this automatically
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_PASSWORD: ${{ secrets.PASSPHRASE }}  # GoReleaser will use this for signing
 
