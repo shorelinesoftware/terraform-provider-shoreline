@@ -41,15 +41,29 @@ jobs:
       -
         name: Import GPG key
         id: import_gpg
-        #uses: hashicorp/ghaction-import-gpg@v2.1.0
-        #env:
-        #  # These secrets will need to be configured for the repository:
-        #  GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-        #  PASSPHRASE: ${{ secrets.PASSPHRASE }}
-        uses: crazy-max/ghaction-import-gpg@v5
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.PASSPHRASE }}
+        run: |
+          # Create a temporary file for the private key
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" > /tmp/private.key
+          
+          # Import the key with passphrase
+          echo "${{ secrets.PASSPHRASE }}" | gpg --batch --passphrase-fd 0 --import /tmp/private.key
+          
+          # Store fingerprint for use with goreleaser
+          FINGERPRINT=$(gpg --list-secret-keys --keyid-format LONG | grep sec | awk '{print $2}' | cut -d'/' -f2)
+          echo "fingerprint=$FINGERPRINT" >> $GITHUB_OUTPUT
+          
+          # Configure Git (if needed)
+          git config --global user.signingkey $FINGERPRINT
+          git config --global commit.gpgsign true
+          
+          # Setup for non-interactive use with passphrase
+          mkdir -p ~/.gnupg
+          echo "allow-loopback-pinentry" > ~/.gnupg/gpg-agent.conf
+          echo "pinentry-mode loopback" > ~/.gnupg/gpg.conf
+          gpg-connect-agent reloadagent /bye
+          
+          # Clean up
+          rm /tmp/private.key
       -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2.8.1
