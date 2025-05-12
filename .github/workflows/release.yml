@@ -1,10 +1,9 @@
 # This GitHub action can publish assets for release when a tag is created.
 # Currently its setup to run on any tag that matches the pattern "v*" (ie. v0.1.0).
 #
-# This uses an action (hashicorp/ghaction-import-gpg) that assumes you set your 
-# private key in the `GPG_PRIVATE_KEY` secret and passphrase in the `PASSPHRASE`
-# secret. If you would rather own your own GPG handling, please fork this action
-# or use an alternative one for key handling.
+# This workflow uses direct shell commands to import the GPG key and configure
+# GPG for signing. It requires you to set your private key in the `GPG_PRIVATE_KEY` 
+# secret and passphrase in the `PASSPHRASE` secret.
 #
 # You will need to pass the `--batch` flag to `gpg` in your signing step 
 # in `goreleaser` to indicate this is being used in a non-interactive mode.
@@ -39,35 +38,67 @@ jobs:
         with:
           go-version: '^1.23.4'
       -
-        name: Import GPG key and configure for goreleaser
+        name: Import GPG key
         id: import_gpg
         run: |
-          # Create a secure temporary directory
-          TEMP_DIR="$(mktemp -d -t gpg-XXXXXXXXXX)"
-          chmod 700 "$TEMP_DIR"
-          
-          # Write key to file
-          KEYFILE="$TEMP_DIR/private.key"
-          echo "${{ secrets.GPG_PRIVATE_KEY }}" > "$KEYFILE"
-          chmod 600 "$KEYFILE"
-          
-          # Import key
-          gpg --batch --import "$KEYFILE"
-          
-          # Setup GPG to use passphrase non-interactively
-          mkdir -p ~/.gnupg
-          chmod 700 ~/.gnupg
-          echo "allow-loopback-pinentry" > ~/.gnupg/gpg-agent.conf
-          echo "pinentry-mode loopback" > ~/.gnupg/gpg.conf
-          gpg-connect-agent reloadagent /bye
-          
-          # Get fingerprint for goreleaser
-          FINGERPRINT=$(gpg --list-secret-keys --keyid-format LONG | grep sec | awk '{print $2}' | cut -d'/' -f2)
+          # Exit on error (to catch errors in any part of the pipeline)
+          set -eo pipefail # Exit on error
+
+          # Create a secure temporary directory with appropriate permissions
+          GNUPGHOME="$(mktemp -d)"
+          chmod 700 "$GNUPGHOME"
+          echo "GNUPGHOME=$GNUPGHOME" >> $GITHUB_ENV
+
+          # Write key to temporary file
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" > "$GNUPGHOME/private.key"
+          chmod 600 "$GNUPGHOME/private.key"
+
+          # Import the key
+          gpg --homedir="$GNUPGHOME" --batch --import "$GNUPGHOME/private.key"
+
+          # Extract the fingerprint more reliably
+          FINGERPRINT=$(gpg --homedir="$GNUPGHOME" --list-secret-keys --with-colons | grep '^fpr:' | head -n 1 | cut -d: -f10)
+
+          # Check if fingerprint was found
+          if [ -z "$FINGERPRINT" ]; then
+            echo "::error::Could not extract GPG key fingerprint."
+            exit 1
+          fi
+          echo "Extracted GPG fingerprint: $FINGERPRINT"
+
+          echo "FINGERPRINT=$FINGERPRINT" >> $GITHUB_ENV
           echo "fingerprint=$FINGERPRINT" >> $GITHUB_OUTPUT
-          
-          # Clean up
-          shred -u "$KEYFILE" 2>/dev/null || rm -f "$KEYFILE"
-          rm -rf "$TEMP_DIR"
+
+          # Configure GPG to trust the key
+          echo "trust-model always" >> "$GNUPGHOME/gpg.conf"
+
+          # Configure Git for signing
+          git config --global user.signingkey "$FINGERPRINT"
+          git config --global commit.gpgsign true
+
+          # Set up GPG to use the passphrase if provided
+          if [ -n "${{ secrets.PASSPHRASE }}" ]; then
+            echo "Configuring GPG agent with passphrase..."
+            # Create a script that provides the passphrase
+            echo "#!/bin/sh" > "$GNUPGHOME/passphrase-script"
+            echo "echo \"${{ secrets.PASSPHRASE }}\"" >> "$GNUPGHOME/passphrase-script"
+            chmod 700 "$GNUPGHOME/passphrase-script"
+            # Configure gpg-agent to use the script for pinentry
+            echo "pinentry-program $GNUPGHOME/passphrase-script" >> "$GNUPGHOME/gpg-agent.conf"
+            echo "allow-loopback-pinentry" >> "$GNUPGHOME/gpg-agent.conf" # Needed for gpg-agent >= 2.1
+
+            # Restart the agent to load the new config
+            echo "Restarting gpg-agent..."
+            gpgconf --homedir="$GNUPGHOME" --kill gpg-agent || true # Kill might fail if not running, ignore error
+            gpg-agent --homedir="$GNUPGHOME" --daemon --pinentry-program "$GNUPGHOME/passphrase-script" # Start daemon explicitly
+
+            # Test pinentry (optional but good for debugging)
+            echo "Testing pinentry..."
+            echo "test" | gpg --homedir="$GNUPGHOME" --clearsign > /dev/null
+            echo "Pinentry test successful."
+          else
+            echo "No PASSPHRASE secret provided, skipping passphrase setup."
+          fi
       -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2.8.1
@@ -75,7 +106,10 @@ jobs:
           version: '~> v2'
           args: release --clean
         env:
+          # Use the fingerprint from our GPG import step
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+          # Use the GNUPGHOME we set up
+          GNUPGHOME: ${{ env.GNUPGHOME }}
+          # GitHub sets this automatically
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GPG_PASSWORD: ${{ secrets.PASSPHRASE }}  # GoReleaser will use this for signing
 
