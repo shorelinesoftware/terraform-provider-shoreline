@@ -80,7 +80,7 @@ jobs:
           # Set up GPG to use the passphrase if provided
           if [ -n "${{ secrets.PASSPHRASE }}" ]; then
             echo "Configuring GPG agent with passphrase..."
-            # Create a script that provides the passphrase
+            # Create a script that provides the passphrase (still needed for goreleaser's gpg call later)
             echo "#!/bin/sh" > "$GNUPGHOME/passphrase-script"
             echo "echo \"${{ secrets.PASSPHRASE }}\"" >> "$GNUPGHOME/passphrase-script"
             chmod 700 "$GNUPGHOME/passphrase-script"
@@ -92,15 +92,14 @@ jobs:
             echo "default-cache-ttl 60" >> "$GNUPGHOME/gpg-agent.conf"
             echo "max-cache-ttl 120" >> "$GNUPGHOME/gpg-agent.conf"
 
-            # Launch the agent with the new config if not already running
+            # Launch the agent with the new config if not already running (for goreleaser later)
             echo "Launching/Reloading gpg-agent..."
             gpgconf --homedir "$GNUPGHOME" --launch gpg-agent
 
-            # Pre-seed the agent cache with the passphrase by signing something small
-            # This avoids the first real signing operation (e.g., by goreleaser) needing pinentry
-            echo "Pre-seeding passphrase cache..."
-            echo "test" | gpg --homedir "$GNUPGHOME" --batch --pinentry-mode loopback --use-agent --clearsign > /dev/null
-            echo "Passphrase cache seeded successfully."
+            # Directly test signing/passphrase by providing it via FD, bypassing agent for this one command
+            echo "Testing passphrase and key directly..."
+            echo "${{ secrets.PASSPHRASE }}" | gpg --homedir "$GNUPGHOME" --batch --yes --pinentry-mode loopback --passphrase-fd 0 --sign --detach-sign --output /dev/null <(echo "test data")
+            echo "Direct passphrase test successful."
           else
             echo "No PASSPHRASE secret provided, skipping passphrase setup."
           fi
