@@ -356,7 +356,7 @@ var ObjectConfigJsonStr = `
             "name":              { "type": "label",    "required": true, "forcenew": true, "skip": true },
             "vault_secret_path": { "type": "string",   "required": true, "step": "secret_info.vault_secret_path" },
             "vault_secret_key":  { "type": "string",   "required": true, "step": "secret_info.vault_secret_key" },
-            "vault_namespace":   { "type": "string",   "required": true, "step": "secret_info.vault_namespace" }
+            "integration_name":   { "type": "string",   "required": true, "step": "secret_info.integration_name" }
         }
     },
 
@@ -486,7 +486,7 @@ var ObjectConfigJsonStr = `
 			"allowed_tags":                                     "Defines a list of tags that are allowed on agent tag ingestion",
 			"skipped_tags":                                     "Defines a list of tags that are skipped on agent tag ingestion",
 			"managed_secrets": 									"System setting that discriminates between usage of external vaults and the built in one.",
-			"integration_name":                                 "The name/symbol of a Shoreline integration involved in triggering the bot.",
+			"integration_name":                                 "The name/symbol of a Shoreline integration.",
 			"editors":                                          "List of users who can edit the object (with configure permission). Empty maps to all users.",
 			"communication_cud_notifications":                  "Enables slack notifications for create/update/delete operations. (Requires workspace and channel.)",
 			"communication_approval_notifications":             "Enables slack notifications for approvals operations. (Requires workspace and channel.)",
@@ -512,8 +512,7 @@ var ObjectConfigJsonStr = `
 			"jwt_auth_path":           "The path to the JWT authentication method in Vault. It tells NVault where to perform JWT login requests.",
 			"role_name":               "The name of the Vault role configured under the JWT auth method. It determines policies and constraints for the login.",
 			"vault_secret_path":       "The full path in Vault where the secret is stored. It includes the mount path and the subpath. It tells Vault where to look for the secret.",
-			"vault_secret_key":        "The specific key within the secret data to retrieve.",
-			"vault_namespace":         "Must match the namespace configured in an existing NVault integration."
+			"vault_secret_key":        "The specific key within the secret data to retrieve."
 		}
 	}
 }

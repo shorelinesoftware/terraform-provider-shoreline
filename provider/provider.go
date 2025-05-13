@@ -2105,11 +2105,11 @@ func resourceShorelineObjectCreate(typ string, primary string, attrs map[string]
 		//op := fmt.Sprintf("%s %s = \"%s\"", typ, name, primaryVal)
 		op := ""
 		if typ == "nvault_secret" {
-			vaultNamespace := d.Get("vault_namespace")
+			integrationName := d.Get("integration_name")
 			vaultSecretPath := d.Get("vault_secret_path")
 			vaultSecretKey := d.Get("vault_secret_key")
 
-			op = fmt.Sprintf("%s %s = nvault_config(\"%s\", \"%s\", \"%s\")", typ, name, vaultNamespace, vaultSecretPath, vaultSecretKey)
+			op = fmt.Sprintf("%s %s = nvault_config(\"%s\", \"%s\", \"%s\")", typ, name, integrationName, vaultSecretPath, vaultSecretKey)
 		} else {
 			op = fmt.Sprintf("%s %s = %s", typ, name, primaryValStr)
 		}
