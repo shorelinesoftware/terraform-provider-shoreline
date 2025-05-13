@@ -783,15 +783,6 @@ func ResourceShorelineObject(configJsStr string, key string) *schema.Resource {
 			//}
 		case "string":
 			sch.Type = schema.TypeString
-
-			if key == "principal" && k == "idp_name" {
-				sch.DiffSuppressFunc = func(diffKey, old, nu string, d *schema.ResourceData) bool {
-					// TODO: add a get_principal_class function in shoreline backend
-					// and return the appropriate idp_name using the idp_id from db
-					// otherwise it cannot be returned from symbol table manager
-					return diffKey == "idp_name"
-				}
-			}
 		case "string[]":
 			sch.Type = schema.TypeList
 			sch.Elem = &schema.Schema{
@@ -1909,10 +1900,18 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 		}
 	}
 
+	if typ == "principal" {
+		orderedAttrs = append(orderedAttrs, "idp_name")
+	}
+
 	for key, _ := range attrs {
 		forceUpdate := GetNestedValueOrDefault(attrs, ToKeyPath(key+".force_update"), false).(bool)
 		if forceUpdate {
 			forcedUpdate[CastToString(key)] = forceUpdate
+		}
+
+		if typ == "principal" && key == "idp_name" {
+			continue
 		}
 
 		if skipKeys[key] != true {
@@ -1921,6 +1920,7 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 			appendActionLog(fmt.Sprintf("Notebook skipping key: %s\n", key))
 		}
 	}
+
 	if typ == "notebook" || typ == "runbook" {
 		// XXX: work around backend issue with data-dependent ordering
 		aVal, _ := d.Get("allowed_entities").([]interface{})
@@ -1968,6 +1968,10 @@ func resourceShorelineObjectSetFields(typ string, attrs map[string]interface{}, 
 				appendActionLog(fmt.Sprintf("Bot running post-ctor set: %s: '%s'.'%s'  HasChange(%v)\n", typ, name, key, d.HasChange(key)))
 				forceSet = true
 			}
+		}
+
+		if typ == "principal" && key == "idp_name" {
+			forceSet = true
 		}
 
 		// NOTE: Terraform reports !exists when a value is explicitly supplied, but matches the 'default'
@@ -2538,6 +2542,14 @@ func resourceShorelineObjectRead(typ string, attrs map[string]interface{}, objec
 				}
 			}
 			if val == nil {
+				if typ == "principal" && key == "idp_name" {
+					currentVal, _ := d.GetOk("idp_name")
+					if currentVal != nil {
+						d.Set("idp_name", currentVal)
+					}
+					continue
+				}
+
 				// not found, so check for a default value and assume that
 				defowlt := GetNestedValueOrDefault(attrs, ToKeyPath(key+".default"), nil)
 				if defowlt != nil {
