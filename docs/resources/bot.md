@@ -162,10 +162,10 @@ Now, anytime JVM memory exceeds our defined threshold the JVM is automatically r
 - `enabled` (Boolean) If the object is currently enabled or disabled. Defaults to `false`.
 - `event_type` (String) Used to tag 'datadog' monitor triggers vs 'shoreline' alarms (default). Defaults to ``.
 - `family` (String) General class for an Action or Bot (e.g., custom, standard, metric, or system check). Defaults to `custom`.
-- `integration_name` (String) The name/symbol of a Shoreline integration involved in triggering the bot. Defaults to ``.
+- `integration_name` (String) The name/symbol of a Shoreline integration. Defaults to ``.
 - `monitor_id` (String) For 'datadog' monitor triggered bots, the DD monitor identifier. Defaults to ``.
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
+- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, File, Time Trigger, Integration, Runbook, Principal, Report Template, Dashboard, NVault Secret).
