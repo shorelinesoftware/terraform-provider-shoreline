@@ -381,7 +381,7 @@ var ObjectConfigJsonStr = `
 
 		"attributes": {
 			"name":                    "The name/symbol for the object within Shoreline and the op language (must be unique, only alphanumeric/underscore).",
-			"type":                    "The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).",
+			"type":                    "The type of object (i.e., Alarm, Action, Bot, Metric, Resource, File, Time Trigger, Integration, Runbook, Principal, Report Template, Dashboard, NVault Secret).",
 			"action_limit":            "The number of simultaneous actions allowed for a permissions group.",
 			"administer_permission":   "If a permissions group is allowed to perform \"administer\" actions.",
 			"allowed_entities":        "The list of users who can run an action or notebook. Any user can run if left empty.",

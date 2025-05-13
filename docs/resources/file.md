@@ -109,4 +109,4 @@ variable "s3_bucket" {
 - `file_data` (String) Internal representation of a distributed File object's data (computed).
 - `file_length` (Number) Length, in bytes, of a distributed File object (computed)
 - `id` (String) The ID of this resource.
-- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
+- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, File, Time Trigger, Integration, Runbook, Principal, Report Template, Dashboard, NVault Secret).

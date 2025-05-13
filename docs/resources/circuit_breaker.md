@@ -37,4 +37,4 @@ See the Shoreline [CircuitBreakers Documentation](https://docs.shoreline.io/circ
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, or File).
+- `type` (String) The type of object (i.e., Alarm, Action, Bot, Metric, Resource, File, Time Trigger, Integration, Runbook, Principal, Report Template, Dashboard, NVault Secret).
