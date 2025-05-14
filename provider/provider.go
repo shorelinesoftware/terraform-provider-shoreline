@@ -1212,14 +1212,11 @@ func IsSecretAwareSupported(backendVersion VersionRecord) bool {
 }
 
 func EscapeString(val interface{}) string {
-	out := fmt.Sprintf("%s", val)
+	str := fmt.Sprintf("%s", val)
 
-	slash := regexp.MustCompile(`\\`)
-	out = slash.ReplaceAllString(out, "\\\\")
-	quote := regexp.MustCompile(`"`)
-	out = quote.ReplaceAllString(out, "\\\"")
+	quoted_str := strconv.Quote(str)
 
-	return out
+	return quoted_str[1 : len(quoted_str)-1]
 }
 
 func SortListByStrVal(val []interface{}) []interface{} {
